@@ -1,0 +1,19 @@
+---
+    observation:
+        "/odom":
+            type: Odometry
+        "/multisense/left/image_rect_color":
+            type: Image
+            options:
+                output_resolution: [32, 32]
+                nchannels: 3
+        "/multisense/depth":
+            type: Image
+            options:
+                output_resolution: [32, 32]
+                nchannels: 1
+    action:
+        "/acc_x":
+            type: Float64
+        "/acc_y":
+            type: Float64
