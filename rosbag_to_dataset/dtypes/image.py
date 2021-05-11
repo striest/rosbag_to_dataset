@@ -21,7 +21,7 @@ class ImageConvert(Dtype):
         return Image
 
     def ros_to_numpy(self, msg):
-        assert isinstance(msg, self.rosmsg_type()), "Got {}, expected {}".format(type(msg), self.rosmsg_type())
+#        assert isinstance(msg, self.rosmsg_type()), "Got {}, expected {}".format(type(msg), self.rosmsg_type())
 
         data = np.frombuffer(msg.data, dtype=np.uint8)
         data = data.reshape(msg.height, msg.width, self.nchannels)
