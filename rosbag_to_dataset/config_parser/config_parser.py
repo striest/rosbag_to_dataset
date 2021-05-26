@@ -8,6 +8,8 @@ from rosbag_to_dataset.dtypes.float64 import Float64Convert
 from rosbag_to_dataset.dtypes.odometry import OdometryConvert
 from rosbag_to_dataset.dtypes.image import ImageConvert
 from rosbag_to_dataset.dtypes.ackermann_drive import AckermannDriveConvert
+from rosbag_to_dataset.dtypes.twist import TwistConvert
+from rosbag_to_dataset.dtypes.imu import ImuConvert
 
 class ConfigParser:
     """
@@ -39,12 +41,16 @@ class ConfigParser:
     def parse(self, spec):
         obs_dict = {}
         obs_converters = OrderedDict()
+        remap = {}
+
         for k,v in spec['observation'].items():
             dtype = self.dtype_convert[spec['observation'][k]['type']]
             converter = dtype(**spec['observation'][k].get('options', {}))
             obs_shape = converter.N()
-            obs_dict[k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
+            remap_k = v['remap'] if 'remap' in v.keys() else k
+            obs_dict[remap_k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
             obs_converters[k] = converter
+            remap[k] = remap_k
 
         obs_space = gym.spaces.Dict(obs_dict)
 
@@ -63,13 +69,15 @@ class ConfigParser:
             'action':act_converters
         }
 
-        return ParseObject(obs_space, act_space, spec['dt']), converters
+        return ParseObject(obs_space, act_space, spec['dt']), converters, remap
 
     dtype_convert = {
         "Float64":Float64Convert,
         "Odometry":OdometryConvert,
         "Image":ImageConvert,
-        "AckermannDrive":AckermannDriveConvert
+        "AckermannDrive":AckermannDriveConvert,
+        "Twist":TwistConvert,
+        "Imu":ImuConvert
     }
 
 class ParseObject:
@@ -82,11 +90,12 @@ class ParseObject:
         self.dt = dt
 
 if __name__ == "__main__":
-    fp = open('sample.yaml')
+    fp = open('2021_atv.yaml')
     d = yaml.safe_load(fp)
     print(d)
     parser = ConfigParser()
-    x, p = parser.parse(d)
+    x, p, r = parser.parse(d)
     print(x.observation_space)
     print(x.action_space)
     print(p)
+    print(r)

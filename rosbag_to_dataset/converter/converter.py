@@ -22,7 +22,7 @@ class Converter:
     We can error check by looking at flags.
     Real-time should be ok-ish as we don't process anything. If not, we can use stamps for the topics that have those.
     """
-    def __init__(self, spec, converters):
+    def __init__(self, spec, converters, remap):
         """
         Args:
             spec: As provided by the ConfigParser module, the sizes of the observation/action fields.
@@ -33,6 +33,7 @@ class Converter:
         self.action_space = spec.action_space
         self.observation_converters = converters['observation']
         self.action_converters = converters['action']
+        self.remap = remap
 
     def reset_queue(self):
         self.queue = {}
@@ -130,7 +131,7 @@ class Converter:
             data = self.queue[topic]
             data = [converter.ros_to_numpy(x) for x in data]
             data = np.stack(data, axis=0)
-            out['observation'][topic] = data
+            out['observation'][self.remap[topic]] = data
 
         for topic, converter in self.action_converters.items():
 #            print(topic, converter)
@@ -157,10 +158,10 @@ if __name__ == '__main__':
 
     print('setting up...')
     config_parser = ConfigParser()
-    spec, converters = config_parser.parse_from_fp(args.config_spec)
+    spec, converters, remap = config_parser.parse_from_fp(args.config_spec)
     bag = rosbag.Bag(args.bag_fp)
 
-    converter = Converter(spec, converters)
+    converter = Converter(spec, converters, remap)
 
     dataset = converter.convert_bag(bag)
 
