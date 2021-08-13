@@ -42,25 +42,35 @@ class ConfigParser:
         obs_dict = {}
         obs_converters = OrderedDict()
         remap = {}
+        rates = {}
 
         for k,v in spec['observation'].items():
             dtype = self.dtype_convert[spec['observation'][k]['type']]
             converter = dtype(**spec['observation'][k].get('options', {}))
             obs_shape = converter.N()
             remap_k = v['remap'] if 'remap' in v.keys() else k
-            obs_dict[remap_k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
             obs_converters[k] = converter
             remap[k] = remap_k
+            if 'N_per_step' in v.keys():
+                N = spec['observation'][k]['N_per_step']
+                obs_dict[remap_k] = gym.spaces.Box(low = np.ones([N, obs_shape]) * -float('inf'), high = np.ones([N, obs_shape]) * float('inf'))
+                rates[k] = spec['dt'] / N
+            else:
+                obs_dict[remap_k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
+                rates[k] = spec['dt']
 
         obs_space = gym.spaces.Dict(obs_dict)
 
         act_dim = 0
         act_converters = OrderedDict()
-        for k,v in spec['action'].items():
-            dtype = self.dtype_convert[spec['action'][k]['type']]
-            converter = dtype(**spec['action'][k].get('options', {}))
-            act_dim += converter.N()
-            act_converters[k] = converter
+
+        if spec.get('action', None) is not None:
+            for k,v in spec['action'].items():
+                dtype = self.dtype_convert[spec['action'][k]['type']]
+                converter = dtype(**spec['action'][k].get('options', {}))
+                act_dim += converter.N()
+                act_converters[k] = converter
+                rates[k] = spec['dt']
 
         act_space = gym.spaces.Box(low = -np.ones(act_dim), high = np.ones(act_dim))
 
@@ -69,7 +79,7 @@ class ConfigParser:
             'action':act_converters
         }
 
-        return ParseObject(obs_space, act_space, spec['dt']), converters, remap
+        return ParseObject(obs_space, act_space, spec['dt']), converters, remap, rates
 
     dtype_convert = {
         "Float64":Float64Convert,
@@ -94,8 +104,9 @@ if __name__ == "__main__":
     d = yaml.safe_load(fp)
     print(d)
     parser = ConfigParser()
-    x, p, r = parser.parse(d)
+    x, p, r, dt = parser.parse(d)
     print(x.observation_space)
     print(x.action_space)
     print(p)
     print(r)
+    print(dt)

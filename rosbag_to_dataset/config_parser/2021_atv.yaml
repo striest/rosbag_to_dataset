@@ -7,6 +7,7 @@
                 orientation: False
                 angular_velocity: True
                 linear_acceleration: True
+            N_per_step: 10
 
         "/multisense/left/image_color":
             type: Image

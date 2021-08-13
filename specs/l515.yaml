@@ -1,10 +1,6 @@
 ---
     observation:
-        "/odometry/filtered_odom":
-            type: Odometry
-            remap: "state"
-
-        "/multisense/imu/imu_data":
+        "/camera/imu":
             type: Imu
             remap: "imu"
             N_per_step: 20
@@ -13,14 +9,14 @@
                 angular_velocity: True
                 linear_acceleration: True
 
-        "/multisense/left/image_color":
+        "/camera/color/image_raw":
             type: Image
             remap: "image_rgb"
             options:
                 output_resolution: [64, 64]
                 nchannels: 3
 
-        "/multisense/left/disparity":
+        "/camera/depth/image_rect_raw":
             type: Image
             remap: "image_depth"
             options:
@@ -28,9 +24,15 @@
                 nchannels: 2
                 aggregate: "littleendian"
 
+        "/mushr_mocap/odom":
+            type: Odometry
+            remap: "state"
+
     action:
-        "/cmd":
-            type: Twist
+        "/car/mux/ackermann_cmd_mux/input/teleop":
+            type: AckermannDrive
             options:
-                mode: action
+                throttle: speed
+                steer: position
+
     dt: 0.1
