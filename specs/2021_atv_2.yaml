@@ -22,19 +22,27 @@
                 output_resolution: [128, 128]
                 nchannels: 3
 
-        "/multisense/right/image_rect":
-            type: Image
-            remap: "image_depth"
+        "/local_height_map":
+            type: GridMap
+            remap: "heightmap"
             options:
-                output_resolution: [64, 64]
-                nchannels: 1
+                channels: ["height"]
+                output_resolution: [128, 128]
+                empty_value: 1000000.
 
-        "/controls":
-            type: RPControls
-            remap: "intervention"
+        "/local_rgb_map":
+            type: Image
+            remap: "rgbmap"
             options:
-                mode: "intervention"
-                intervention_threshold: 200.
+                output_resolution: [128, 128]
+                nchannels: 3
+
+                #        "/controls":
+                #            type: RPControls
+                #            remap: "intervention"
+                #            options:
+                #                mode: "intervention"
+                #                intervention_threshold: 100.
 
         "/wheel_rpm":
             type: RPWheelEncoders
@@ -45,6 +53,14 @@
             type: RPShockSensors
             remap: "shock_travel"
             N_per_step: 20
+
+        "/controls":
+            type: RPControls
+            remap: "intervention"
+            options:
+                mode: "intervention"
+                intervention_threshold: 200.
+
 
     action:
         "/cmd":

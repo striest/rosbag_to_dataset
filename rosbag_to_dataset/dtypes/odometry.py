@@ -9,12 +9,13 @@ class OdometryConvert(Dtype):
     """
     Convert an odometry message into a 13d vec.
     """
-    def __init__(self, zero_position=False):
+    def __init__(self, zero_position=False, use_vel=True):
         self.zero_position = zero_position
         self.initial_position = None if self.zero_position else np.zeros(3)
+        self.use_vel = use_vel
 
     def N(self):
-        return 13
+        return 13 if self.use_vel else 7
 
     def rosmsg_type(self):
         return Odometry
@@ -30,7 +31,7 @@ class OdometryConvert(Dtype):
         res = np.array(p + q + pdot + qdot)
         res[:3] -= self.initial_position
 
-        return res
+        return res if self.use_vel else res[:7]
 
 if __name__ == "__main__":
     c = OdometryConvert()

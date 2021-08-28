@@ -10,6 +10,9 @@ from rosbag_to_dataset.dtypes.image import ImageConvert
 from rosbag_to_dataset.dtypes.ackermann_drive import AckermannDriveConvert
 from rosbag_to_dataset.dtypes.twist import TwistConvert
 from rosbag_to_dataset.dtypes.imu import ImuConvert
+from rosbag_to_dataset.dtypes.pose import PoseConvert
+from rosbag_to_dataset.dtypes.gridmap import GridMapConvert
+from rosbag_to_dataset.dtypes.racepak_sensors import RPControlsConvert, RPWheelEncodersConvert, RPShockSensorsConvert
 
 class ConfigParser:
     """
@@ -87,7 +90,12 @@ class ConfigParser:
         "Image":ImageConvert,
         "AckermannDrive":AckermannDriveConvert,
         "Twist":TwistConvert,
-        "Imu":ImuConvert
+        "Imu":ImuConvert,
+        "Pose":PoseConvert,
+        "GridMap":GridMapConvert,
+        "RPControls":RPControlsConvert,
+        "RPWheelEncoders":RPWheelEncodersConvert,
+        "RPShockSensors":RPShockSensorsConvert,
     }
 
 class ParseObject:

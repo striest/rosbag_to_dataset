@@ -59,6 +59,16 @@ class Converter:
 
         #For now, start simple. Just get the message that immediately follows the timestep
         #Assuming that messages are chronologically ordered per topic.
+
+        #The start and stop time depends on if there is a clock topic
+        if '/clock' in [x['topic'] for x in info_dict['topics']]:
+            clock_msgs = []
+            for topic, msg, t in bag.read_messages():
+                if topic == '/clock':
+                    clock_msgs.append(msg)
+            info_dict['start'] = clock_msgs[0].clock.to_sec()
+            info_dict['end'] = clock_msgs[-1].clock.to_sec()
+
         timesteps = {k:np.arange(info_dict['start'], info_dict['end'], self.rates[k]) for k in self.queue.keys()}
 
         topic_curr_idx = {k:0 for k in self.queue.keys()}
@@ -72,12 +82,14 @@ class Converter:
 
                 #Check if there is a stamp and it has been set.
                 has_stamp = hasattr(msg, 'header') and msg.header.stamp.to_sec() > 1000.
+                has_info = hasattr(msg, 'info') and msg.info.header.stamp.to_sec() > 1000.
 
                 #Use the timestamp if its valid. Otherwise default to rosbag time.
-                if has_stamp and self.use_stamps:
-                    if (tidx < timesteps[topic].shape[0]) and (msg.header.stamp > rospy.Time.from_sec(timesteps[topic][tidx])):
+                if (has_stamp or has_info) and self.use_stamps:
+                    stamp = msg.header.stamp if has_stamp else msg.info.header.stamp
+                    if (tidx < timesteps[topic].shape[0]) and (stamp > rospy.Time.from_sec(timesteps[topic][tidx])):
                         #Add to data. Find the smallest timestep that's less than t.
-                        idx = np.searchsorted(timesteps[topic], msg.header.stamp.to_sec())
+                        idx = np.searchsorted(timesteps[topic], stamp.to_sec())
                         topic_curr_idx[topic] = idx
 
                         #In case of missing data.
