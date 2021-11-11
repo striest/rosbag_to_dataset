@@ -23,26 +23,19 @@
                 nchannels: 3
 
         "/local_height_map":
-            type: GridMap
+            type: Image
             remap: "heightmap"
             options:
-                channels: ["height"]
-                output_resolution: [128, 128]
+                output_resolution: [64, 64]
                 empty_value: 1000000.
+                nchannels: 2
 
         "/local_rgb_map":
             type: Image
             remap: "rgbmap"
             options:
-                output_resolution: [128, 128]
+                output_resolution: [64, 64]
                 nchannels: 3
-
-                #        "/controls":
-                #            type: RPControls
-                #            remap: "intervention"
-                #            options:
-                #                mode: "intervention"
-                #                intervention_threshold: 100.
 
         "/wheel_rpm":
             type: RPWheelEncoders

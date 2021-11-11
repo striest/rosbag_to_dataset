@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import torch
 import rosbag
 import os
 
@@ -14,6 +15,8 @@ if __name__ == '__main__':
     parser.add_argument('--bag_dir', type=str, required=True, help='Path to the dir with bag files to get data from')
     parser.add_argument('--save_to', type=str, required=True, help='Name of the dir to save the result to')
     parser.add_argument('--use_stamps', type=str2bool, required=False, default=True, help='Whether to use the time provided in the stamps or just the rosbag time')
+    parser.add_argument('--torch', type=str2bool, required=False, default=True, help='Whether to return the dataset as torch or numpy')
+    parser.add_argument('--zero_pose_init', type=str2bool, required=False, default=True, help='Whether to initialize all trajs at 0')
 
     args = parser.parse_args()
 
@@ -33,7 +36,7 @@ if __name__ == '__main__':
 
         converter = Converter(spec, converters, remap, rates, args.use_stamps)
 
-        dataset = converter.convert_bag(bag)
+        dataset = converter.convert_bag(bag, as_torch=args.torch, zero_pose_init=args.zero_pose_init)
 
         for k in dataset['observation'].keys():
             print('{}:\n\t{}'.format(k, dataset['observation'][k].shape))
@@ -44,7 +47,10 @@ if __name__ == '__main__':
             print('No actions')
 
         fp = os.path.join(args.save_to, bag_fp[:-4])
-        np.savez(fp, **dataset)
+        if args.torch:
+            torch.save(dataset, fp + '.pt')
+        else:
+            np.savez(fp, **dataset)
 
         total_steps += next(iter(dataset['observation'].values())).shape[0]
 

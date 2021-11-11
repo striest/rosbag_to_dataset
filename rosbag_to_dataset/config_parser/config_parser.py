@@ -4,6 +4,7 @@ import numpy as np
 
 from collections import OrderedDict
 
+from rosbag_to_dataset.dtypes.bool import BoolConvert
 from rosbag_to_dataset.dtypes.float64 import Float64Convert
 from rosbag_to_dataset.dtypes.odometry import OdometryConvert
 from rosbag_to_dataset.dtypes.image import ImageConvert
@@ -86,6 +87,7 @@ class ConfigParser:
 
     dtype_convert = {
         "Float64":Float64Convert,
+        "Bool":BoolConvert,
         "Odometry":OdometryConvert,
         "Image":ImageConvert,
         "AckermannDrive":AckermannDriveConvert,
