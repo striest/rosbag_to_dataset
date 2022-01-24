@@ -35,6 +35,13 @@ class OnlineConverter:
         self.use_stamps = use_stamps
         self.max_queue_len = 100 #This is the max of expected num messages per dt over all time series (no need to change unless > 1000hz)
 
+        #Printouts
+        print('ONLINE CONVERTER:')
+        print('Observation space:')
+        print(self.observation_converters)
+        print('ACtion space:')
+        print(self.action_converters)
+
         self.init_queue()
         self.init_subscribers()
 
