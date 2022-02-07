@@ -1,7 +1,7 @@
 import rospy
 import numpy as np
 
-from common_msgs.msg import BoolStamped
+from std_msgs.msg import Bool
 
 from rosbag_to_dataset.dtypes.base import Dtype
 
@@ -16,7 +16,7 @@ class BoolConvert(Dtype):
         return 1
 
     def rosmsg_type(self):
-        return BoolStamped
+        return Bool
 
     def ros_to_numpy(self, msg):
 #        assert isinstance(msg, self.rosmsg_type()), "Got {}, expected {}".format(type(msg), self.rosmsg_type())
