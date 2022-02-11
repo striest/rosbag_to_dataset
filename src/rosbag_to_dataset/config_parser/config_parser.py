@@ -13,6 +13,7 @@ from rosbag_to_dataset.dtypes.twist import TwistConvert
 from rosbag_to_dataset.dtypes.imu import ImuConvert
 from rosbag_to_dataset.dtypes.pose import PoseConvert
 from rosbag_to_dataset.dtypes.vector3 import Vector3Convert
+from rosbag_to_dataset.dtypes.pointcloud import PointCloudConvert
 
 class ConfigParser:
     """
@@ -85,14 +86,15 @@ class ConfigParser:
         return ParseObject(obs_space, act_space, spec['dt']), converters, remap, rates
 
     dtype_convert = {
-        "Float64":Float64Convert,
-        "Bool":BoolConvert,
-        "Odometry":OdometryConvert,
-        "Image":ImageConvert,
         "AckermannDrive":AckermannDriveConvert,
-        "Twist":TwistConvert,
+        "Bool":BoolConvert,
+        "Float64":Float64Convert,
+        "Image":ImageConvert,
         "Imu":ImuConvert,
+        "Odometry":OdometryConvert,
+        "PointCloud":PointCloudConvert,
         "Pose":PoseConvert,
+        "Twist":TwistConvert,
         "Vector3":Vector3Convert,
     }
 
