@@ -8,6 +8,7 @@ from rosbag_to_dataset.dtypes.bool import BoolConvert
 from rosbag_to_dataset.dtypes.float64 import Float64Convert
 from rosbag_to_dataset.dtypes.odometry import OdometryConvert
 from rosbag_to_dataset.dtypes.image import ImageConvert
+from rosbag_to_dataset.dtypes.compressed_image import CompressedImageConvert
 from rosbag_to_dataset.dtypes.ackermann_drive import AckermannDriveConvert
 from rosbag_to_dataset.dtypes.twist import TwistConvert
 from rosbag_to_dataset.dtypes.imu import ImuConvert
@@ -88,6 +89,7 @@ class ConfigParser:
     dtype_convert = {
         "AckermannDrive":AckermannDriveConvert,
         "Bool":BoolConvert,
+        "CompressedImage":CompressedImageConvert,
         "Float64":Float64Convert,
         "Image":ImageConvert,
         "Imu":ImuConvert,
