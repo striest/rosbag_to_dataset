@@ -4,19 +4,17 @@ import numpy as np
 
 from collections import OrderedDict
 
-from rosbag_to_dataset.dtypes.ackermann_drive import AckermannDriveConvert
 from rosbag_to_dataset.dtypes.bool import BoolConvert
-from rosbag_to_dataset.dtypes.compressed_image import CompressedImageConvert
 from rosbag_to_dataset.dtypes.float64 import Float64Convert
-from rosbag_to_dataset.dtypes.gridmap import GridMapConvert
-from rosbag_to_dataset.dtypes.image import ImageConvert
-from rosbag_to_dataset.dtypes.imu import ImuConvert
-from rosbag_to_dataset.dtypes.int32 import Int32Convert
 from rosbag_to_dataset.dtypes.odometry import OdometryConvert
-from rosbag_to_dataset.dtypes.pose import PoseConvert
-from rosbag_to_dataset.dtypes.racepak_sensors import RPControlsConvert, RPWheelEncodersConvert, RPShockSensorsConvert
+from rosbag_to_dataset.dtypes.image import ImageConvert
+from rosbag_to_dataset.dtypes.compressed_image import CompressedImageConvert
+from rosbag_to_dataset.dtypes.ackermann_drive import AckermannDriveConvert
 from rosbag_to_dataset.dtypes.twist import TwistConvert
+from rosbag_to_dataset.dtypes.imu import ImuConvert
+from rosbag_to_dataset.dtypes.pose import PoseConvert
 from rosbag_to_dataset.dtypes.vector3 import Vector3Convert
+from rosbag_to_dataset.dtypes.pointcloud import PointCloudConvert
 
 class ConfigParser:
     """
@@ -90,18 +88,14 @@ class ConfigParser:
 
     dtype_convert = {
         "AckermannDrive":AckermannDriveConvert,
-        "CompressedImage":CompressedImageConvert,
         "Bool":BoolConvert,
+        "CompressedImage":CompressedImageConvert,
         "Float64":Float64Convert,
-        "GridMap":GridMapConvert,
         "Image":ImageConvert,
         "Imu":ImuConvert,
-        "Int32":Int32Convert,
         "Odometry":OdometryConvert,
+        "PointCloud":PointCloudConvert,
         "Pose":PoseConvert,
-        "RPControls":RPControlsConvert,
-        "RPWheelEncoders":RPWheelEncodersConvert,
-        "RPShockSensors":RPShockSensorsConvert,
         "Twist":TwistConvert,
         "Vector3":Vector3Convert,
     }
@@ -119,6 +113,7 @@ if __name__ == "__main__":
     fp = open('2021_atv.yaml')
     d = yaml.safe_load(fp)
     print(d)
+    print(type(d))
     parser = ConfigParser()
     x, p, r, dt = parser.parse(d)
     print(x.observation_space)

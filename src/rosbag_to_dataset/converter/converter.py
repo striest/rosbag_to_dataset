@@ -76,8 +76,10 @@ class Converter:
         prev_t = rospy.Time.from_sec(0.)
         durs = []
 
+
+        # import pdb;pdb.set_trace()
         #TODO: Write the code to check if stamp is available. Use it if so else default back to t.
-        for topic, msg, t in bag.read_messages():
+        for topic, msg, t in bag.read_messages(topics=list(self.queue.keys())):
             if topic in self.queue.keys():
                 tidx = topic_curr_idx[topic]
 
@@ -116,6 +118,7 @@ class Converter:
             while len(self.queue[k]) < timesteps[k].shape[0]:
                 self.queue[k].append(None)
 
+        # import pdb;pdb.set_trace()
         self.preprocess_queue()
         res = self.convert_queue()
         if as_torch:
@@ -144,6 +147,7 @@ class Converter:
         data_exists = {}
         strides = {}
         start_idxs = {}
+        # import pdb; pdb.set_trace()
         for k in self.queue.keys():
             data_exists[k] = [not x is None for x in self.queue[k]]
             strides[k] = int(self.dt/self.rates[k])
@@ -153,15 +157,24 @@ class Converter:
         #thankfully, index gives first occurrence of value.
         start_idx = max(start_idxs.values())
 
+        #import pdb;pdb.set_trace()
+
         #For now, just search backward to fill in missing data.
         #This is most similar to the online case, where you'll have stale data if the sensor doesn't return.
+
         for k in self.queue.keys():
-            last_avail = start_idx * strides[k]
+            #import pdb;pdb.set_trace()
+            last_avail = start_idxs[k] * strides[k]
+            for tt in range(start_idxs[k], start_idx * strides[k]):
+                if data_exists[k][tt]:
+                    last_avail = tt
+
             for t in range(start_idx, len(self.queue[k])):
                 if data_exists[k][t]:
                     last_avail = t
                 else:
                     self.queue[k][t] = self.queue[k][last_avail]
+            #import pdb;pdb.set_trace()
 
         self.queue = {k:v[start_idx*strides[k]:] for k,v in self.queue.items()}
 
@@ -203,7 +216,8 @@ class Converter:
         if len(self.action_converters) > 0:
             out['action'] = np.concatenate([v for v in out['action'].values()], axis=1)
 
-        min_t = min(out['action'].shape[0], min([v.shape[0] for v in out['observation'].values()]))
+        # import pdb;pdb.set_trace()
+        # min_t = min(out['action'].shape[0], min([v.shape[0] for v in out['observation'].values()]))
 
         return out
 

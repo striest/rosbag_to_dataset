@@ -17,7 +17,10 @@ class BoolConvert(Dtype):
         return 1
 
     def rosmsg_type(self):
-        return BoolStamped if self.stamped else Bool
+        if self.stamped:
+            return BoolStamped
+        else:
+            return Bool
 
     def ros_to_numpy(self, msg):
 #        assert isinstance(msg, self.rosmsg_type()), "Got {}, expected {}".format(type(msg), self.rosmsg_type())

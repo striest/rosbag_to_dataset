@@ -38,7 +38,7 @@ if __name__ == '__main__':
     except:
         print('No actions')
 
-    fp = os.path.join(args.save_to, bag_fp[:-4])
+    fp = os.path.join(args.save_to, args.save_as)
     if args.torch:
         torch.save(dataset, fp + '.pt')
     else:

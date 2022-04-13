@@ -7,23 +7,32 @@ from rosbag_to_dataset.dtypes.base import Dtype
 
 class Vector3Convert(Dtype):
     """
-    Convert a vector3
     """
-    def __init__(self, stamped=False):
+    def __init__(self, stamped=True):
+        """
+        """
         self.stamped = stamped
 
     def N(self):
         return 3
 
     def rosmsg_type(self):
-        return Vector3Stamped if self.stamped else Vector3
+        if self.stamped:
+            return Vector3Stamped
+        else:
+            return Vector3
 
     def ros_to_numpy(self, msg):
-        vec = msg.vector if self.stamped else msg
+        vec = msg
+        if self.stamped:
+            vec = msg.vector
+
         return np.array([vec.x, vec.y, vec.z])
 
 if __name__ == "__main__":
-    c = OdometryConvert()
-    msg = Odometry()
+    c1 = TwistConvert('state')
+    c2 = TwistConvert('action')
+    msg = TwistStamped()
 
-    print(c.ros_to_numpy(msg))
+    print(c1.ros_to_numpy(msg))
+    print(c2.ros_to_numpy(msg))

@@ -107,7 +107,7 @@ class OnlineConverter:
             out['action'][topic] = data
 
         if len(self.action_converters) > 0:
-            out['action'] = torch.cat([v for v in out['action'].values()], axis=0)
+            out['action'] = torch.cat([v for v in out['action'].values()], dim=0)
 
         return out
 

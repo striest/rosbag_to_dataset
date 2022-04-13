@@ -1,0 +1,77 @@
+---
+    observation:
+        "/wanda/stereo_right/image_rect_color/compressed":
+            type: CompressedImage
+            remap: "image_rgb"
+            options:
+                output_resolution: [480, 640]
+                nchannels: 3
+        
+        "/wanda/imu/data":
+            type: Imu
+            remap: "imu"
+            N_per_step: 25
+            options:
+                orientation: False
+                angular_velocity: True
+                linear_acceleration: True
+
+        "/wanda/odom":
+            type: Odometry
+            remap: "state"
+            options:
+                use_vel: False
+
+        # "/warthog2/left_drive/velocity":
+        #     type: Float64
+        #     remap: "left_vel"
+        #     N_per_step: TODO
+
+        # "/warthog2/right_drive/velocity":
+        #     type: Float64
+        #     remap: "right_vel"
+        #     N_per_step: TODO
+
+        "/local_height_map_low":
+            type: Image
+            remap: "heightmap_low"
+            options:
+                output_resolution: [200, 200]
+                empty_value: 1000000.
+                nchannels: 1
+
+        "/local_height_map_high":
+            type: Image
+            remap: "heightmap_high"
+            options:
+                output_resolution: [200, 200]
+                empty_value: 1000000.
+                nchannels: 1
+
+        "/local_rgb_map":
+            type: Image
+            remap: "rgb_map"
+            options:
+                output_resolution: [200, 200]
+                empty_value: 1000000.
+                nchannels: 3
+
+        "/local_rgb_map_inflate":
+            type: Image
+            remap: "rgb_map_inflate"
+            options:
+                output_resolution: [200, 200]
+                empty_value: 1000000.
+                nchannels: 3
+
+        "/traversability_cost":
+            type: Float64
+            remap: "traversability_cost"
+
+
+    action:
+        "/wanda/warthog_velocity_controller/cmd_vel_out":
+            type: Twist
+            options:
+                mode: action
+    dt: 0.1

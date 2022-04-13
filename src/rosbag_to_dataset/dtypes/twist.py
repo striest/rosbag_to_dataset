@@ -1,7 +1,7 @@
 import rospy
 import numpy as np
 
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import Twist, TwistStamped
 
 from rosbag_to_dataset.dtypes.base import Dtype
 
@@ -11,32 +11,40 @@ class TwistConvert(Dtype):
     1. Converts a twist message into a 6D velocity/orientation
     2. Converts a twist message into a 2D throttle/steer (using linear.x, angular.z)
     """
-    def __init__(self, mode='state'):
+    def __init__(self, mode='state', stamped=True):
         """
         Args:
             mode: One of {'state', 'action'}. How to interpret the twist command.
         """
         assert mode in {'state', 'action'}, "Expected mode to be one of ['state', 'action']. Got {}".format(mode)
         self.mode = mode
+        self.stamped = stamped
 
     def N(self):
         return 2 if self.mode == 'action' else 6
 
     def rosmsg_type(self):
-        return TwistStamped
+        if self.stamped:
+            return TwistStamped
+        else:
+            return Twist
 
     def ros_to_numpy(self, msg):
+        twist = msg
+        if self.stamped:
+            twist = msg.twist
+
         if self.mode == 'state':
-            vx = msg.twist.linear.x
-            vy = msg.twist.linear.y
-            vz = msg.twist.linear.z
-            wx = msg.twist.angular.x
-            wy = msg.twist.angular.y
-            wz = msg.twist.angular.z
+            vx = twist.linear.x
+            vy = twist.linear.y
+            vz = twist.linear.z
+            wx = twist.angular.x
+            wy = twist.angular.y
+            wz = twist.angular.z
             return np.array([vx, vy, vz, wx, wy, wz])
         elif self.mode == 'action':
-            throttle = msg.twist.linear.x
-            steer = msg.twist.angular.z
+            throttle = twist.linear.x
+            steer = twist.angular.z
             return np.array([throttle, steer])
 
 if __name__ == "__main__":
