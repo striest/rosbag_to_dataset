@@ -129,3 +129,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# post_processing/tartanvo
+src/rosbag_to_dataset/post_processing/tartanvo/models
+src/rosbag_to_dataset/post_processing/mapping/cscrollgrid.c
