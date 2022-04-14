@@ -7,6 +7,7 @@ from collections import OrderedDict
 from rosbag_to_dataset.dtypes.ackermann_drive import AckermannDriveConvert
 from rosbag_to_dataset.dtypes.bool import BoolConvert
 from rosbag_to_dataset.dtypes.compressed_image import CompressedImageConvert
+from rosbag_to_dataset.dtypes.float32 import Float32Convert
 from rosbag_to_dataset.dtypes.float64 import Float64Convert
 from rosbag_to_dataset.dtypes.gridmap import GridMapConvert
 from rosbag_to_dataset.dtypes.image import ImageConvert
@@ -92,6 +93,7 @@ class ConfigParser:
         "AckermannDrive":AckermannDriveConvert,
         "CompressedImage":CompressedImageConvert,
         "Bool":BoolConvert,
+        "Float32":Float32Convert,
         "Float64":Float64Convert,
         "GridMap":GridMapConvert,
         "Image":ImageConvert,
