@@ -153,4 +153,4 @@ class TartanVOInference(object):
 # python imgs2odom.py --model-name 43_6_2_vonet_30000_wo_pwc.pkl --network-type 2  --image-input-w 640 --image-input-h 448
 if __name__ == '__main__':
     node = TartanVOInference()
-    node.process(traj_root_folder='/cairo/arl_bag_files/TartanCost/Trajectories/000101', vo_output_folder = 'tartanvo_odom')
+    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', vo_output_folder = 'tartanvo_odom')

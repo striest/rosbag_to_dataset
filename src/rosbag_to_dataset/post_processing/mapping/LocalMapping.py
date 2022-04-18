@@ -17,7 +17,7 @@ from ScrollGrid import ScrollGrid
 import time
 
 
-def pointcloud2_to_xyzrgb_array(cloud_msg, remove_nans=True, dtype=np.float):
+def pointcloud2_to_xyzrgb_array(cloud_msg, remove_nans=True, dtype=np.float64):
     '''Pulls out x, y, and z columns from the cloud recordarray, and returns
         a 3xN matrix.
     '''

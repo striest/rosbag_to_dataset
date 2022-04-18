@@ -21,20 +21,15 @@ class ConfigParser:
     Class that reads in the spec of the rosbag ot convert to data.
     Expects input as a yaml file that generally looks like the following (currently WIP, subject to change).
 
-    observation:
+    data:
         topic:
             type:<one of the supported types>
+            folder:<output folder for this modality>
+            N_per_step:<frequency factor based on dt>
             <option>:<value>
             ...
-    action:
-        topic:
-            type:<one of the supported types, but probably not images>
-            <option>:<value>
-            ...
-
-    I'm likely going to restrict actions to vectors, meaning that there are probably only a few dtypes that actions can actually be.
-    Also, we're going to squish actions into a single vector, but leave states as dictionaries. End result of this class is the sizes of the various inputs.
-    I.e. generate a pseudo-env that works with my replay buffers (a class/dict w/ action_space, observation_space.).
+    dt: 0.1
+    main_topic:<this frame is used to align the timestamp>
     """
     def __init__(self):
         pass
@@ -44,47 +39,26 @@ class ConfigParser:
         return self.parse(x)
 
     def parse(self, spec):
-        obs_dict = {}
         obs_converters = OrderedDict()
-        remap = {}
+        outfolder = {}
         rates = {}
 
-        for k,v in spec['observation'].items():
-            dtype = self.dtype_convert[spec['observation'][k]['type']]
-            converter = dtype(**spec['observation'][k].get('options', {}))
-            obs_shape = converter.N()
-            remap_k = v['remap'] if 'remap' in v.keys() else k
+        for k,v in spec['data'].items():
+            dtype = self.dtype_convert[spec['data'][k]['type']]
+            converter = dtype(**spec['data'][k].get('options', {}))
+            outfolder_k = v['folder'] if 'folder' in v.keys() else k
             obs_converters[k] = converter
-            remap[k] = remap_k
+            outfolder[k] = outfolder_k
             if 'N_per_step' in v.keys():
-                N = spec['observation'][k]['N_per_step']
-                obs_dict[remap_k] = gym.spaces.Box(low = np.ones([N, obs_shape]) * -float('inf'), high = np.ones([N, obs_shape]) * float('inf'))
+                N = spec['data'][k]['N_per_step']
                 rates[k] = spec['dt'] / N
             else:
-                obs_dict[remap_k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
                 rates[k] = spec['dt']
-
-        obs_space = gym.spaces.Dict(obs_dict)
-
-        act_dim = 0
-        act_converters = OrderedDict()
-
-        if spec.get('action', None) is not None:
-            for k,v in spec['action'].items():
-                dtype = self.dtype_convert[spec['action'][k]['type']]
-                converter = dtype(**spec['action'][k].get('options', {}))
-                act_dim += converter.N()
-                act_converters[k] = converter
-                rates[k] = spec['dt']
-
-        act_space = gym.spaces.Box(low = -np.ones(act_dim), high = np.ones(act_dim))
-
-        converters = {
-            'observation':obs_converters,
-            'action':act_converters
-        }
-
-        return ParseObject(obs_space, act_space, spec['dt']), converters, remap, rates
+        if 'main_topic' in spec:
+            maintopic = spec['main_topic']
+        else:
+            maintopic = list(spec['data'].keys())[0] # use first topic in the yaml file
+        return obs_converters, outfolder, rates, spec['dt'], maintopic
 
     dtype_convert = {
         "AckermannDrive":AckermannDriveConvert,
@@ -100,24 +74,24 @@ class ConfigParser:
         "Vector3":Vector3Convert,
     }
 
-class ParseObject:
-    """
-    Basically a dummy class that has an observation_space and action_space field.
-    """
-    def __init__(self, observation_space, action_space, dt):
-        self.observation_space = observation_space
-        self.action_space = action_space
-        self.dt = dt
+# class ParseObject:
+#     """
+#     Basically a dummy class that has an observation_space and action_space field.
+#     """
+#     def __init__(self, observation_space, action_space, dt):
+#         self.observation_space = observation_space
+#         self.action_space = action_space
+#         self.dt = dt
 
 if __name__ == "__main__":
-    fp = open('2021_atv.yaml')
+    fp = open('specs/debug_offline.yaml')
     d = yaml.safe_load(fp)
     print(d)
     print(type(d))
     parser = ConfigParser()
-    x, p, r, dt = parser.parse(d)
-    print(x.observation_space)
-    print(x.action_space)
+    x, p, r, dt, mt = parser.parse(d)
+    print(x)
     print(p)
     print(r)
     print(dt)
+    print(mt)

@@ -36,11 +36,20 @@ class CompressedImageConvert(Dtype):
 
         data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
 
-        data = np.moveaxis(data, 2, 0) #Switch to channels-first
+        # data = np.moveaxis(data, 2, 0) #Switch to channels-first
 
-        data = data.astype(np.float32) / (255.)
+        # data = data.astype(np.float32) / (255.)
 
         return data
+
+    def save_file_one_msg(self, msg, filename):
+        """
+        Save the data to hard drive.
+        This function should be implemented where the data is stored frame by frame like image or point cloud
+        """
+        data = self.ros_to_numpy(msg)
+        cv2.imwrite(filename+'.png', data)
+
 
 if __name__ == "__main__":
     c = ImageConvert(nchannels=1, output_resolution=[32, 32])

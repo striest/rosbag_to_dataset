@@ -282,7 +282,7 @@ if __name__ == '__main__':
 
     # rospy.loginfo("stereo_net_node initialized")
     node = StereoInference()
-    node.process(traj_root_folder='/cairo/arl_bag_files/TartanCost/Trajectories/000101', 
+    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', 
                 depth_output_folder='depth_left', points_output_folder='points_left')
     # rospy.spin()
 

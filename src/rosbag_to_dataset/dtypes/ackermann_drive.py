@@ -40,6 +40,20 @@ class AckermannDriveConvert(Dtype):
         res = np.array([throttle, steer])
         return res
 
+    def save_file_one_msg(self, data, filename):
+        """
+        Save the data to hard drive.
+        This function should be implemented where the data is stored frame by frame like image or point cloud
+        """
+        return self.ros_to_numpy(data)
+
+    def save_file(self, data, filename):
+        """
+        Save the data to hard drive.
+        This function should be implemented where the data of the whole trajectory is stored in one file, like imu, odometry, etc.
+        """
+        np.save(filename+'/drive.npy', data)
+
 if __name__ == "__main__":
     c = AckermannDriveConvert()
     msg = AckermannDriveStamped()

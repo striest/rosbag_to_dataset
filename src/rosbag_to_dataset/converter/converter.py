@@ -47,14 +47,20 @@ class Converter:
         for k,v in self.action_converters.items():
             self.queue[k] = []
 
+    def find_first_msg_time(self, bag, topic):
+        for topic, msg, t in bag.read_messages(topics=[topic]):
+            timestamp = msg.header.stamp
+            return rospy.Time.to_sec(timestamp)
+
+
     def convert_bag(self, bag, as_torch=False, zero_pose_init=True):
         """
         Convert a bag into a dataset.
         """
         print('extracting messages...')
         self.reset_queue()
-        info_dict = yaml.safe_load(bag._get_yaml_info())
-        topics = bag.get_type_and_topic_info()[1].keys()
+        info_dict = yaml.safe_load(bag._get_yaml_info()) # info about the bagfile
+        topics = bag.get_type_and_topic_info()[1].keys() # topics in the bagfile
         for k in self.queue.keys():
             assert k in topics, "Could not find topic {} from envspec in the list of topics for this bag.".format(k)
 
@@ -69,20 +75,24 @@ class Converter:
                     clock_msgs.append(msg)
             info_dict['start'] = clock_msgs[0].clock.to_sec()
             info_dict['end'] = clock_msgs[-1].clock.to_sec()
-
-        timesteps = {k:np.arange(info_dict['start'], info_dict['end'], self.rates[k]) for k in self.queue.keys()}
+        import ipdb;ipdb.set_trace()
+        # # time steps for each topic at the given frequency
+        # timesteps = {k:np.arange(info_dict['start'], info_dict['end'], self.rates[k]) for k in self.queue.keys()}
+        starttime = self.find_first_msg_time(bag, '/multisense/left/image_rect_color')
+        endtime = starttime + (info_dict['end']-info_dict['start'])
+        timesteps = {k:np.arange(starttime, endtime, self.rates[k]) for k in self.queue.keys()}
 
         topic_curr_idx = {k:0 for k in self.queue.keys()}
         prev_t = rospy.Time.from_sec(0.)
         durs = []
 
 
-        # import pdb;pdb.set_trace()
         #TODO: Write the code to check if stamp is available. Use it if so else default back to t.
         for topic, msg, t in bag.read_messages(topics=list(self.queue.keys())):
             if topic in self.queue.keys():
                 tidx = topic_curr_idx[topic]
 
+                # import ipdb;ipdb.set_trace()
                 #Check if there is a stamp and it has been set.
                 has_stamp = hasattr(msg, 'header') and msg.header.stamp.to_sec() > 1000.
                 has_info = hasattr(msg, 'info') and msg.info.header.stamp.to_sec() > 1000.
@@ -90,16 +100,16 @@ class Converter:
                 #Use the timestamp if its valid. Otherwise default to rosbag time.
                 if (has_stamp or has_info) and self.use_stamps:
                     stamp = msg.header.stamp if has_stamp else msg.info.header.stamp
-                    if (tidx < timesteps[topic].shape[0]) and (stamp > rospy.Time.from_sec(timesteps[topic][tidx])):
+                    if (tidx < timesteps[topic].shape[0]) and (stamp >= rospy.Time.from_sec(timesteps[topic][tidx])):
                         #Add to data. Find the smallest timestep that's less than t.
                         idx = np.searchsorted(timesteps[topic], stamp.to_sec())
-                        topic_curr_idx[topic] = idx
+                        topic_curr_idx[topic] = idx # amigo: should be idx-1 ??
 
                         #In case of missing data.
                         while len(self.queue[topic]) < idx:
                             self.queue[topic].append(None)
 
-                        self.queue[topic].append(msg)
+                        self.queue[topic].append((stamp,msg))
                 else:
                     if (tidx < timesteps[topic].shape[0]) and (t > rospy.Time.from_sec(timesteps[topic][tidx])):
                         #Add to data. Find the smallest timestep that's less than t.
@@ -110,9 +120,10 @@ class Converter:
                         while len(self.queue[topic]) < idx:
                             self.queue[topic].append(None)
 
-                        self.queue[topic].append(msg)
+                        self.queue[topic].append((t, msg))
 
 
+        import ipdb;ipdb.set_trace()
         #Make sure all queues same length
         for k in self.queue.keys():
             while len(self.queue[k]) < timesteps[k].shape[0]:
@@ -192,8 +203,8 @@ class Converter:
         for topic, converter in self.observation_converters.items():
 #            print(topic, converter)
 
-            data = self.queue[topic]
-            data = [converter.ros_to_numpy(x) for x in data]
+            data = self.queue[topic] # 0 is time
+            data = [converter.ros_to_numpy(x) for (time, x) in data]
             data = np.stack(data, axis=0)
 
             if strides[topic] > 1:
@@ -207,7 +218,7 @@ class Converter:
         for topic, converter in self.action_converters.items():
 #            print(topic, converter)
             data = self.queue[topic]
-            data = [converter.ros_to_numpy(x) for x in data]
+            data = [converter.ros_to_numpy(x) for (time, x) in data]
             data = np.stack(data, axis=0)
             if len(data.shape) == 1:
                 data = np.expand_dims(data, axis=1)

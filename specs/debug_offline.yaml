@@ -1,0 +1,45 @@
+---
+  main_topic: "/multisense/left/image_rect"
+  dt: 0.1
+  data: 
+    # "/odometry/filtered_odom":
+    #     type: Odometry
+    #     remap: "state"
+    #     options:
+    #         use_vel: False
+
+    "/multisense/imu/imu_data":
+        type: Imu
+        folder: "imu"
+        N_per_step: 10
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+
+    "/multisense/left/image_rect_color":
+        type: Image
+        folder: "image_left_color"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 3
+
+    "/multisense/right/image_rect":
+        type: Image
+        folder: "image_right"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 1
+
+    "/multisense/left/image_rect":
+        type: Image
+        folder: "image_left"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 1
+
+    # "/cmd":
+    #     type: Twist
+    #     options:
+    #         mode: action
+

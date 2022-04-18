@@ -9,7 +9,7 @@ import yaml
 import shutil
 
 from rosbag_to_dataset.util.bag_util import filter_bags, parse_dict
-from rosbag_to_dataset.converter.converter import Converter
+from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 
 
 
@@ -42,8 +42,8 @@ if __name__ == "__main__":
 
     required_topics = yaml.safe_load(open(topic_spec, 'r'))
 
-    required_topic_dirs  = list(required_topics.keys())
-    required_topic_names = [list(required_topics.values())[i]['name'] for i in range(len(required_topics))]
+    required_topic_dirs  = [list(required_topics.values())[i]['remap'] for i in range(len(required_topics))]# list(required_topics.keys())
+    required_topic_names = list(required_topics.keys()) #[list(required_topics.values())[i]['name'] for i in range(len(required_topics))]
     required_topic_types = [list(required_topics.values())[i]['type'] for i in range(len(required_topics))]
 
     # Count how many trajectories already exist in the dataset and set 
@@ -55,14 +55,14 @@ if __name__ == "__main__":
         for file in files:
             bag_fp = os.path.join(subdir, file)
             if ".bag" in bag_fp:
-
-                #Read in YAML file in directory if one exists and save labels from YAML file to later annotate specific trajectories with
-                labels_fp = os.path.join(subdir, 'labels.yaml')
-                with open(labels_fp, 'r') as f:
-                    dir_labels = yaml.safe_load(f)
+                # import ipdb;ipdb.set_trace()
+                # #Read in YAML file in directory if one exists and save labels from YAML file to later annotate specific trajectories with
+                # labels_fp = os.path.join(subdir, 'labels.yaml')
+                # with open(labels_fp, 'r') as f:
+                #     dir_labels = yaml.safe_load(f)
                 
-                labels = dir_labels['labels']
-                label_names = dir_labels['label_names']
+                # labels = dir_labels['labels']
+                # label_names = dir_labels['label_names']
 
                 #Check the duration of the rosbag. If it is shorter than 5s, ignore, if it is 5s, good, if it is greater than 5s, split it into 5s trajectories and get rid of the remainder. NOTE: this creates new bags in the filesystem of size 5.
                 valid_bags = filter_bags(bag_fp, bag_length)
@@ -108,12 +108,11 @@ if __name__ == "__main__":
 
 
                     # Generate spec file to be used with rosbag-to-dataset Converter interface for this specific bag, making use of frequency and required_topics as the remap names so that we can use these to access dictionary that will be returned by rosbag-to-dataset
-
                     spec, converters, remap, rates = parse_dict(sensors)
 
-                    converter = Converter(spec, converters, remap, rates, use_stamps=False)
+                    converter = ConverterToFiles(spec, converters, remap, rates, use_stamps=True)
 
-                    dataset = converter.convert_bag(bag, as_torch=False, zero_pose_init=True)
+                    dataset = converter.convert_bag(bag, zero_pose_init=True)
 
 
                     for i, req_dir in enumerate(required_topic_dirs):

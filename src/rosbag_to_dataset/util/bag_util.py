@@ -33,6 +33,14 @@ sensor_specs = {
             'use_vel': True
         }
     },
+    'geometry_msgs/TwistStamped': {
+        'type': 'Twist',
+        'remap': None,
+        'N_per_step': None,
+        'options': {
+            'mode': 'action'
+        }
+    },
     # 'sensor_msgs/PointCloud2': {
     #     'type': 'PointCloud',
     #     'remap': None,
@@ -76,6 +84,7 @@ def filter_bags(bag_fp, length=5, epsilon=0.01):
     valid_bags = [f"{bag_fp[:-4]}_{i}.bag" for i in range(num_output_bags)]
 
 
+    # import ipdb;ipdb.set_trace()
     # Record all files in directory to make sure you don't split bags that have been already split
     directory, _ = os.path.split(bag_fp)
     files_in_dir = []
@@ -90,6 +99,7 @@ def filter_bags(bag_fp, length=5, epsilon=0.01):
             for topic, msg, t in input_bag.read_messages(start_time=bag_starts[i], end_time=bag_ends[i]):
                 outbag.write(topic, msg, t)
 
+    # import ipdb;ipdb.set_trace()
     
     return valid_bags
 

@@ -52,15 +52,23 @@ class ImageConvert(Dtype):
         elif self.aggregate == 'bigendian':
             data = sum([data[:, :, -(i+1)] * (256**i) for i in range(self.nchannels)])
 
-        if len(data.shape) == 2:
-            data = np.expand_dims(data, axis=0)
-        else:
-            data = np.moveaxis(data, 2, 0) #Switch to channels-first
+        # if len(data.shape) == 2:
+        #     data = np.expand_dims(data, axis=0)
+        # else:
+        #     data = np.moveaxis(data, 2, 0) #Switch to channels-first
 
-        if is_rgb:
-            data = data.astype(np.float32) / (255. if self.aggregate == 'none' else 255.**self.nchannels)
+        # if is_rgb:
+        #     data = data.astype(np.float32) / (255. if self.aggregate == 'none' else 255.**self.nchannels)
 
         return data
+
+    def save_file_one_msg(self, msg, filename):
+        """
+        Save the data to hard drive.
+        This function should be implemented where the data is stored frame by frame like image or point cloud
+        """
+        data = self.ros_to_numpy(msg)
+        cv2.imwrite(filename+'.png', data)
 
 if __name__ == "__main__":
     c = ImageConvert(nchannels=1, output_resolution=[32, 32])

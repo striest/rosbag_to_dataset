@@ -7,7 +7,7 @@ from sensor_msgs.point_cloud2 import PointCloud2, PointField
 
 from scipy.spatial.transform import Rotation
 
-def pointcloud2_to_xyzrgb_array(cloud_msg, remove_nans=True, dtype=np.float):
+def pointcloud2_to_xyzrgb_array(cloud_msg, remove_nans=True, dtype=np.float64):
     '''Pulls out x, y, and z columns from the cloud recordarray, and returns
         a 3xN matrix.
     '''

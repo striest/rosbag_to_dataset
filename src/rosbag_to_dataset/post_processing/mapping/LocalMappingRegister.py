@@ -159,7 +159,7 @@ class LocalMappingRegisterNode(object):
 if __name__ == '__main__':
 
     node = LocalMappingRegisterNode()
-    node.process('/cairo/arl_bag_files/TartanCost/Trajectories/000101', heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')
+    node.process('/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')
 
 
         
