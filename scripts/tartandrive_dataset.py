@@ -5,6 +5,7 @@ from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import maybe_mkdir
 
+# python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/debug_offline.yaml --save_to test_output/20210903_298
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 

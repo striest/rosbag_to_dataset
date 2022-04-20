@@ -105,7 +105,7 @@ class StereoInference:
         self.crop_intrinsics()
         self.scale_intrinsics()
 
-        self.atvmask = np.load(self.curdir+'/atvmask.npy')
+        self.atvmask = np.load(self.curdir+'/atvmask_tartandrive.npy')
         self.crop_resize_atvmask()
         self.atvmask = self.atvmask < 10 # a threshold
 

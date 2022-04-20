@@ -2,11 +2,11 @@
   main_topic: "/multisense/left/image_rect"
   dt: 0.1
   data: 
-    # "/odometry/filtered_odom":
-    #     type: Odometry
-    #     remap: "state"
-    #     options:
-    #         use_vel: False
+    "/odometry/filtered_odom":
+        type: Odometry
+        folder: "odom"
+        options:
+            use_vel: True
 
     "/multisense/imu/imu_data":
         type: Imu
@@ -38,8 +38,24 @@
             output_resolution: [1024, 544]
             nchannels: 1
 
-    # "/cmd":
-    #     type: Twist
-    #     options:
-    #         mode: action
+    "/cmd":
+        type: Twist
+        options:
+            mode: action
 
+    # "/wheel_rpm":
+    #     type: RPWheelEncoders
+    #     remap: "wheel_rpm"
+    #     N_per_step: 20
+
+    # "/shock_pos":
+    #     type: RPShockSensors
+    #     remap: "shock_travel"
+    #     N_per_step: 20
+
+    # "/controls":
+    #     type: RPControls
+    #     remap: "intervention"
+    #     options:
+    #         mode: "intervention"
+    #         intervention_threshold: 200.

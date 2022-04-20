@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
-  common_msgs
+  # common_msgs
   geometry_msgs
 )
 
