@@ -1,5 +1,5 @@
 import yaml
-import gym
+# import gym
 import numpy as np
 
 from collections import OrderedDict
