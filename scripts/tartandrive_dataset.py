@@ -18,13 +18,20 @@ if __name__ == '__main__':
     print('setting up...')
     config_parser = ConfigParser()
     converters, outfolders, rates, dt, maintopic = config_parser.parse_from_fp(args.config_spec)
-    bag = rosbag.Bag(args.bag_fp)
 
-    # create folders
-    maybe_mkdir(args.save_to)
-    for k, folder in outfolders.items():
-        maybe_mkdir(args.save_to+'/'+folder)
+    with open(args.bag_fp, 'r') as f:
+        lines = f.readlines()
 
-    converter = ConverterToFiles(args.save_to, dt, converters, outfolders, rates)
-    dataset = converter.convert_bag(bag, main_topic=maintopic)
+    for line in lines:
+        bagfile, outfolder = line.strip().split(' ')
+        bag = rosbag.Bag(bagfile)
+
+        # create foldersoutfolders
+        trajoutfolder = args.save_to+'/'+outfolder
+        maybe_mkdir(trajoutfolder)
+        for k, folder in outfolders.items():
+            maybe_mkdir(trajoutfolder+'/'+folder)
+
+        converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
+        dataset = converter.convert_bag(bag, main_topic=maintopic)
 

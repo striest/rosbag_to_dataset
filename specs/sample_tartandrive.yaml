@@ -17,7 +17,7 @@
             angular_velocity: True
             linear_acceleration: True
 
-    "/multisense/left/image_color":
+    "/multisense/left/image_rect_color":
         type: Image
         folder: "image_left_color"
         options:
