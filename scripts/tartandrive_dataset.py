@@ -6,8 +6,8 @@ from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir
 from os.path import isfile
 
-# python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/debug_offline.yaml --save_to test_output/20210903_298
-# python tartandrive_dataset.py --config_spec ../specs/sample_tartandrive.yaml --bag_list trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
+# python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
+# python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
 
 if __name__ == '__main__':
     '''

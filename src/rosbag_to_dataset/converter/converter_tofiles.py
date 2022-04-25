@@ -233,12 +233,14 @@ class ConverterToFiles:
             else: 
                 stamp = t
 
-            if abs(stamp.to_sec() - self.timesteps[topic][tidx])<10e-5: 
+            while tidx < len(self.timesteps[topic]) and abs(stamp.to_sec() - self.timesteps[topic][tidx])<10e-5: 
                 filename = self.outputdir + '/' + self.outfolders[topic] + '/' + str(tidx).zfill(6) 
                 self.queue[topic].append(self.converters[topic].save_file_one_msg(msg, filename) )
                 topic_curr_idx[topic] = topic_curr_idx[topic] + 1
+                tidx = topic_curr_idx[topic]
 
         for topic in self.topics:
+            assert len(self.queue[topic]) == self.timesteps[topic].shape[0], 'convert_queue error: queuelen {} != timestep_len {}'.format(len(self.queue[topic]), self.timesteps[topic].shape[0])
             filefolder = self.outputdir + '/' + self.outfolders[topic] 
             self.converters[topic].save_file(self.queue[topic], filefolder)
             np.savetxt(self.outputdir + '/' + self.outfolders[topic] + '/timestamps.txt', np.array(self.timesteps[topic]))
