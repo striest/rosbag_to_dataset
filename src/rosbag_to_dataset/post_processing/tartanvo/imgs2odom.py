@@ -39,6 +39,7 @@ from torch.utils.data import DataLoader
 from utils import se2SE, SO2quat, se2quat
 from TartanSVO import TartanSVO
 import time
+import os
 from os import mkdir
 from os.path import isdir, dirname, realpath
 from arguments import get_args
@@ -153,4 +154,16 @@ class TartanVOInference(object):
 # python imgs2odom.py --model-name 43_6_2_vonet_30000_wo_pwc.pkl --network-type 2  --image-input-w 640 --image-input-h 448
 if __name__ == '__main__':
     node = TartanVOInference()
-    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', vo_output_folder = 'tartanvo_odom')
+    # node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', vo_output_folder = 'tartanvo_odom')
+    # node.process(traj_root_folder='/home/mateo/Data/SARA/TartanDriveCost/Trajectories/000009', vo_output_folder = 'tartanvo_odom')
+
+    # node.process(traj_root_folder='/home/mateo/rosbag_to_dataset/test_output/20210903_42', vo_output_folder = 'tartanvo_odom')
+
+
+    dataset_folder = '/home/mateo/Data/SARA/TartanDriveCost/'
+    trajectories_dir = os.path.join(dataset_folder, "Trajectories")
+    traj_dirs = list(filter(os.path.isdir, [os.path.join(trajectories_dir,x) for x in sorted(os.listdir(trajectories_dir))]))
+
+    for i, d in enumerate(traj_dirs):
+        print(f"Processing trajectory in {d} for odom")
+        node.process(traj_root_folder=d, vo_output_folder = 'tartanvo_odom')

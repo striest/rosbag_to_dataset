@@ -10,6 +10,7 @@ from GridFilter import GridFilter
 from scipy.spatial.transform import Rotation
 import time
 from arguments import get_args
+import os
 from os import listdir
 from os import mkdir
 from os.path import isdir, dirname, realpath
@@ -159,11 +160,14 @@ class LocalMappingRegisterNode(object):
 if __name__ == '__main__':
 
     node = LocalMappingRegisterNode()
-    node.process('/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')
+    # node.process('/home/mateo/Data/SARA/TartanDriveCost/Trajectories/000009', heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')
 
+    # node.process('/home/mateo/rosbag_to_dataset/test_output/20210903_42', heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')
 
-        
+    dataset_folder = '/home/mateo/Data/SARA/TartanDriveCost/'
+    trajectories_dir = os.path.join(dataset_folder, "Trajectories")
+    traj_dirs = list(filter(os.path.isdir, [os.path.join(trajectories_dir,x) for x in sorted(os.listdir(trajectories_dir))]))
 
-
-
-
+    for i, d in enumerate(traj_dirs):
+        print(f"Processing trajectory in {d} for height maps and rgb maps")
+        node.process(d, heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')

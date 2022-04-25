@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from math import ceil
 import time
+import pyximport
+pyximport.install(setup_args={"script_args" : ["--verbose"]})
 from cscrollgrid import fast_min_max, inflate_map
 np.set_printoptions(suppress=True, threshold=10000)
 

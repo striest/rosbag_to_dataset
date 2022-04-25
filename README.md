@@ -63,7 +63,7 @@ ROOT
 
 Note that inside each modality folder, there is a `timestamps.txt` file, specifying the corresponding timestamps of each frame. 
 
-## Offline
+## Run the Extraction Code
 
 To generate offline data, do the following:
 

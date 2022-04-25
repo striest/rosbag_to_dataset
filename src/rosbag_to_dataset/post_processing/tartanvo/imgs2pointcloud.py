@@ -2,6 +2,7 @@ import cv2
 import torch
 import numpy as np
 import time
+import os
 from os import mkdir
 from os.path import isdir, dirname, realpath
 
@@ -249,8 +250,10 @@ class StereoInference:
             with torch.no_grad():        
                 leftTensor = sample['img0'].cuda()
                 rightTensor = sample['img1'].cuda()
+                print('input: ', leftTensor.shape, leftTensor.mean(), leftTensor.max(), leftTensor.min(), rightTensor.mean(), rightTensor.max(), rightTensor.min())
                 inputTensor = torch.cat((leftTensor, rightTensor), dim=1)
                 output = self.stereonet((inputTensor))
+                print('output: ', output.shape, output.mean(), output.max(), output.min())
                 # import ipdb;ipdb.set_trace()
             #     torch.cuda.synchronize()        
             # print ('Stereo estimation forward time {}'.format(time.time()-starttime))
@@ -282,7 +285,16 @@ if __name__ == '__main__':
 
     # rospy.loginfo("stereo_net_node initialized")
     node = StereoInference()
-    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', 
-                depth_output_folder='depth_left', points_output_folder='points_left')
+    # node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', depth_output_folder='depth_left', points_output_folder='points_left')
     # rospy.spin()
+    # node.process(traj_root_folder='/home/mateo/Data/SARA/TartanDriveCost/Trajectories/000009', depth_output_folder='depth_left', points_output_folder='points_left')
 
+    # node.process(traj_root_folder='/home/mateo/rosbag_to_dataset/test_output/20210903_42', depth_output_folder='depth_left', points_output_folder='points_left')
+
+    dataset_folder = '/home/mateo/Data/SARA/TartanDriveCost/'
+    trajectories_dir = os.path.join(dataset_folder, "Trajectories")
+    traj_dirs = list(filter(os.path.isdir, [os.path.join(trajectories_dir,x) for x in sorted(os.listdir(trajectories_dir))]))
+
+    for i, d in enumerate(traj_dirs):
+        print(f"Processing trajectory in {d} for pointcloud")
+        node.process(traj_root_folder=d, depth_output_folder='depth_left', points_output_folder='points_left')
