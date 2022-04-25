@@ -3,7 +3,7 @@ import rosbag
 
 from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
-from rosbag_to_dataset.util.os_util import maybe_mkdir
+from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir
 from os.path import isfile
 
 # python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/debug_offline.yaml --save_to test_output/20210903_298
@@ -44,10 +44,12 @@ if __name__ == '__main__':
         print("No input bagfiles specified..")
         exit()
 
+    maybe_mkdir(args.save_to)
     for bagfile, outfolder in bagfilelist:
         # bagfile, outfolder = line.strip().split(' ')
         print('Reading bagfile {}'.format(bagfile))
         bag = rosbag.Bag(bagfile)
+        print('Bagfile loaded')
 
         # create foldersoutfolders
         trajoutfolder = args.save_to+'/'+outfolder
@@ -56,5 +58,9 @@ if __name__ == '__main__':
             maybe_mkdir(trajoutfolder+'/'+folder)
 
         converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
-        dataset = converter.convert_bag(bag, main_topic=maintopic)
+        suc = dataset = converter.convert_bag(bag, main_topic=maintopic)
+
+        if not suc: 
+            print('Convert bagfile {} failure..'.format(bagfile))
+            maybe_rmdir(trajoutfolder)
 
