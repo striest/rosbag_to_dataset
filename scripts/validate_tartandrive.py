@@ -15,7 +15,7 @@ if __name__ == '__main__':
     '''
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--root', type=str, required=True, default="", help='Path to the bag file to get data from')
+    parser.add_argument('--root', type=str, required=True, default="", help='Path of the data folder')
     parser.add_argument('--bag_list', type=str, required=True, default="", help='Path to the bag file to get data from')
     parser.add_argument('--outfile', type=str, required=True, help='Name of the dir to save the result to')
 

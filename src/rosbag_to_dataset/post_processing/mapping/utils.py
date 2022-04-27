@@ -96,7 +96,7 @@ def quat2SE(quat_data):
     quat_data: 7
     SE: 4 x 4
     '''
-    SO = Rotation.from_quat(quat_data[3:7]).as_dcm()
+    SO = Rotation.from_quat(quat_data[3:7]).as_matrix()
     SE = np.matrix(np.eye(4))
     SE[0:3,0:3] = np.matrix(SO)
     SE[0:3,3]   = np.matrix(quat_data[0:3]).T
@@ -113,7 +113,7 @@ def SE2quat(SE_data):
     return pos_quat
 
 def SO2quat(SO_data):
-    rr = Rotation.from_dcm(SO_data)
+    rr = Rotation.from_matrix(SO_data)
     return rr.as_quat()
 
 def pose2motion(pose1, pose2, skip=0):
