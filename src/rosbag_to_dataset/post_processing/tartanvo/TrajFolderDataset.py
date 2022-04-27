@@ -131,12 +131,15 @@ class TrajFolderDataset(Dataset):
             imgcolor = cv2.imread(self.colorfiles[idx].strip())
             sample['imgc'] = imgcolor
 
-        # image processing
-        sample = crop_imgs(sample, self.crop_w, self.crop_h)
-        sample = scale_imgs(sample, self.resize_w, self.resize_h)
-        # # debug vo
-        # sample = scale_imgs(sample, 844, 448)
-        # sample = crop_imgs(sample, 102, 0)
+        # # image processing
+        # hard code the preprocessing for stereo and vo
+        if self.forvo: # for vo, resize to (896 x 448), crop to (640 x 448)
+            sample = scale_imgs(sample, self.resize_w, self.resize_h)
+            sample = crop_imgs(sample, self.crop_w, self.crop_h)
+        else:
+            sample = crop_imgs(sample, self.crop_w, self.crop_h)
+            sample = scale_imgs(sample, self.resize_w, self.resize_h)
+        # debug vo
         sample = to_tensor(sample)
         sample = normalize(sample,mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225], keep_old=self.forvo) 
 

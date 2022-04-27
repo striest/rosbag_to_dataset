@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from PSM import feature_extraction, Hourglass 
+from .PSM import feature_extraction, Hourglass 
 
 
 def predict_layer(in_planes):

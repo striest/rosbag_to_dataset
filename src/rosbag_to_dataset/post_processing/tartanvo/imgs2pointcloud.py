@@ -6,12 +6,11 @@ from os import mkdir
 from os.path import isdir, dirname, realpath
 
 # from PSM import stackhourglass as StereoNet
-from StereoNet7 import StereoNet7 as StereoNet
-from TrajFolderDataset import TrajFolderDataset
-from arguments import get_args
+from .StereoNet7 import StereoNet7 as StereoNet
+from .TrajFolderDataset import TrajFolderDataset
 
 from torch.utils.data import DataLoader
-
+from .arguments import *
 
 def depth_to_point_cloud(depth, focalx, focaly, pu, pv, filtermin=-1, filtermax=-1, colorimg=None, mask=None):
     """
@@ -78,12 +77,6 @@ def points_height_filter(points, maxhight, colorimg=None):
         colorimg_filter = None
     return points_filter, colorimg_filter
 
-class Depth2Points:
-    def __init__(self):
-        '''
-        Project depth image to points
-        '''
-
 class StereoInference:
     def __init__(self):
         '''
@@ -91,8 +84,7 @@ class StereoInference:
         depth_output_folder: if given, the data will be output to the folder
         '''
         self.curdir = dirname(realpath(__file__))
-        args = get_args()
-        self.parse_params(args)
+        self.parse_params()
 
         self.stereonet = StereoNet(group_norm=False)
         self.load_model(self.stereonet, self.curdir+'/models/'+self.modelname)
@@ -108,6 +100,7 @@ class StereoInference:
         self.atvmask = np.load(self.curdir+'/atvmask_tartandrive.npy')
         self.crop_resize_atvmask()
         self.atvmask = self.atvmask < 10 # a threshold
+        self.mask_boarder_points()
 
     def load_dataset(self, traj_root_folder):
         testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder='image_left_color', 
@@ -116,32 +109,32 @@ class StereoInference:
                                         shuffle=False, num_workers=self.worker_num)
         self.testDataiter = iter(testDataloader)
 
-    def parse_params(self, args):
-        self.modelname = args.model_name #'models/5_5_4_stereo_30000.pkl'
+    def parse_params(self):
+        self.modelname = stereo_args["model_name"] #'models/5_5_4_stereo_30000.pkl'
 
         # camera parameters
-        self.w = args.image_width # , 1024)
-        self.h = args.image_height # , 544)
-        self.focalx = args.focal_x # , 477.6049499511719)
-        self.focaly = args.focal_y # , 477.6049499511719)
-        self.pu = args.center_x # , 499.5)
-        self.pv = args.center_y # , 252.0)
-        self.fxbl = args.focal_x_baseline # , 100.14994812011719)
+        self.w = common_args["image_width"] # , 1024)
+        self.h = common_args["image_height"] # , 544)
+        self.focalx = common_args["focal_x"] # , 477.6049499511719)
+        self.focaly = common_args["focal_y"] # , 477.6049499511719)
+        self.pu = common_args["center_x"] # , 499.5)
+        self.pv = common_args["center_y"] # , 252.0)
+        self.fxbl = common_args["focal_x_baseline"] # , 100.14994812011719)
 
         # depth generation parameters
-        self.crop_w = args.image_crop_w # , 64) # to deal with vignette effect, crop the image
-        self.crop_h = args.image_crop_h # , 32) # after cropping the size is (960, 512)
-        self.input_w = args.image_input_w # , 512)
-        self.input_h = args.image_input_h # , 256)
-        self.visualize = args.visualize_depth # , True)
+        self.crop_w = stereo_args["image_crop_w"] # , 64) # to deal with vignette effect, crop the image
+        self.crop_h = stereo_args["image_crop_h"] # , 32) # after cropping the size is (960, 512)
+        self.input_w = stereo_args["image_input_w"] # , 512)
+        self.input_h = stereo_args["image_input_h"] # , 256)
+        self.visualize = stereo_args["visualize_depth"] # , True)
 
         # point cloud processing parameters
-        self.mindist = args.pc_min_dist # , 2.5) # not filter if set to -1 
-        self.maxdist = args.pc_max_dist # , 10.0) # not filter if set to -1
-        self.maxhight = args.pc_max_height # , 2.0) # not filter if set to -1
+        self.mindist = stereo_args["pc_min_dist"] # , 2.5) # not filter if set to -1 
+        self.maxdist = stereo_args["pc_max_dist"] # , 10.0) # not filter if set to -1
+        self.maxhight = stereo_args["pc_max_height"] # , 2.0) # not filter if set to -1
 
-        self.batch_size = args.batch_size
-        self.worker_num = args.worker_num
+        self.batch_size = common_args["batch_size"]
+        self.worker_num = common_args["worker_num"]
         # # some flags to control the point cloud processing
         # self.transform_ground = args.pc_transform_ground # , True)
 
@@ -185,24 +178,12 @@ class StereoInference:
         self.atvmask = self.atvmask[self.crop_h:-self.crop_h, self.crop_w:-self.crop_w]
         self.atvmask = cv2.resize(self.atvmask,(self.input_w, self.input_h))
 
-    def crop_intrinsics(self):
-        self.pu = self.pu - self.crop_w
-        self.pv = self.pv - self.crop_h
-        self.w = self.w - 2 * self.crop_w
-        self.h = self.h - 2 * self.crop_h
-
-    def scale_intrinsics(self):
-        scalex = float(self.input_w)/self.w
-        scaley = float(self.input_h)/self.h
-        self.focalx = self.focalx * scalex
-        self.focaly = self.focaly * scaley
-        self.pu = self.pu * scalex
-        self.pv = self.pv * scaley
-        self.fxbl = self.fxbl * scalex
-
-    def crop_resize_atvmask(self):
-        self.atvmask = self.atvmask[self.crop_h:-self.crop_h, self.crop_w:-self.crop_w]
-        self.atvmask = cv2.resize(self.atvmask,(self.input_w, self.input_h))
+    def mask_boarder_points(self, maskw=10, maskh=10):
+        self.atvmask[0:maskh, :] = False
+        self.atvmask[-maskh:, :] = False
+        self.atvmask[:, 0:maskw] = False
+        self.atvmask[:, -maskw:] = False
+        # import ipdb;ipdb.set_trace()
 
     def disp2vis(self, disp, scale=10,):
         '''
@@ -216,7 +197,7 @@ class StereoInference:
 
     def save_as_points_file(self, disparity, colored_image, filename):
         # import ipdb;ipdb.set_trace()
-        depth = self.fxbl / disparity
+        depth = self.fxbl / (disparity+1e-8)
         point_array, color_array = depth_to_point_cloud(depth, self.focalx, self.focaly, self.pu, self.pv, 
                                                         self.mindist, self.maxdist, colored_image, self.atvmask)
         points_data = np.concatenate((point_array, color_array), axis=1)
@@ -236,8 +217,9 @@ class StereoInference:
                 mkdir(pcoutdir)
                 print('Create folder: {}'.format(pcoutdir))
 
+        count = 0
         while True: # for all the images in the trajectory
-            starttime0 = time.time()
+            # starttime0 = time.time()
             try:
                 sample = self.testDataiter.next()
             except StopIteration:
@@ -251,12 +233,12 @@ class StereoInference:
                 rightTensor = sample['img1'].cuda()
                 inputTensor = torch.cat((leftTensor, rightTensor), dim=1)
                 output = self.stereonet((inputTensor))
-                # import ipdb;ipdb.set_trace()
-            #     torch.cuda.synchronize()        
-            # print ('Stereo estimation forward time {}'.format(time.time()-starttime))
+                torch.cuda.synchronize()        
+            print ('{}. Stereo estimation forward time {}'.format(count, time.time()-starttime))
             colored_np = sample['imgc'].numpy()
             disp = output.cpu().squeeze(1).numpy() * 50 # 50 is the normalization factor used in training
-            
+            count += len(disp)
+
             if depth_output_folder is not None: # save the output files to the folder
                 filenames = sample['filename0']
                 for k in range(disp.shape[0]):
@@ -266,23 +248,23 @@ class StereoInference:
                     np.save(filestr+'.npy',dispk)
                     self.save_as_points_file(dispk, colored_np[k], filestrpc+'.npy')
 
-                    if self.visualize: # save visualization file to the folder
-                        dispvis = self.disp2vis(dispk, scale=3)
-                        cv2.imwrite(filestr+'.jpg',dispvis)
+                    # if self.visualize: # save visualization file to the folder
+                    dispvis = self.disp2vis(dispk, scale=3)
+                    cv2.imwrite(filestr+'.jpg',dispvis)
 
             if self.visualize:
                 cv2.imshow('img', dispvis)
                 cv2.waitKey(1)
             # import ipdb;ipdb.set_trace()
 
-# python imgs2pointcloud.py --visualize --image-input-w 640 --image-input-h 448
+# python imgs2pointcloud.py --visualize-depth --image-input-w 512 --image-input-h 256
 if __name__ == '__main__':
 
     # rospy.init_node("stereo_net", log_level=rospy.INFO)
 
     # rospy.loginfo("stereo_net_node initialized")
     node = StereoInference()
-    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', 
+    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210805_slope2', 
                 depth_output_folder='depth_left', points_output_folder='points_left')
     # rospy.spin()
 

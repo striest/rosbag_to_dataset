@@ -1,30 +1,10 @@
-import argparse
+mapping_args = {}
 
-def get_args():
-    parser = argparse.ArgumentParser(description='Deep learning stereo and vo')
+mapping_args['resolution']      = 0.02 # The resolution of the map
+mapping_args['min_x']           = -2.0 # The minimum range of the map
+mapping_args['max_x']           = 10.0 # The maximum range of the map
+mapping_args['min_y']           = -6.0 # The minimum range of the map
+mapping_args['max_y']           = 6.0 # The maximum range of the map
 
-    parser.add_argument('--resolution', type=float, default=0.02,
-                        help='The resolution of the map')
-
-    parser.add_argument('--min-x', type=float, default=-2.0,
-                        help='The minimum range of the map')
-
-    parser.add_argument('--max-x', type=float, default=10.0,
-                        help='The maximum range of the map')
-
-    parser.add_argument('--min-y', type=float, default=-6.0,
-                        help='The minimum range of the map')
-
-    parser.add_argument('--max-y', type=float, default=6.0,
-                        help='The maximum range of the map')
-
-
-    parser.add_argument('--max-points-num', type=int, default=3000000,
-                        help='maximum number of the points')
-
-    parser.add_argument('--visualize-maps', action='store_true', default=False,
-                        help='Visualize the map')
-
-    args = parser.parse_args()
-
-    return args
+mapping_args['max_points_num']  = 3000000 # maximum number of the points
+mapping_args['visualize_maps']  = False # Visualize the map

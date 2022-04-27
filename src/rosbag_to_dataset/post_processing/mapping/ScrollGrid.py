@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from math import ceil
 import time
-from cscrollgrid import fast_min_max, inflate_map
+from .cscrollgrid import fast_min_max, inflate_map
 np.set_printoptions(suppress=True, threshold=10000)
 
 FLOATMAX = 1000000.0

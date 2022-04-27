@@ -3,8 +3,7 @@ from os.path import isfile, isdir
 from os import listdir
 import numpy as np
 
-# python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
-# python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
+# python scripts/validate_tartandrive.py --root /project/learningphysics/tartandrive_trajs --bag_list scripts/trajlist.txt --outfile scripts/trajlist_missing.txt
 
 if __name__ == '__main__':
     '''
@@ -13,9 +12,6 @@ if __name__ == '__main__':
       <Full path of the bagfile1> <Output folder name1>
       <Full path of the bagfile2> <Output folder name2>
       ...
-    The extracted data will be stored in <save_to>/<Output folder name>
-
-    if no bag_list is specified, the code will look at bag_fp and process the single bagfile. The output folder is specified by the save_to param
     '''
     parser = argparse.ArgumentParser()
 
@@ -32,7 +28,7 @@ if __name__ == '__main__':
 
     outfile = open(args.outfile, 'w')
     for bagfile, outfolder in bagfilelist:
-        print('---',outfolder,'---')
+        print('--- {} ---'.format(outfolder))
         trajdir = args.root + '/' + outfolder
 
         if not isdir(trajdir):

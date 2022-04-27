@@ -16,21 +16,21 @@ class StereoVONet(nn.Module):
         super(StereoVONet, self).__init__()
 
         if network==0: # PSM + PWC
-            from PWC import PWCDCNet as FlowNet
-            from PSM import stackhourglass as StereoNet
+            from .PWC import PWCDCNet as FlowNet
+            from .PSM import stackhourglass as StereoNet
             self.flowNet   = FlowNet()
         if network==1: # 5_5 + PWC
-            from PWC import PWCDCNet as FlowNet
-            from StereoNet7 import StereoNet7 as StereoNet
+            from .PWC import PWCDCNet as FlowNet
+            from .StereoNet7 import StereoNet7 as StereoNet
             self.flowNet   = FlowNet()
         else:
-            from FlowNet2 import FlowNet2 as FlowNet
-            from StereoNet7 import StereoNet7 as StereoNet
+            from .FlowNet2 import FlowNet2 as FlowNet
+            from .StereoNet7 import StereoNet7 as StereoNet
             self.flowNet   = FlowNet(middleblock=3)
 
         self.stereoNet = StereoNet()
 
-        from VOFlowNet import VOFlowRes as FlowPoseNet
+        from .VOFlowNet import VOFlowRes as FlowPoseNet
         self.flowPoseNet = FlowPoseNet(intrinsic=intrinsic, down_scale=down_scale, config=config, stereo=True, autoDistTarget=autoDistTarget)
 
         self.network = network
