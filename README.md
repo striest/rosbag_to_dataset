@@ -70,8 +70,11 @@ python scripts/tartandrive_dataset.py --bag_fp <ARG> --config_spec <ARG> --save_
 ```
 
 Args
+
     --config_spec: path to the configuration file
+
     --bag_fp: path to bagfile
+
     --save_to: new dir to save data files in
 
 To process *multiple bagfiles* at once, you can first generate a text file with a list of input bagfiles and output folder:
@@ -91,8 +94,11 @@ python scripts/tartandrive_dataset.py --bag_list <ARG> --config_spec <ARG> --sav
 ```
 
 Args
+
     --config_spec: path to the configuration file
+
     --bag_list: path to text file listing multiple bagfiles and output folders
+
     --save_to: new dir to save all the trajectories in
 
 ## TartanVO and local mapping
@@ -106,28 +112,28 @@ cd src/rosbag_to_dataset/post_processing/tartanvo
 sh download_models.sh
 cd ../mapping
 python setup.py built_ext --inplace
-
 ```
 
 Run the mapping code: 
 
 ```
 python scripts/tartandrive_postprocessing.py --root <ARG> --bag_list <ARG>
-
 ```
 
 Args
+
     --root: path to the data folder, generated from the last step
+
     --bag_list: same file used in the last step, listing bagfiles and the output directories. 
 
 Mapping parameters: 
 
 There are many parameters for the stereo matching, visual odometry and mapping modules. Please look into `src/rosbag_to_dataset/post_processing/tartanvo/arguments.py` and `src/rosbag_to_dataset/post_processing/mapping/arguments.py`. 
 
-# Code Notes
+## Code Notes
 This code is derived from the Tartan_cost branch. The main feature is to store the data into files instead of returning as numpy array. Another key change is the way of aligning the timestamps. A main-topic is defined in the spec file, other topics are aligned with the main-topic by finding the msg with the closest timestamps. 
 
-# TODO:
+## TODO:
 
 * Extract data based on a existing timestamps.txt, which allows us to extract new data while still synchronized with the existing ones.
 * Support and test new modalities, such as intervention signal, top-down maps, pointcloud, etc. 
