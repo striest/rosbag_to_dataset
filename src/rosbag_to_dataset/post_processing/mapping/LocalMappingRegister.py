@@ -47,9 +47,14 @@ class LocalMappingRegisterNode(object):
         self.novatel2body = np.array([[0,-1 ,0],
                                       [1, 0, 0],
                                       [0, 0, 1]])
-        self.rotback = np.array([[0, 1 ,0],
+        self.body2novatel = np.array([[0, 1 ,0],
                                 [-1, 0, 0],
                                 [ 0, 0, 1]])
+
+        self.R_gd = np.array([[ 0.9692535 ,  0.        , -0.24606434],
+                                [ 0.00610748, -0.99969192,  0.02405752],
+                                [-0.24598853, -0.02482067, -0.96895489]] )
+        self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 1.77348523e+00]])
 
     def parse_params(self):
         self.resolution = mapping_args['resolution']  # ', 0.05)
@@ -107,8 +112,26 @@ class LocalMappingRegisterNode(object):
         rotation2 = Rotation.from_euler("YXZ", angle_align, degrees=True)
         rotation2_mat = rotation2.as_matrix()
         rot_mat2 = rotation2_mat.transpose()
-        rot_mat3 = np.matmul(self.rotback, rot_mat2) # rotate the points back to forward x
+        rot_mat3 = np.matmul(self.body2novatel, rot_mat2) # rotate the points back to forward x
         points_aligned = np.matmul(rot_mat3, points_ground.transpose(1,0)).transpose(1,0)
+        return points_aligned
+
+    def gravity_align2(self, points, odom): 
+        orientation = odom[3:7]
+        rotations = Rotation.from_quat(orientation)
+        rot_mat = rotations.as_matrix()
+
+        yy = np.array([rot_mat[0,1], rot_mat[1,1], 0.0]) # project the y axis to the ground
+        yy = yy/np.linalg.norm(yy)
+        zz = np.array([0.,0, 1])
+        xx = np.cross(yy, zz)
+        rot_mat2 = np.stack((xx,yy,zz),axis=1)
+        rot_mat3 = rot_mat.transpose() @ rot_mat2 
+
+        R = self.R_gd @ self.body2novatel @ rot_mat3 @ self.novatel2body 
+        T = self.T_gd @ self.body2novatel @ rot_mat3 @ self.novatel2body
+        
+        points_aligned = points @ R + T
         return points_aligned
 
     def process(self, traj_root_folder, heightmap_output_folder=None, rgbmap_output_folder=None):
@@ -139,7 +162,8 @@ class LocalMappingRegisterNode(object):
                 self.xyz_register = np.concatenate((xyz_array, points_trans),axis=0)
                 self.color_register = np.concatenate((color_array, self.color_register),axis=0)
                 # xyz_register_ground = transform_ground(self.xyz_register)
-                xyz_register_ground = self.gravity_align(self.xyz_register, odoms[k])
+                xyz_register_ground = self.gravity_align2(self.xyz_register, odoms[k])
+                # import ipdb;ipdb.set_trace()
 
                 xyz_register_ground, self.xyz_register, self.color_register = self.points_filter(xyz_register_ground, self.xyz_register, self.color_register)
                 
