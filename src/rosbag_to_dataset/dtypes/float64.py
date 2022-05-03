@@ -20,7 +20,7 @@ class Float64Convert(Dtype):
 
     def ros_to_numpy(self, msg):
 #        assert isinstance(msg, self.rosmsg_type()), "Got {}, expected {}".format(type(msg), self.rosmsg_type())
-        return np.array(msg.data)
+        return np.array([msg.data])
 
 if __name__ == "__main__":
     c = Float64Convert()

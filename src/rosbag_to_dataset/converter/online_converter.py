@@ -104,6 +104,8 @@ class OnlineConverter:
 
         for topic, cvt in self.action_converters.items():
             data = torch.tensor(cvt.ros_to_numpy(self.queue[topic])).float()
+            if len(data.shape) == 0:
+                data = data.unsqueeze(0)
             out['action'][topic] = data
 
         if len(self.action_converters) > 0:
