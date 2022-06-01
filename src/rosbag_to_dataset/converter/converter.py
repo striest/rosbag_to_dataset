@@ -118,6 +118,7 @@ class Converter:
 
         self.preprocess_queue()
         res = self.convert_queue()
+
         if as_torch:
             torch_traj = self.traj_to_torch(res)
             torch_traj = self.preprocess_pose(torch_traj, zero_pose_init)
@@ -177,19 +178,29 @@ class Converter:
         strides = {k:int(self.dt/self.rates[k]) for k in self.queue.keys()}
 
         for topic, converter in self.observation_converters.items():
-#            print(topic, converter)
-
             data = self.queue[topic]
             data = [converter.ros_to_numpy(x) for x in data]
-            data = np.stack(data, axis=0)
 
-            if strides[topic] > 1:
-                #If strided, need to reshape data (we also need to (same) pad the end)
-                pad_t = strides[topic] - (data.shape[0] % strides[topic])
-                data = np.concatenate([data, np.stack([data[-1]] * pad_t, axis=0)], axis=0)
-                data = data.reshape(-1, strides[topic], *data.shape[1:])
+            if isinstance(converter.N(), dict):
+                for subdata_k in converter.N().keys():
+                    subdata = np.stack([x[subdata_k] for x in data], axis=0)
+                    if strides[topic] > 1:
+                        pad_t = strides[topic] - (subdata.shape[0] % strides[topic])
+                        subdata = np.concatenate([subdata, np.stack([subdata[-1]] * pad_t, axis=0)], axis=0)
+                        subdata = data.reshape(-1, strides[topic], *subdata.shape[1:])
 
-            out['observation'][self.remap[topic]] = data
+                    out['observation'][self.remap[topic] + '_' + subdata_k] = subdata
+                        
+            else:
+                data = np.stack(data, axis=0)
+
+                if strides[topic] > 1:
+                    #If strided, need to reshape data (we also need to (same) pad the end)
+                    pad_t = strides[topic] - (data.shape[0] % strides[topic])
+                    data = np.concatenate([data, np.stack([data[-1]] * pad_t, axis=0)], axis=0)
+                    data = data.reshape(-1, strides[topic], *data.shape[1:])
+
+                out['observation'][self.remap[topic]] = data
 
         for topic, converter in self.action_converters.items():
 #            print(topic, converter)

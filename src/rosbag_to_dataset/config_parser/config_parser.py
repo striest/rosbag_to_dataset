@@ -61,10 +61,20 @@ class ConfigParser:
             remap[k] = remap_k
             if 'N_per_step' in v.keys():
                 N = spec['observation'][k]['N_per_step']
-                obs_dict[remap_k] = gym.spaces.Box(low = np.ones([N, obs_shape]) * -float('inf'), high = np.ones([N, obs_shape]) * float('inf'))
+
+                if isinstance(obs_shape, dict):
+                    for kk, vv in obs_shape.items():
+                        obs_dict[remap_k + '_' + kk] = gym.spaces.Box(low = np.ones([N, vv]) * -float('inf'), high = np.ones([N, vv]) * float('inf'))
+                else:
+                    obs_dict[remap_k] = gym.spaces.Box(low = np.ones([N, obs_shape]) * -float('inf'), high = np.ones([N, obs_shape]) * float('inf'))
+
                 rates[k] = spec['dt'] / N
             else:
-                obs_dict[remap_k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
+                if isinstance(obs_shape, dict):
+                    for kk, vv in obs_shape.items():
+                        obs_dict[remap_k + '_' + kk] = gym.spaces.Box(low = np.ones(vv) * -float('inf'), high = np.ones(vv) * float('inf'))
+                else:
+                    obs_dict[remap_k] = gym.spaces.Box(low = np.ones(obs_shape) * -float('inf'), high = np.ones(obs_shape) * float('inf'))
                 rates[k] = spec['dt']
 
         obs_space = gym.spaces.Dict(obs_dict)
