@@ -31,7 +31,6 @@ def transform_ground(points):
     # rospy.loginfo("transform ground pt num {} time {}".format(points.shape[0], time.time()-starttime))
     return points_trans.transpose(1, 0)
 
-
 class LocalMappingRegisterNode(object):
     def __init__(self):
         self.curdir = dirname(realpath(__file__))
@@ -48,8 +47,8 @@ class LocalMappingRegisterNode(object):
                                       [1, 0, 0],
                                       [0, 0, 1]])
         self.body2novatel = np.array([[0, 1 ,0],
-                                [-1, 0, 0],
-                                [ 0, 0, 1]])
+                                      [-1, 0, 0],
+                                      [ 0, 0, 1]])
 
         self.R_gd = np.array([[ 0.9692535 ,  0.        , -0.24606434],
                                 [ 0.00610748, -0.99969192,  0.02405752],
@@ -161,28 +160,26 @@ class LocalMappingRegisterNode(object):
                 points_trans = coord_transform(self.xyz_register, R, T)
                 self.xyz_register = np.concatenate((xyz_array, points_trans),axis=0)
                 self.color_register = np.concatenate((color_array, self.color_register),axis=0)
-                # xyz_register_ground = transform_ground(self.xyz_register)
-                xyz_register_ground = self.gravity_align2(self.xyz_register, odoms[k])
-                # import ipdb;ipdb.set_trace()
-
-                xyz_register_ground, self.xyz_register, self.color_register = self.points_filter(xyz_register_ground, self.xyz_register, self.color_register)
-                
-                if len(xyz_register_ground) > self.max_points_num:
-                    # filter by density 
-                    # points_ordered = xyz_register_ground[xyz_register_ground[:,0].argsort()]
-                    # filter_mask = self.gridfilter.grid_filter_multicore(points_ordered, corenum=8)
-                    filter_mask = self.gridfilter.grid_filter(xyz_register_ground)
-                    xyz_register_ground = xyz_register_ground[filter_mask, :]
-                    self.xyz_register = self.xyz_register[filter_mask, :]
-                    self.color_register = self.color_register[filter_mask, :]
-                    print("GridFilter: {} - > {}".format(filter_mask.shape[0], xyz_register_ground.shape[0]))
 
             else:
                 self.xyz_register = xyz_array
                 self.color_register = color_array
-                # xyz_register_ground = transform_ground(self.xyz_register)
-                xyz_register_ground = self.gravity_align(self.xyz_register, odoms[k])
 
+            xyz_register_ground = self.gravity_align2(self.xyz_register, odoms[k])
+            # xyz_register_ground1 = self.gravity_align(self.xyz_register, odoms[k])
+            # xyz_register_ground3 = self.gravity_align3(self.xyz_register, odoms[k])
+            # import ipdb;ipdb.set_trace()
+            xyz_register_ground, self.xyz_register, self.color_register = self.points_filter(xyz_register_ground, self.xyz_register, self.color_register)
+
+            if len(xyz_register_ground) > self.max_points_num:
+                # filter by density 
+                # points_ordered = xyz_register_ground[xyz_register_ground[:,0].argsort()]
+                # filter_mask = self.gridfilter.grid_filter_multicore(points_ordered, corenum=8)
+                filter_mask = self.gridfilter.grid_filter(xyz_register_ground)
+                xyz_register_ground = xyz_register_ground[filter_mask, :]
+                self.xyz_register = self.xyz_register[filter_mask, :]
+                self.color_register = self.color_register[filter_mask, :]
+                print("GridFilter: {} - > {}".format(filter_mask.shape[0], xyz_register_ground.shape[0]))
 
             self.localmap.pc_to_map(xyz_register_ground, self.color_register)
             self.localmap.inflate_maps()

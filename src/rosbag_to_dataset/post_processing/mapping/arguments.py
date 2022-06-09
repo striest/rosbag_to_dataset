@@ -7,4 +7,4 @@ mapping_args['min_y']           = -6.0 # The minimum range of the map
 mapping_args['max_y']           = 6.0 # The maximum range of the map
 
 mapping_args['max_points_num']  = 3000000 # maximum number of the points
-mapping_args['visualize_maps']  = False # Visualize the map
+mapping_args['visualize_maps']  = True # Visualize the map

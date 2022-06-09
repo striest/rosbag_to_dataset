@@ -77,6 +77,7 @@ if __name__ == '__main__':
         motions = np.load(trajdir + '/tartanvo_odom/motions.npy')
         motions = np.concatenate((motions, motions[-1:,:])) # add one more frame
         odoms = np.load(trajdir + '/odom/odometry.npy')
+        costs = np.load(trajdir + '/cost/cost.npy')
 
         datanum = len(imglist)
         for k in range(datanum):
@@ -107,6 +108,7 @@ if __name__ == '__main__':
             cmd = cmds[k] 
             motion = motions[k]
             odom = odoms[k]
+            cost = cost[k]
 
             velx = motion[0] / dt
             _, _, yaw = Rotation.from_quat(motion[3:7]).as_euler("XYZ", degrees=True)
@@ -115,13 +117,13 @@ if __name__ == '__main__':
             orientation = odom[3:7]
             _, slope, _ = Rotation.from_quat(orientation).as_euler("ZXY", degrees=True)
 
-            text1 = "Throttle: {:.2f},         Steering: {:.2f}".format(cmd[0], cmd[1])
-            text2 = "Velx:    {:.2f} m/s,    Yawrate: {:.2f} deg/s".format(velx, yaw)
-            text3 = "Slope angle: {:.2f} deg".format(slope)
+            text1 = "{} Throttle: {:.2f},         Steering: {:.2f}".format(str(k).zfill(4), cmd[0], cmd[1])
+            text2 = "      Velx:    {:.2f} m/s,    Yawrate: {:.2f} deg/s".format(velx, yaw)
+            text3 = "      Slope angle: {:.2f} deg,  Cost: {:.2f}".format(slope, cost)
 
             # pts = np.array([[0,0],[320,0],[320,20],[0,20]],np.int32)
             # put a bg rect
-            disp[10:75, 0:320, :] = disp[10:75, 0:320, :]/5 * 2 + np.array([70, 40, 10],dtype=np.uint8)/5 * 3
+            disp[10:75, 0:370, :] = disp[10:75, 0:370, :]/5 * 2 + np.array([70, 40, 10],dtype=np.uint8)/5 * 3
             # cv2.fillConvexPoly(disp, pts, (70,30,10))
             cv2.putText(disp,text1, (15,25),cv2.FONT_HERSHEY_SIMPLEX,0.4,(0,210,245),thickness=1)
             cv2.putText(disp,text2, (15,45),cv2.FONT_HERSHEY_SIMPLEX,0.4,(0,210,245),thickness=1)

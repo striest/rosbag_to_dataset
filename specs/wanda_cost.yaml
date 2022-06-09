@@ -1,0 +1,58 @@
+---
+  main_topic: "/wanda/stereo_left/image_rect_color/compressed"
+  dt: 0.2
+  data: 
+    "/wanda/odom":
+        type: Odometry
+        folder: "odom"
+        options:
+            use_vel: True
+
+    "/wanda/imu/data":
+        type: Imu
+        folder: "imu"
+        N_per_step: 10
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+
+    "/wanda/stereo_left/image_rect_color/compressed":
+        type: CompressedImage
+        folder: "image_left"
+        options:
+            output_resolution: [1440, 1024]
+            nchannels: 3
+
+    "/wanda/stereo_right/image_rect_color/compressed":
+        type: CompressedImage
+        folder: "image_right"
+        options:
+            output_resolution: [1440, 1024]
+            nchannels: 1
+
+    "/wanda/warthog_velocity_controller/cmd_vel_out":
+        type: Twist
+        folder: "cmd"
+        options:
+            mode: action
+
+    "/local_height_map_inflate":
+        type: Image
+        folder: "height_map"
+        options:
+            output_resolution: [500, 500]
+            nchannels: 4
+            savetype: 'npy'
+
+    "/local_rgb_map_inflate":
+        type: Image
+        folder: "rgb_map"
+        options:
+            output_resolution: [500, 500]
+            nchannels: 3
+            savetype: 'npy'
+
+    "/traversability_cost":
+        type: FloatStamped
+        folder: "cost"

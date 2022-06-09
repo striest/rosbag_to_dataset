@@ -10,7 +10,7 @@ class ImageConvert(Dtype):
     """
     For image, we'll rescale and 
     """
-    def __init__(self, nchannels, output_resolution, empty_value=None, aggregate='none'):
+    def __init__(self, nchannels, output_resolution, empty_value=None, aggregate='none', savetype='png'):
         """
         Args:
             nchannels: The number of channels in the image
@@ -22,6 +22,7 @@ class ImageConvert(Dtype):
         self.output_resolution = output_resolution
         self.aggregate = aggregate
         self.empty_value = empty_value
+        self.savetype = savetype
 
     def N(self):
         return [self.nchannels] + self.output_resolution
@@ -31,7 +32,6 @@ class ImageConvert(Dtype):
 
     def ros_to_numpy(self, msg):
 #        assert isinstance(msg, self.rosmsg_type()), "Got {}, expected {}".format(type(msg), self.rosmsg_type())
-
         is_rgb = ('8' in msg.encoding)
         if is_rgb:
             data = np.frombuffer(msg.data, dtype=np.uint8).copy()
@@ -68,7 +68,10 @@ class ImageConvert(Dtype):
         This function should be implemented where the data is stored frame by frame like image or point cloud
         """
         data = self.ros_to_numpy(msg)
-        cv2.imwrite(filename+'.png', data)
+        if self.savetype == 'png':
+            cv2.imwrite(filename+'.png', data)
+        elif self.savetype == 'npy':
+            np.save(filename+'.npy', data)
 
 if __name__ == "__main__":
     c = ImageConvert(nchannels=1, output_resolution=[32, 32])

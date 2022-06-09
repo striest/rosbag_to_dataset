@@ -15,6 +15,7 @@ from rosbag_to_dataset.dtypes.imu import ImuConvert
 from rosbag_to_dataset.dtypes.pose import PoseConvert
 from rosbag_to_dataset.dtypes.vector3 import Vector3Convert
 from rosbag_to_dataset.dtypes.pointcloud import PointCloudConvert
+from rosbag_to_dataset.dtypes.float_stamped import FloatStampedConvert
 
 class ConfigParser:
     """
@@ -72,6 +73,7 @@ class ConfigParser:
         "Pose":PoseConvert,
         "Twist":TwistConvert,
         "Vector3":Vector3Convert,
+        "FloatStamped":FloatStampedConvert,
     }
 
 # class ParseObject:
