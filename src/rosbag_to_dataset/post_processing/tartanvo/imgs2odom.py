@@ -31,12 +31,13 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import cv2
 import numpy as np
 from torch.utils.data import DataLoader
 import time
 from os import mkdir
 from os.path import isdir, dirname, realpath
-from .arguments import *
+from .arguments_wanda import *
 
 from .TrajFolderDataset import TrajFolderDataset
 from .utils import se2SE, SO2quat, se2quat
@@ -60,8 +61,8 @@ class TartanVOInference(object):
 
     def load_dataset(self, traj_root_folder):
         testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder=None, forvo=True, \
-                                        imgw=self.w, imgh=self.h, crop_w=self.crop_w, crop_h=self.crop_h, resize_w=self.resize_w, resize_h=self.resize_h, \
-                                        focalx=self.focalx, focaly=self.focaly, centerx=self.pu, centery=self.pv, blxfx=self.fxbl)
+                                        imgw=self.w, imgh=self.h, crop_w=self.crop_w, crop_h_low=self.crop_h, crop_h_high= self.crop_h, resize_w=self.resize_w, resize_h=self.resize_h, \
+                                        focalx=self.focalx, focaly=self.focaly, centerx=self.pu, centery=self.pv, blxfx=self.fxbl,stereomaps=self.stereomaps)
 
         testDataloader = DataLoader(testDataset, batch_size=self.batch_size, 
                                         shuffle=False, num_workers=self.worker_num)
@@ -93,6 +94,21 @@ class TartanVOInference(object):
 
         self.batch_size = common_args['batch_size']
         self.worker_num = common_args['worker_num']
+        self.stereo_maps = common_args['stereo_maps']
+        if self.stereo_maps != '':
+            loadmap = np.load(self.curdir+'/'+self.stereo_maps, allow_pickle=True)
+            loadmap = loadmap.item()
+            # import ipdb;ipdb.set_trace()
+            map1, map2 = cv2.initUndistortRectifyMap(\
+                        loadmap['k1'], loadmap['d1'],\
+                        loadmap['r1'], loadmap['p1'],\
+                        (self.w, self.h), cv2.CV_32FC1)
+
+            map3, map4 = cv2.initUndistortRectifyMap(\
+                        loadmap['k2'], loadmap['d2'],\
+                        loadmap['r2'], loadmap['p2'],\
+                        (self.w, self.h), cv2.CV_32FC1)
+            self.stereomaps = [map1, map2, map3, map4]
 
     def process_motion(self, motion):
         motionlist = []
@@ -155,4 +171,5 @@ class TartanVOInference(object):
 # python imgs2odom.py --model-name 43_6_2_vonet_30000_wo_pwc.pkl --network-type 2  --image-input-w 640 --image-input-h 448
 if __name__ == '__main__':
     node = TartanVOInference()
-    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210805_slope2', vo_output_folder = 'tartanvo_odom')
+    # node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210805_slope2', vo_output_folder = 'tartanvo_odom')
+    node.process(traj_root_folder='/cairo/arl_bag_files/SARA/arl0608/wanda_cmu_0', vo_output_folder = 'tartanvo_odom')

@@ -52,7 +52,7 @@ class CompressedImageConvert(Dtype):
 
 
 if __name__ == "__main__":
-    c = ImageConvert(nchannels=1, output_resolution=[32, 32])
-    msg = Image(width=64, height=64, data=np.arange(64**2).astype(np.uint8))
+    c = CompressedImageConvert(nchannels=1, output_resolution=[32, 32])
+    # msg = Image(width=64, height=64, data=np.arange(64**2).astype(np.uint8))
 
-    print(c.ros_to_numpy(msg))
+    # print(c.ros_to_numpy(msg))

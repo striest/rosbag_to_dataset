@@ -1,6 +1,6 @@
 ---
   main_topic: "/wanda/stereo_left/image_rect_color/compressed"
-  dt: 0.2
+  dt: 0.1
   data: 
     "/wanda/odom":
         type: Odometry

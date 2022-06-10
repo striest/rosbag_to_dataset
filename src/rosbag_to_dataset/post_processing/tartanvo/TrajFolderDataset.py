@@ -4,16 +4,11 @@ from torch.utils.data import Dataset
 from os import listdir
 import torch
 
-def crop_imgs( sample, crop_w, crop_h):
+def crop_imgs( sample, crop_w, crop_h_low, crop_h_high):
     for imgstr in {'img0', 'img1', 'imgc', 'img0n', 'intrinsic'}: 
         if imgstr in sample:
             img = sample[imgstr]
-            if crop_w == 0: 
-                img = img[crop_h:-crop_h, :, :]
-            elif crop_h ==0: 
-                img = img[:, crop_w:-crop_w, :]
-            else:
-                img = img[crop_h:-crop_h, crop_w:-crop_w, :]
+            img = img[crop_h_low:img.shape[0]-crop_h_high, crop_w:img.shape[1]-crop_w, :]
             sample[imgstr] = img
     return sample
 
@@ -62,8 +57,8 @@ class TrajFolderDataset(Dataset):
     """Load images from a folder. """
 
     def __init__(self, rootfolder, leftfolder='image_left', rightfolder='image_right', colorfolder=None, forvo=False, \
-                    imgw=1024, imgh=544, crop_w=64, crop_h=32, resize_w=640, resize_h=448, \
-                    focalx=320, focaly=320, centerx=320, centery=160, blxfx=80):
+                    imgw=1024, imgh=544, crop_w=64, crop_h_high=32, crop_h_low=32, resize_w=640, resize_h=448, \
+                    focalx=320, focaly=320, centerx=320, centery=160, blxfx=80, stereomaps=None):
         '''
         forvo: true return two consequtive left images
                false return two corresponding left/right images
@@ -76,6 +71,7 @@ class TrajFolderDataset(Dataset):
         self.leftfiles = [(imgleftfolder +'/'+ ff) for ff in leftfiles if (ff.endswith('.png') or ff.endswith('.jpg'))]
         self.rightfiles = [(imgrightfolder +'/'+ ff) for ff in rightfiles if (ff.endswith('.png') or ff.endswith('.jpg'))]
         assert len(self.leftfiles)==len(self.rightfiles), "Left and right images are not consistent! "
+        self.stereomaps = stereomaps
         
         self.leftfiles.sort()
         self.rightfiles.sort()
@@ -99,7 +95,7 @@ class TrajFolderDataset(Dataset):
 
         self.forvo = forvo
         self.imgw, self.imgh = imgw, imgh
-        self.crop_w, self.crop_h = crop_w, crop_h
+        self.crop_w, self.crop_h_high, self.crop_h_low = crop_w, crop_h_high, crop_h_low
         self.resize_w, self.resize_h = resize_w, resize_h
         self.focalx, self.focaly, self.centerx, self.centery = focalx, focaly, centerx, centery
         self.blxfx = blxfx
@@ -114,6 +110,10 @@ class TrajFolderDataset(Dataset):
         img1 = cv2.imread(imgfile1)
         img2 = cv2.imread(imgfile2)
 
+        if self.stereomaps != '': # rectify stereo images (for warthog)
+            img1 = cv2.remap( img1, self.stereomaps[0], self.stereomaps[1], cv2.INTER_LINEAR )
+            img2 = cv2.remap( img2, self.stereomaps[2], self.stereomaps[3], cv2.INTER_LINEAR )
+
         sample = {'img0': img1, 
                 'img1': img2, 
                 'filename0': imgfile1.split('/')[-1], 
@@ -122,6 +122,8 @@ class TrajFolderDataset(Dataset):
         if self.forvo:
             imgfilenext = self.leftfiles[idx+1].strip()
             img1n = cv2.imread(imgfilenext)
+            if self.stereomaps != '': # rectify stereo images (for warthog)
+                img1n = cv2.remap( img1n, self.stereomaps[0], self.stereomaps[1], cv2.INTER_LINEAR )
             sample['img0n'] = img1n
             sample['filename0n'] = imgfilenext.split('/')[-1]
             sample['intrinsic'] = self.intrinsics
@@ -130,14 +132,16 @@ class TrajFolderDataset(Dataset):
         if self.colorfiles is not None:
             imgcolor = cv2.imread(self.colorfiles[idx].strip())
             sample['imgc'] = imgcolor
+        else:
+            sample['imgc'] = img1.copy()
 
         # # image processing
         # hard code the preprocessing for stereo and vo
         if self.forvo: # for vo, resize to (896 x 448), crop to (640 x 448)
             sample = scale_imgs(sample, self.resize_w, self.resize_h)
-            sample = crop_imgs(sample, self.crop_w, self.crop_h)
+            sample = crop_imgs(sample, self.crop_w, self.crop_h_low, self.crop_h_high)
         else:
-            sample = crop_imgs(sample, self.crop_w, self.crop_h)
+            sample = crop_imgs(sample, self.crop_w, self.crop_h_low, self.crop_h_high)
             sample = scale_imgs(sample, self.resize_w, self.resize_h)
         # debug vo
         sample = to_tensor(sample)

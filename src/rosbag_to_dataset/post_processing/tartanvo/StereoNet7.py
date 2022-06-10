@@ -142,7 +142,7 @@ class StereoNet7(nn.Module):
         out0 = self.conv_c13(x)
         # x = F.relu(x, inplace=True)
 
-        return out0
+        return out0, None
 
 if __name__ == '__main__':
     

@@ -50,4 +50,4 @@ if __name__ == '__main__':
                     depth_output_folder='depth_left', points_output_folder='points_left')
 
         mappingnode = LocalMappingRegisterNode()
-        mappingnode.process(trajdir, heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')
+        mappingnode.process(trajdir, heightmap_output_folder='height_map_vo', rgbmap_output_folder='rgb_map_vo')

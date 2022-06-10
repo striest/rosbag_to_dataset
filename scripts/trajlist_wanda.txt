@@ -1,0 +1,7 @@
+/cairo/arl_bag_files/SARA/arl0608/cmu_0_data_collect_2022-06-08-12-35-17.bag wanda_cmu_0
+/cairo/arl_bag_files/SARA/arl0608/cmu_1_data_collect_2022-06-08-12-50-22.bag wanda_cmu_1
+/cairo/arl_bag_files/SARA/arl0608/cmu_2_data_collect_2022-06-08-13-02-13.bag wanda_cmu_2
+/cairo/arl_bag_files/SARA/arl0608/cmu_3_data_collect_2022-06-08-13-15-06.bag wanda_cmu_3
+/cairo/arl_bag_files/SARA/arl0608/cmu_4_data_collect_2022-06-08-13-20-30.bag wanda_cmu_4
+/cairo/arl_bag_files/SARA/arl0608/cmu_5_data_collect_2022-06-08-13-27-19.bag wanda_cmu_5
+/cairo/arl_bag_files/SARA/arl0608/cmu_6_data_collect_2022-06-08-13-33-59.bag wanda_cmu_6

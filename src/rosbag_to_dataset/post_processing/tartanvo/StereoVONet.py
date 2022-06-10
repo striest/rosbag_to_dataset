@@ -93,7 +93,7 @@ class StereoVONet(nn.Module):
         # downscale the stereo input 
         x0_stereo = F.interpolate(x0_stereo, size=(256,256), mode='bilinear', align_corners=True)
         x1_stereo = F.interpolate(x1_stereo, size=(256,256), mode='bilinear', align_corners=True)
-        stereo_out = self.stereoNet(torch.cat((x0_stereo, x1_stereo),dim=1))
+        stereo_out, _ = self.stereoNet(torch.cat((x0_stereo, x1_stereo),dim=1))
 
         # scale the disparity size
         if self.network == 0: # psmnet, 3 outputs # deprecated since manually downscaled the input size
@@ -186,7 +186,7 @@ class StereoVONet(nn.Module):
         # downscale the stereo input 
         x0_stereo = F.interpolate(x0_stereo, size=(256,256), mode='bilinear', align_corners=True)
         x1_stereo = F.interpolate(x1_stereo, size=(256,256), mode='bilinear', align_corners=True)
-        stereo_out = self.stereoNet([x0_stereo, x1_stereo])
+        stereo_out, _ = self.stereoNet([x0_stereo, x1_stereo])
 
         # scale the disparity size
         if self.network == 0: # psmnet, 3 outputs # deprecated since manually downscaled the input size

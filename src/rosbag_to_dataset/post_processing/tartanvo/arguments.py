@@ -1,3 +1,4 @@
+# arguments for tartandrive
 common_args = {}
 common_args['image_width']      = 1024 # the width of the image from the sensor
 common_args['image_height']     = 544 # the height of the image from the sensor
@@ -30,3 +31,5 @@ stereo_args['visualize_depth']  = False # visualize the depth estimation (defaul
 stereo_args['pc_min_dist']      = 2.5 # Minimum distance of the points, filter out close points on the vehicle
 stereo_args['pc_max_dist']      = 15.0 # Maximum distance of the points
 stereo_args['pc_max_height']    = 2.0 # Maximum height of the points
+stereo_args['mask_file']        = 'atvmask_tartandrive' 
+
