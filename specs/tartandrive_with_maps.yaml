@@ -1,0 +1,77 @@
+---
+  main_topic: "/multisense/left/image_rect"
+  dt: 0.1
+  data: 
+    "/odometry/filtered_odom":
+        type: Odometry
+        folder: "odom"
+        options:
+            use_vel: True
+
+    "/multisense/imu/imu_data":
+        type: Imu
+        folder: "imu"
+        N_per_step: 10
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+
+    "/multisense/left/image_rect_color":
+        type: Image
+        folder: "image_left_color"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 3
+
+    "/multisense/right/image_rect":
+        type: Image
+        folder: "image_right"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 1
+
+    "/multisense/left/image_rect":
+        type: Image
+        folder: "image_left"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 1
+
+    "/cmd":
+        type: Twist
+        options:
+            mode: action
+
+    "/local_height_map_inflate":
+        type: Image
+        folder: "height_map"
+        options:
+            output_resolution: [500, 500]
+            nchannels: 4
+            savetype: 'npy'
+
+    "/local_rgb_map_inflate":
+        type: Image
+        folder: "rgb_map"
+        options:
+            output_resolution: [500, 500]
+            nchannels: 3
+            savetype: 'npy'
+
+    # "/wheel_rpm":
+    #     type: RPWheelEncoders
+    #     remap: "wheel_rpm"
+    #     N_per_step: 20
+
+    # "/shock_pos":
+    #     type: RPShockSensors
+    #     remap: "shock_travel"
+    #     N_per_step: 20
+
+    # "/controls":
+    #     type: RPControls
+    #     remap: "intervention"
+    #     options:
+    #         mode: "intervention"
+    #         intervention_threshold: 200.
