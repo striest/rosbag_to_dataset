@@ -12,6 +12,7 @@ from .TrajFolderDataset import TrajFolderDataset
 
 from torch.utils.data import DataLoader
 from .arguments_wanda import *
+# from .arguments import *
 
 def depth_to_point_cloud(depth, focalx, focaly, pu, pv, filtermin=-1, filtermax=-1, colorimg=None, mask=None):
     """
@@ -112,7 +113,7 @@ class StereoInference:
         self.mask_boarder_points()
 
     def load_dataset(self, traj_root_folder):
-        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder=None, 
+        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder=self.colored_folder, 
                                         forvo=False,  crop_w=self.crop_w, crop_h_low=self.crop_h_low, crop_h_high= self.crop_h_high, resize_w=self.input_w, resize_h=self.input_h, 
                                         stereomaps=self.stereomaps)
         testDataloader = DataLoader(testDataset, batch_size=self.batch_size, 
@@ -137,6 +138,7 @@ class StereoInference:
         self.input_w = stereo_args["image_input_w"] # , 512)
         self.input_h = stereo_args["image_input_h"] # , 256)
         self.visualize = stereo_args["visualize_depth"] # , True)
+        self.colored_folder = stereo_args['colored_folder']
 
         # point cloud processing parameters
         self.mindist = stereo_args["pc_min_dist"] # , 2.5) # not filter if set to -1 
@@ -166,6 +168,8 @@ class StereoInference:
                         loadmap['r2'], loadmap['p2'],\
                         (self.w, self.h), cv2.CV_32FC1)
             self.stereomaps = [map1, map2, map3, map4]
+        else:
+            self.stereomaps = None
 
     def load_model(self, model, modelname):
         preTrainDict = torch.load(modelname)

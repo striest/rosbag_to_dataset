@@ -38,6 +38,7 @@ import time
 from os import mkdir
 from os.path import isdir, dirname, realpath
 from .arguments_wanda import *
+# from .arguments import *
 
 from .TrajFolderDataset import TrajFolderDataset
 from .utils import se2SE, SO2quat, se2quat
@@ -60,7 +61,7 @@ class TartanVOInference(object):
         # self.scale = 1.0
 
     def load_dataset(self, traj_root_folder):
-        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder=None, forvo=True, \
+        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder="", forvo=True, \
                                         imgw=self.w, imgh=self.h, crop_w=self.crop_w, crop_h_low=self.crop_h, crop_h_high= self.crop_h, resize_w=self.resize_w, resize_h=self.resize_h, \
                                         focalx=self.focalx, focaly=self.focaly, centerx=self.pu, centery=self.pv, blxfx=self.fxbl,stereomaps=self.stereomaps)
 
@@ -109,6 +110,8 @@ class TartanVOInference(object):
                         loadmap['r2'], loadmap['p2'],\
                         (self.w, self.h), cv2.CV_32FC1)
             self.stereomaps = [map1, map2, map3, map4]
+        else:
+            self.stereomaps = None
 
     def process_motion(self, motion):
         motionlist = []
