@@ -158,33 +158,9 @@ if __name__ == '__main__':
 	#change collecter and training buf to model so it can be converted
 
 	trainer = trainer_cls(env, policy, latent_model, opt, train_buf,collector, losses=losses, steps_per_epoch=0, eval_dataset=trajs, **config['trainer']['params'], device="cpu")
-	config['experiment_fp'] = config['experiment_fp']+"/epoch10"
 	experiment = Experiment(trainer, config['name'], experiment_filepath=config['experiment_fp'], save_logs_every=1, save_every=config['save_every'], buffer_cycle=1, config = config)
 
 	maybe_mkdir(os.path.join(config['experiment_fp'], config['name']), force=False)
 	with open(os.path.join(config['experiment_fp'], config['name'], '_config.yaml'), 'w') as fp:
 		yaml.dump(config, fp)
-
-	if True:
-		experiment.run()
-		trainer.total_epochs = 5000
-		config['trainer']['params']['epochs'] = 5000
-		config['experiment_fp'] = config['experiment_fp'][:-2]+"5000"
-		experiment = Experiment(trainer, config['name'], experiment_filepath=config['experiment_fp'], save_logs_every=1, save_every=config['save_every'], buffer_cycle=1, config = config)
-
-		maybe_mkdir(os.path.join(config['experiment_fp'], config['name']), force=False)
-		with open(os.path.join(config['experiment_fp'], config['name'], '_config.yaml'), 'w') as fp:
-			yaml.dump(config, fp)
-		experiment.run()
-
-
-	else:
-		print("hellooooo")
-		best_model_dir = "/project/learningphysics/tartandrive_trajs_parv_test/experiment/reconstruction_atv_all_t50/_best/model.cpt"
-		latent_model = torch.load(best_model_dir)
-		latent_model = nn.DataParallel(latent_model,device_ids=[0,1])
-		latent_model = latent_model.to(config['model_device'])
-		trainer = trainer_cls(env, policy, latent_model, opt, collector, losses=losses, steps_per_epoch=0, eval_dataset=trajs, **config['trainer']['params'], device=config['model_device'])
-
-		eval_feature_wise_rmse = trainer.evaluate(train_dataset=False,plot_data=True,data_dir=os.path.join(config['experiment_fp'],"trajs"))
-		print("Eval RMSE", eval_feature_wise_rmse.mean().item())
+	experiment.run()
