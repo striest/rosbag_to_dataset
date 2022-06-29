@@ -100,6 +100,7 @@ class OnlineConverter:
 
         for topic, cvt in self.observation_converters.items():
             while self.queue[topic] == None:
+                print(f"Waiting for message at - {topic}")
                 time.sleep(0.1)
             if self.rates[topic] == self.dt:
                 out['observation'][self.remap[topic]] = torch.tensor(cvt.ros_to_numpy(self.queue[topic])).float()
