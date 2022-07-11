@@ -173,7 +173,7 @@ if __name__ == '__main__':
 
 	else:
 		print("hellooooo")
-		best_model_dir = "/project/learningphysics/tartandrive_trajs_parv_test/experiment/reconstruction_atv_all_t50/_best/model.cpt"
+		best_model_dir = "/data/datasets/parvm/tartandrive_trajs_parv_test/experiment/reconstruction_atv_all_t50/_best/model.cpt"
 		latent_model = torch.load(best_model_dir)
 		latent_model = nn.DataParallel(latent_model,device_ids=[0,1])
 		latent_model = latent_model.to(config['model_device'])

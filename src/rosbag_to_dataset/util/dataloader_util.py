@@ -103,6 +103,8 @@ class DataLoaderUtil:
 
 		for topic in self.remapped_obs:
 			data = queue[topic]
+			if topic == 'state' and self.config['state']['velocity'] == False:
+				data = data[...,:7]
 			out['observation'][topic] = data
 		
 		for topic in self.action:
