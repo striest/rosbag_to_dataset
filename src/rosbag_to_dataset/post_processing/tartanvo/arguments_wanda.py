@@ -36,3 +36,4 @@ stereo_args['pc_max_dist']      = 15.0 # Maximum distance of the points
 stereo_args['pc_max_height']    = 2.0 # Maximum height of the points
 stereo_args['uncertainty_thresh']    = -2.5 
 stereo_args['mask_file']        = '' 
+stereo_args['colored_folder']   = '' 

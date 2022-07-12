@@ -56,7 +56,7 @@ def make_intrinsics_layer(w, h, fx, fy, ox, oy, ):
 class TrajFolderDataset(Dataset):
     """Load images from a folder. """
 
-    def __init__(self, rootfolder, leftfolder='image_left', rightfolder='image_right', colorfolder=None, forvo=False, \
+    def __init__(self, rootfolder, leftfolder='image_left', rightfolder='image_right', colorfolder="", forvo=False, \
                     imgw=1024, imgh=544, crop_w=64, crop_h_high=32, crop_h_low=32, resize_w=640, resize_h=448, \
                     focalx=320, focaly=320, centerx=320, centery=160, blxfx=80, stereomaps=None):
         '''
@@ -77,7 +77,7 @@ class TrajFolderDataset(Dataset):
         self.rightfiles.sort()
 
         # load colored image
-        if colorfolder is not None:
+        if colorfolder != "":
             imgcolorfolder = rootfolder + '/' + colorfolder
             colorfiles = listdir(imgcolorfolder)
             self.colorfiles = [(imgcolorfolder +'/'+ ff) for ff in colorfiles if (ff.endswith('.png') or ff.endswith('.jpg'))]
@@ -110,7 +110,7 @@ class TrajFolderDataset(Dataset):
         img1 = cv2.imread(imgfile1)
         img2 = cv2.imread(imgfile2)
 
-        if self.stereomaps != '': # rectify stereo images (for warthog)
+        if self.stereomaps is not None: # rectify stereo images (for warthog)
             img1 = cv2.remap( img1, self.stereomaps[0], self.stereomaps[1], cv2.INTER_LINEAR )
             img2 = cv2.remap( img2, self.stereomaps[2], self.stereomaps[3], cv2.INTER_LINEAR )
 
@@ -122,7 +122,7 @@ class TrajFolderDataset(Dataset):
         if self.forvo:
             imgfilenext = self.leftfiles[idx+1].strip()
             img1n = cv2.imread(imgfilenext)
-            if self.stereomaps != '': # rectify stereo images (for warthog)
+            if self.stereomaps is not None: # rectify stereo images (for warthog)
                 img1n = cv2.remap( img1n, self.stereomaps[0], self.stereomaps[1], cv2.INTER_LINEAR )
             sample['img0n'] = img1n
             sample['filename0n'] = imgfilenext.split('/')[-1]

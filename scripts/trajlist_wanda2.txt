@@ -1,6 +1,3 @@
-/cairo/arl_bag_files/SARA/arl0609/cmu_1_gw_500_baseline_2022-06-09-12-02-39.bag wanda2_cmu_1
-/cairo/arl_bag_files/SARA/arl0609/cmu_2_gw_100_baseline_outside_gate_2022-06-09-15-19-20.bag wanda2_cmu_2_1
-/cairo/arl_bag_files/SARA/arl0609/cmu_2_gw_100_baseline_outside_gate_2022-06-09-15-26-26.bag wanda2_cmu_2_2
 /cairo/arl_bag_files/SARA/arl0609/cmu_2_gw_100_baseline_outside_gate_2022-06-09-15-28-19.bag wanda2_cmu_2_3
 /cairo/arl_bag_files/SARA/arl0609/cmu_3_gw_100_baseline_outside_gate_2022-06-09-15-37-43.bag wanda2_cmu_3
 /cairo/arl_bag_files/SARA/arl0609/cmu_4_gw_100_baseline_outside_gate_2022-06-09-16-20-06.bag wanda2_cmu_4
