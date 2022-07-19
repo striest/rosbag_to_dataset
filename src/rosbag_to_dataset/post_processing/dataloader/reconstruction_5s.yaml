@@ -2,10 +2,10 @@ device_ids: "0"
 #Alwasy use it in the form of "<id_1>,<id_2>" without any space on either sides of 
 model_device: cuda:0
 output_device: "0"
-eval_fp: /data/datasets/parvm/tartandrive_trajs_parv_final/eval
-eval_framelistfile: /data/datasets/parvm/tartandrive_trajs_parv_final/eval/trainframes.txt
+eval_fp: /project/learningphysics/tartandrive_trajs_parv_final/eval
+eval_framelistfile: /project/learningphysics/tartandrive_trajs_parv_final/eval/trainframes.txt
 
-experiment_fp: /data/datasets/parvm/tartandrive_trajs_parv_final/experiment
+experiment_fp: /project/learningphysics/tartandrive_trajs_parv_final/experiment
 latent_model:
   params:
     act_encoder_hidden_size:
@@ -168,8 +168,8 @@ save_every: 500
 dt: 0.1
 N_per_step: 10 #for imu (this is the supposed imu freq)
 modality_len: 60
-train_fp: /data/datasets/parvm/tartandrive_trajs_parv_final/train
-train_framelistfile: /data/datasets/parvm/tartandrive_trajs_parv_final/train/trainframes.txt
+train_fp: /project/learningphysics/tartandrive_trajs_parv_final/train
+train_framelistfile: /project/learningphysics/tartandrive_trajs_parv_final/train/trainframes.txt
 
 loader:
   train:

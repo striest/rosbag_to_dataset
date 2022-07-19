@@ -40,7 +40,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--experiment_fp', type=str, required=True, help='The folder path for the experiment')
 	args = parser.parse_args()
-	config = yaml.load(open(os.path.join(args.experiment_fp,"_config.yaml"), 'r'), Loader=yaml.FullLoader)	
+	config = yaml.load(open(os.path.join(args.experiment_fp,"_config.yaml"), 'r'), Loader=yaml.FullLoader)
 	# now = datetime.now()
 	# config["experiment_fp"] = os.path.join(
     #         config["experiment_fp"], f'{now.strftime("%m-%d-%Y,%H-%M-%S")}')
@@ -73,7 +73,10 @@ if __name__ == '__main__':
 	print('\nloading eval data...')
 	EvalDataLoaderObj = DataLoaderUtil(config["eval_framelistfile"] , config["eval_fp"], config, batch_size = config["loader"]['eval']['batch_size'], shuffle = config["loader"]['eval']['shuffle'], num_workers = config["loader"]['eval']['num_workers'], persistent_workers = config["loader"]['eval']['persistent_workers'])
 
-	eval_num_batches = EvalDataLoaderObj.calc_num_batches(config["loader"]['eval']['buffer_capacity'])
+	if config['loader']['eval']['all']:
+		eval_num_batches = None
+	else:
+		eval_num_batches = EvalDataLoaderObj.calc_num_batches(config["loader"]['eval']['buffer_capacity'])
 	traj_list_eval = BackgroundLoader(EvalDataLoaderObj,eval_num_batches)
 
 	if not isinstance(traj_list_eval, list):
@@ -174,7 +177,7 @@ if __name__ == '__main__':
 
 	# else:
 	# 	print("hellooooo")
-	# 	best_model_dir = "/data/datasets/parvm/tartandrive_trajs_parv_test/experiment/reconstruction_atv_all_t50/_best/model.cpt"
+	# 	best_model_dir = "/project/learningphysics/tartandrive_trajs_parv_test/experiment/reconstruction_atv_all_t50/_best/model.cpt"
 	# 	latent_model = torch.load(best_model_dir)
 	# 	latent_model = nn.DataParallel(latent_model,device_ids=[0,1])
 	# 	latent_model = latent_model.to(config['model_device'])

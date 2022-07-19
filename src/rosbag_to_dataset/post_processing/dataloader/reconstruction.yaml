@@ -79,53 +79,55 @@ modalities:
   #       scale: 0.1
   #     type: MSELoss
   #   topic: imu
-  # rgbmap:
-  #   decoder:
-  #     params:
-  #       channels:
-  #       - 32
-  #       - 16
-  #       - 8
-  #       - 4
-  #     type: CNNDecoder
-  #   encoder:
-  #     params:
-  #       channels:
-  #       - 4
-  #       - 8
-  #       - 16
-  #       - 32
-  #     type: CNNEncoder
-  #   loss:
-  #     params:
-  #       scale: 100.0
-  #     type: MSELoss
-  #   output_resolution: [64,64]
-  #   topic: rgbmap
+  rgbmap:
+    decoder:
+      params:
+        channels:
+        - 32
+        - 16
+        - 8
+        - 4
+      type: CNNDecoder
+    encoder:
+      params:
+        channels:
+        - 4
+        - 8
+        - 16
+        - 32
+      type: CNNEncoder
+    loss:
+      params:
+        scale: 100.0
+      type: MSELoss
+    output_resolution: [64,64]
+    topic: rgbmap
   
-  # heightmap:
-  #   decoder:
-  #     params:
-  #       channels:
-  #       - 32
-  #       - 16
-  #       - 8
-  #       - 4
-  #     type: CNNDecoder
-  #   encoder:
-  #     params:
-  #       channels:
-  #       - 4
-  #       - 8
-  #       - 16
-  #       - 32
-  #     type: CNNEncoder
-  #   loss:
-  #     params:
-  #       scale: 1.0
-  #     type: MSELoss
-  #   output_resolution: [64,64]
-  #   topic: heightmap
+  heightmap:
+    decoder:
+      params:
+        channels:
+        - 32
+        - 16
+        - 8
+        - 4
+      type: CNNDecoder
+    encoder:
+      params:
+        channels:
+        - 4
+        - 8
+        - 16
+        - 32
+      type: CNNEncoder
+    loss:
+      params:
+        scale: 1.0
+      type: MSELoss
+    output_resolution: [64,64]
+    clipping: [-2,2]
+    num_channels: 2
+    topic: heightmap
   # wheel_rpm:
   #   decoder:
   #     params:
@@ -175,12 +177,13 @@ state:
 
 loader:
   train:
-    buffer_capacity: 7680
+    buffer_capacity: 76800
     batch_size: 64
     num_workers: 4
     persistent_workers: True
     shuffle: True
   eval:
+    all: True
     buffer_capacity: 7680
     batch_size: 64
     num_workers: 4

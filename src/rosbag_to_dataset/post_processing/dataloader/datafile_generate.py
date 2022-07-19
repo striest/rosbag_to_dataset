@@ -41,8 +41,8 @@ def enumerate_trajs(data_root_dir):
     print('Detected {} trajs'.format(len(trajfolders)))
     return trajfolders
 
-data_root_dir = '/data/datasets/parvm/tartandrive_trajs_parv_final/train'
-outfile = '/data/datasets/parvm/tartandrive_trajs_parv_final/train/trainframes.txt'
+data_root_dir = '/project/learningphysics/tartandrive_trajs_parv_final/eval'
+outfile = '/project/learningphysics/tartandrive_trajs_parv_final/eval/trainframes.txt'
 f = open(outfile, 'w')
 
 trajlist = enumerate_trajs(data_root_dir)

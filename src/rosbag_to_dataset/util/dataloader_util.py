@@ -6,7 +6,7 @@ from rosbag_to_dataset.post_processing import *
 from rosbag_to_dataset.post_processing.dataloader.TartanDriveDataset import DatasetBase
 from wheeledsim_rl.util.util import dict_to, DummyEnv
 from wheeledsim_rl.replaybuffers.dict_replaybuffer import NStepDictReplayBuffer
-
+import copy
 import torch
 import random
 
@@ -61,6 +61,10 @@ class DataLoaderUtil:
 					if v['topic'] == value:
 						self.observation.append(key)
 						break
+				if v['topic'] == 'heightmap':
+					self.min_height = v['clipping'][0]
+					self.max_height = v['clipping'][1]
+					self.heightmap_num_channels = v['num_channels']
 		self.action = ['cmd']
 		self.observation.append('odom') #since odom is not added as modality
 		self.remapped_obs = [self.remap[i] for i in self.observation]
@@ -207,12 +211,18 @@ class DataLoaderUtil:
 		"""
 		for k in res['observation'].keys():
 			if k not in ['state','imu']:
-				map_data = res['observation'][k]
-				map_data[~torch.isfinite(map_data)] = fill_value
-				res['observation'][k] = map_data.moveaxis(-1, -3)
-				map_data = res['next_observation'][k]
-				map_data[~torch.isfinite(map_data)] = fill_value
-				res['next_observation'][k] = map_data.moveaxis(-1, -3)
+				# map_data = res['observation'][k]
+				# map_data[~torch.isfinite(map_data)] = fill_value
+				# if k in ['heightmap']:
+				# 	res['observation'][k] = res['observation'][k][...,:self.heightmap_num_channels]
+				# 	res['observation'][k] = torch.clamp(res['observation'][k],self.min_height,self.max_height)
+				res['observation'][k] = res['observation'][k].moveaxis(-1, -3)
+				# map_data = res['next_observation'][k]
+				# map_data[~torch.isfinite(map_data)] = fill_value
+				# if k in ['heightmap']:
+				# 	res['next_observation'][k] = res['next_observation'][k][...,:self.heightmap_num_channels]
+				# 	res['next_observation'][k] = torch.clamp(res['next_observation'][k],self.min_height,self.max_height)
+				res['next_observation'][k] = res['next_observation'][k].moveaxis(-1, -3)
 		return res
 	
 	def calc_num_batches(self, capacity):
@@ -272,34 +282,6 @@ def BackgroundLoader(dataloader,num_batches=None):
 	except Exception as e:
 		print(e)
 		raise Exception
-		# return e
-# class NoDaemonProcess(mp.Process):
-# 	# make 'daemon' attribute always return False
-# 	def _get_daemon(self):
-# 		return False
-# 	def _set_daemon(self, value):
-# 		pass
-# 	daemon = property(_get_daemon, _set_daemon)
-
-# # We sub-class multiprocessing.pool.Pool instead of multiprocessing.Pool
-# # because the latter is only a wrapper function, not a proper class.
-# class TartanMultiProcessingPool(multiprocessing.pool.Pool):
-# 	Process = NoDaemonProcess
-
-# def runbc(config, capacity = None,train = True):
-# 	if train:
-# 		DataLoaderObj = DataLoaderUtil(config["train_framelistfile"] , config["train_fp"], config, batch_size = config["loader"]['train']['batch_size'], shuffle = config["loader"]['train']['shuffle'], num_workers = config["loader"]['train']['num_workers'], persistent_workers = config["loader"]['train']['persistent_workers'])
-# 	else:
-# 		DataLoaderObj = DataLoaderUtil(config["eval_framelistfile"] , config["eval_fp"], config, batch_size = config["loader"]['eval']['batch_size'], shuffle = config["loader"]['eval']['shuffle'], num_workers = config["loader"]['eval']['num_workers'], persistent_workers = config["loader"]['eval']['persistent_workers'])
-# 	num_batches = DataLoaderObj.calc_num_batches(capacity)
-# 	r1 = TartanMultiProcessingPool().apply_async(BackgroundLoader, args=(DataLoaderObj,num_batches,))
-# 	while not r1.ready():
-# 		# et = time.time()-st
-# 		# print(f"{et}s passed f this")
-# 		time.sleep(1)
-# 	print("All wrapped up")
-# 	result = r1.get()
-# 	return result
 
 if __name__ == '__main__':
 	print(f"Helloo")
@@ -310,57 +292,11 @@ if __name__ == '__main__':
 
 	config = yaml.load(open(args.config_fp, 'r'), Loader=yaml.FullLoader)
 
-	print(f"Helloo")
-	# DataLoaderObj = DataLoaderUtil(config["train_framelistfile"] , config["train_fp"], config, batch_size = 1, num_workers = 0, persistent_workers = True, shuffle= False)
-	# traj_list =  DataLoaderObj.convert_obs_to_traj(num_batches=1)
-	# train_buffer_init = runbc(config,300)
-	# eval_buffer_init = runbc(config,300,train = False)
-	# env_traj = runbc(config,capacity = config['modality_len'])[0]
 	DataLoaderObj = DataLoaderUtil(config["train_framelistfile"] , config["train_fp"], config, batch_size = config["loader"]['train']['batch_size'], shuffle = config["loader"]['train']['shuffle'], num_workers = config["loader"]['train']['num_workers'], persistent_workers = config["loader"]['train']['persistent_workers'])
 
-	# t1 = threading.Thread(target=BackgroundLoader, args=(DataLoaderObj,4))
-	# concurrent.futures.ThreadPoolExecutor() as executor:
 	future = concurrent.futures.ThreadPoolExecutor().submit(BackgroundLoader, DataLoaderObj,4)
 	env_traj = future.result()[0]
 	env = DummyEnv(env_traj)
 	train_buf = NStepDictReplayBuffer(env, capacity=10)
 	future = concurrent.futures.ThreadPoolExecutor().submit(BackgroundLoader, DataLoaderObj,4)
 	train_traj = future.result()
-	# print("Train and eval laoded")
-	# st = time.time()
-	# for i in range(5):10
-	# 	et = time.time()-st
-	# 	print(f"{et}s passed in waste")
-	# 	time.sleep(2)
-	# proc_bg = None
-	# DataLoaderObj = DataLoaderUtil(config["train_framelistfile"] , config["train_fp"], config, batch_size = config["loader"]['train']['batch_size'], shuffle = config["loader"]['train']['shuffle'], num_workers = config["loader"]['train']['num_workers'], persistent_workers = config["loader"]['train']['persistent_workers'])
-
-	# for i in range(10):
-	# 	time.sleep(3)
-	# 	print(f"Epoch {i} completed")
-	# 	if proc_bg == None:
-	# 		proc_bg = TartanMultiProcessingPool().apply_async(BackgroundLoader, args=(DataLoaderObj,10))
-	# 	elif proc_bg.ready():
-	# 		print(f"Success : {proc_bg.successful()}")
-	# 		if proc_bg.successful():
-	# 			train_buffer_new = proc_bg.get()
-	# 			proc_bg = TartanMultiProcessingPool().apply_async(BackgroundLoader, args=(DataLoaderObj,10))
-	# 		else:
-	# 			print(proc_bg.get())
-	# 			raise Exception
-
-
-
-	# DataLoaderObj = DataLoaderUtil(config["train_framelistfile"] , config["train_fp"], config, batch_size = 64, num_workers = 4, persistent_workers = True, shuffle= False)
-	# r1 = TartanMultiProcessingPool().apply_async(BackgroundLoader, args=(4,))
-	# st = time.time()
-	# while not r1.ready():
-	# 	et = time.time()-st
-	# 	print(f"{et}s passed")
-	# 	time.sleep(5)
-	# print("All wrapped up")
-	# result = r1.get()
-	# if r1.successful():
-	# 	print(len(result))
-	# else:
-	# 	print(result)

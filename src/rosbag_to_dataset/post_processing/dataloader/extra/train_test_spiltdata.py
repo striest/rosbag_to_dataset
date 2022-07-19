@@ -10,8 +10,8 @@ def Diff(li1, li2):
 if __name__ == '__main__':
 
     random.seed(1)
-    data_dir = "/data/datasets/parvm/tartandrive_trajs"
-    save_data_dir = "/data/datasets/parvm/tartandrive_trajs_parv_final"
+    data_dir = "/project/learningphysics/tartandrive_trajs"
+    save_data_dir = "/project/learningphysics/tartandrive_trajs_parv_final"
 
     train_data_dir = os.path.join(save_data_dir,"train")
     eval_data_dir = os.path.join(save_data_dir,"eval")

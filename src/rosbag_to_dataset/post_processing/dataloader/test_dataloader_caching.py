@@ -75,7 +75,10 @@ if __name__ == '__main__':
 	print('\nloading eval data...')
 	EvalDataLoaderObj = DataLoaderUtil(config["eval_framelistfile"] , config["eval_fp"], config, batch_size = config["loader"]['eval']['batch_size'], shuffle = config["loader"]['eval']['shuffle'], num_workers = config["loader"]['eval']['num_workers'], persistent_workers = config["loader"]['eval']['persistent_workers'])
 
-	eval_num_batches = EvalDataLoaderObj.calc_num_batches(config["loader"]['eval']['buffer_capacity'])
+	if config['loader']['eval']['all']:
+		eval_num_batches = None
+	else:
+		eval_num_batches = EvalDataLoaderObj.calc_num_batches(config["loader"]['eval']['buffer_capacity'])
 	traj_list_eval = BackgroundLoader(EvalDataLoaderObj,eval_num_batches)
 
 	if not isinstance(traj_list_eval, list):
