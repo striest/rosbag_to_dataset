@@ -38,7 +38,7 @@ import concurrent.futures
 
 class DataLoaderUtil:
 
-	def __init__(self,frame_list_file_fp , dataroot_fp, config, observation = None, frame_skip = 0, frame_stride= 5, batch_size = 1, shuffle = True, num_workers = 0, persistent_workers = True):
+	def __init__(self,frame_list_file_fp , dataroot_fp, config, observation = None, frame_skip = 0, frame_stride= 5, batch_size = 1, shuffle = True, num_workers = 0, persistent_workers = True, init_dataset = True):
 		self.frame_list_file_fp = frame_list_file_fp
 		self.dataroot_fp= dataroot_fp
 		self.batch_size = batch_size
@@ -86,14 +86,14 @@ class DataLoaderUtil:
 
 		self.config = config
 		self.num_workers = num_workers
-
-		self.dataset = DatasetBase(self.frame_list_file_fp, \
-								dataroot= self.dataroot_fp, \
-								datatypes = self.datatypes, \
-								modalitylens = self.modalities_len, \
-								transform=None, \
-								imu_freq = self.N_per_step, \
-								frame_skip = frame_skip, frame_stride=frame_stride, config = self.config , remap = self.remap)
+		if init_dataset:
+			self.dataset = DatasetBase(self.frame_list_file_fp, \
+									dataroot= self.dataroot_fp, \
+									datatypes = self.datatypes, \
+									modalitylens = self.modalities_len, \
+									transform=None, \
+									imu_freq = self.N_per_step, \
+									frame_skip = frame_skip, frame_stride=frame_stride, config = self.config , remap = self.remap)
 
 
 	def convert_queue(self, queue):

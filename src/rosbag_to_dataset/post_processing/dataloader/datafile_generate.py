@@ -41,13 +41,13 @@ def enumerate_trajs(data_root_dir):
     print('Detected {} trajs'.format(len(trajfolders)))
     return trajfolders
 
-data_root_dir = '/project/learningphysics/tartandrive_trajs_parv_final/eval'
-outfile = '/project/learningphysics/tartandrive_trajs_parv_final/eval/trainframes.txt'
+data_root_dir = '/home/parvm/RISS/affix_data/raw/test'
+outfile = '/home/parvm/RISS/affix_data/raw/test/trainframes.txt'
 f = open(outfile, 'w')
 
 trajlist = enumerate_trajs(data_root_dir)
 for trajdir in trajlist:
-    trajindlist = process_traj(data_root_dir + '/' +trajdir)
+    trajindlist = process_traj(data_root_dir + '/' +trajdir,folderstr = 'image_left_color')
     for trajinds in trajindlist:
         f.write(trajdir)
         f.write(' ')

@@ -60,6 +60,8 @@ class DatasetBase(Dataset):
             self.cmdlist = self.loadDataFromFile(self.trajlist, 'cmd/twist.npy')
         if 'odom' in self.datatypelist:
             self.odomlist = self.loadDataFromFile(self.trajlist, 'odom/odometry.npy')
+        if 'delta' in self.datatypelist:
+            self.deltalist = self.loadDataFromFile(self.trajlist, 'delta/float.npy')
         if 'imu' in self.datatypelist:
             self.imulist = self.loadDataFromFile(self.trajlist, 'imu/imu.npy')
         
@@ -212,6 +214,9 @@ class DatasetBase(Dataset):
             elif datatype == 'cmd':
                 cmdlist = self.load_cmd(frameindlist, datalen)
                 sample[datatype] = cmdlist
+            elif datatype == 'delta':
+                deltalist = self.load_delta(frameindlist, datalen)
+                sample[datatype] = deltalist
             elif datatype == 'imu':
                 imulist = self.load_imu(imuframeind, datalen)
                 sample[datatype] = imulist
@@ -260,6 +265,9 @@ class DatasetBase(Dataset):
 
     def load_cmd(self, frameindlist, datalen):
         return self.cmdlist[frameindlist[:datalen]]
+    
+    def load_delta(self, frameindlist, datalen):
+        return self.deltalist[frameindlist[:datalen]]
 
     def loadDataFromFile(self, trajlist, data_folder_and_filename):
         print('Loading data from {}...'.format(data_folder_and_filename))
