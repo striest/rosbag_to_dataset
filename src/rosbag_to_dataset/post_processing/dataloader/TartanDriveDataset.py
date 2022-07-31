@@ -62,6 +62,9 @@ class DatasetBase(Dataset):
             self.odomlist = self.loadDataFromFile(self.trajlist, 'odom/odometry.npy')
         if 'delta' in self.datatypelist:
             self.deltalist = self.loadDataFromFile(self.trajlist, 'delta/float.npy')
+        if 'params' in self.datatypelist:
+            self.paramslist = self.loadDataFromFile(self.trajlist, 'params/float.npy')
+            print("self.paramslist shape ",self.paramslist.shape)
         if 'imu' in self.datatypelist:
             self.imulist = self.loadDataFromFile(self.trajlist, 'imu/imu.npy')
         
@@ -217,6 +220,9 @@ class DatasetBase(Dataset):
             elif datatype == 'delta':
                 deltalist = self.load_delta(frameindlist, datalen)
                 sample[datatype] = deltalist
+            elif datatype == 'params':
+                paramslist = self.load_params(frameindlist, datalen)
+                sample[datatype] = paramslist
             elif datatype == 'imu':
                 imulist = self.load_imu(imuframeind, datalen)
                 sample[datatype] = imulist
@@ -268,6 +274,8 @@ class DatasetBase(Dataset):
     
     def load_delta(self, frameindlist, datalen):
         return self.deltalist[frameindlist[:datalen]]
+    def load_params(self, frameindlist, datalen):
+        return self.paramslist[frameindlist[:datalen]]
 
     def loadDataFromFile(self, trajlist, data_folder_and_filename):
         print('Loading data from {}...'.format(data_folder_and_filename))
