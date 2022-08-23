@@ -41,8 +41,11 @@ def enumerate_trajs(data_root_dir):
     print('Detected {} trajs'.format(len(trajfolders)))
     return trajfolders
 
-data_root_dir = '/home/parvm/RISS/affix_data/raw/test'
-outfile = '/home/parvm/RISS/affix_data/raw/test/trainframes.txt'
+# data_root_dir = '/home/parvm/RISS/affix_data/extracted_online_bags/opt/final'
+# outfile = '/home/parvm/RISS/affix_data/extracted_online_bags/opt/final/trainframes.txt'
+
+data_root_dir = '/home/parvm/RISS/affix_data/extracted_online_bags/learned/final'
+outfile = '/home/parvm/RISS/affix_data/extracted_online_bags/learned/final/trainframes.txt'
 f = open(outfile, 'w')
 
 trajlist = enumerate_trajs(data_root_dir)
