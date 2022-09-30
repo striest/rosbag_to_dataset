@@ -64,10 +64,11 @@ def fast_min_max(np.ndarray[np.float32_t, ndim=3] emem,
 
             if z > emem[x, y, 1]:
                 emem[x, y, 1] = z
-                # cmem[x, y, :] = c_gid[i]
-                cmem[x, y, 0] = <uint8_t>((cnt-1)/(cnt) * cmem[x, y, 0] + c_gid[i,0]/(cnt)) #<uint8_t>c_gid[i,0]
-                cmem[x, y, 1] = <uint8_t>((cnt-1)/(cnt) * cmem[x, y, 1] + c_gid[i,1]/(cnt)) #<uint8_t>c_gid[i,1]
-                cmem[x, y, 2] = <uint8_t>((cnt-1)/(cnt) * cmem[x, y, 2] + c_gid[i,2]/(cnt)) #<uint8_t>c_gid[i,2]
+                
+            # cmem[x, y, :] = c_gid[i]
+            cmem[x, y, 0] = <uint8_t>((cnt-1)/(cnt) * cmem[x, y, 0] + c_gid[i,0]/(cnt)) #<uint8_t>c_gid[i,0]
+            cmem[x, y, 1] = <uint8_t>((cnt-1)/(cnt) * cmem[x, y, 1] + c_gid[i,1]/(cnt)) #<uint8_t>c_gid[i,1]
+            cmem[x, y, 2] = <uint8_t>((cnt-1)/(cnt) * cmem[x, y, 2] + c_gid[i,2]/(cnt)) #<uint8_t>c_gid[i,2]
 
     return emem, cmem
 

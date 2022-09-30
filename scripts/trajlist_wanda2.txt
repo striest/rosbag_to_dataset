@@ -1,0 +1,10 @@
+/cairo/arl_bag_files/SARA/arl0609/cmu_2_gw_100_baseline_outside_gate_2022-06-09-15-28-19.bag wanda2_cmu_2_3
+/cairo/arl_bag_files/SARA/arl0609/cmu_3_gw_100_baseline_outside_gate_2022-06-09-15-37-43.bag wanda2_cmu_3
+/cairo/arl_bag_files/SARA/arl0609/cmu_4_gw_100_baseline_outside_gate_2022-06-09-16-20-06.bag wanda2_cmu_4
+/cairo/arl_bag_files/SARA/arl0609/cmu_5_gw_100_baseline_outside_gate_to_hill_start_2022-06-09-16-40-00.bag wanda2_cmu_5
+/cairo/arl_bag_files/SARA/arl0609/cmu_6_gw_100_baseline_outside_gate_to_hill_start_2022-06-09-16-47-34.bag wanda2_cmu_6
+/cairo/arl_bag_files/SARA/arl0609/cmu_7_gw_100_learned_outside_gate_to_hill_start_2022-06-09-16-55-40.bag wanda2_cmu_7
+/cairo/arl_bag_files/SARA/arl0609/cmu_8_gw_100_baseline_outside_gate_across_to_hill_2022-06-09-17-20-09.bag wanda2_cmu_8
+/cairo/arl_bag_files/SARA/arl0609/cmu_9_gw_100_learned_outside_gate_across_to_hill_2022-06-09-17-26-40.bag wanda2_cmu_9
+/cairo/arl_bag_files/SARA/arl0609/cmu_10_gw_100_learned_outside_gate_across_to_hill_2022-06-09-17-35-44.bag wanda2_cmu_10
+/cairo/arl_bag_files/SARA/arl0609/cmu_11_trail_data_collect_2022-06-09-17-53-30.bag wanda2_cmu_11

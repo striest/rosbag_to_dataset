@@ -36,10 +36,10 @@ import time
 
 np.set_printoptions(precision=4, suppress=True, threshold=10000)
 
-from StereoVONet import StereoVONet
+from .StereoVONet import StereoVONet
 
 # debug
-from utils import visflow, disp2vis, tensor2img
+from .utils import visflow, disp2vis, tensor2img
 import cv2
 
 class TartanSVO(object):

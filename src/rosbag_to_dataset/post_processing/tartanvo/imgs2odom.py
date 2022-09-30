@@ -31,17 +31,18 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import cv2
 import numpy as np
-
-from TrajFolderDataset import TrajFolderDataset
 from torch.utils.data import DataLoader
-
-from utils import se2SE, SO2quat, se2quat
-from TartanSVO import TartanSVO
 import time
 from os import mkdir
 from os.path import isdir, dirname, realpath
-from arguments import get_args
+from .arguments_wanda import *
+# from .arguments import *
+
+from .TrajFolderDataset import TrajFolderDataset
+from .utils import se2SE, SO2quat, se2quat
+from .TartanSVO import TartanSVO
 
 class TartanVOInference(object):
     def __init__(self):
@@ -51,8 +52,7 @@ class TartanVOInference(object):
         '''
         self.curdir = dirname(realpath(__file__))
 
-        args = get_args()
-        self.parse_params(args)
+        self.parse_params()
 
         # self.cam_intrinsics = [self.w, self.h, self.focalx, self.focaly, self.pu, self.pv]
         self.load_model()
@@ -61,9 +61,9 @@ class TartanVOInference(object):
         # self.scale = 1.0
 
     def load_dataset(self, traj_root_folder):
-        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder=None, forvo=True, \
-                                        imgw=self.w, imgh=self.h, crop_w=self.crop_w, crop_h=self.crop_h, resize_w=self.input_w, resize_h=self.input_h, \
-                                        focalx=self.focalx, focaly=self.focaly, centerx=self.pu, centery=self.pv, blxfx=self.fxbl)
+        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder="", forvo=True, \
+                                        imgw=self.w, imgh=self.h, crop_w=self.crop_w, crop_h_low=self.crop_h, crop_h_high= self.crop_h, resize_w=self.resize_w, resize_h=self.resize_h, \
+                                        focalx=self.focalx, focaly=self.focaly, centerx=self.pu, centery=self.pv, blxfx=self.fxbl,stereomaps=self.stereomaps)
 
         testDataloader = DataLoader(testDataset, batch_size=self.batch_size, 
                                         shuffle=False, num_workers=self.worker_num)
@@ -71,30 +71,47 @@ class TartanVOInference(object):
 
         self.pose = np.matrix(np.eye(4,4))
 
-    def parse_params(self, args):
-        self.modelname = args.model_name # 'models/43_6_2_vonet_30000.pkl'
-        self.network_type = args.network_type # 0
+    def parse_params(self):
+        self.modelname = vo_args['model_name'] # 'models/43_6_2_vonet_30000.pkl'
+        self.network_type = vo_args['network_type'] # 0
 
         # camera parameters
-        self.w = args.image_width # , 1024)
-        self.h = args.image_height # , 544)
-        self.focalx = args.focal_x # , 477.6049499511719)
-        self.focaly = args.focal_y # , 477.6049499511719)
-        self.pu = args.center_x # , 499.5)
-        self.pv = args.center_y # , 252.0)
-        self.fxbl = args.focal_x_baseline # , 100.14994812011719)
+        self.w = common_args['image_width'] # , 1024)
+        self.h = common_args['image_height'] # , 544)
+        self.focalx = common_args['focal_x'] # , 477.6049499511719)
+        self.focaly = common_args['focal_y'] # , 477.6049499511719)
+        self.pu = common_args['center_x'] # , 499.5)
+        self.pv = common_args['center_y'] # , 252.0)
+        self.fxbl = common_args['focal_x_baseline'] # , 100.14994812011719)
 
         # depth generation parameters
-        self.crop_w = args.image_crop_w # , 64) # to deal with vignette effect, crop the image
-        self.crop_h = args.image_crop_h # , 32) # after cropping the size is (960, 512)
-        self.input_w = args.image_input_w # , 512)
-        self.input_h = args.image_input_h # , 256)
-        self.visualize = args.visualize_depth # , True)
+        self.resize_w = vo_args['image_resize_w'] # after resizing the size is (896, 448)
+        self.resize_h = vo_args['image_resize_h'] # 
+        self.crop_w = vo_args['image_crop_w'] # 
+        self.crop_h = vo_args['image_crop_h'] # after cropping the size is (640, 448)
+        self.input_w = vo_args['image_input_w'] # , 640)
+        self.input_h = vo_args['image_input_h'] # , 448)
+        self.visualize = vo_args['visualize'] # , True)
 
-        self.batch_size = args.batch_size
-        self.worker_num = args.worker_num
-        # # some flags to control the point cloud processing
-        # self.transform_ground = args.pc_transform_ground # , True)
+        self.batch_size = common_args['batch_size']
+        self.worker_num = common_args['worker_num']
+        self.stereo_maps = common_args['stereo_maps']
+        if self.stereo_maps != '':
+            loadmap = np.load(self.curdir+'/'+self.stereo_maps, allow_pickle=True)
+            loadmap = loadmap.item()
+            # import ipdb;ipdb.set_trace()
+            map1, map2 = cv2.initUndistortRectifyMap(\
+                        loadmap['k1'], loadmap['d1'],\
+                        loadmap['r1'], loadmap['p1'],\
+                        (self.w, self.h), cv2.CV_32FC1)
+
+            map3, map4 = cv2.initUndistortRectifyMap(\
+                        loadmap['k2'], loadmap['d2'],\
+                        loadmap['r2'], loadmap['p2'],\
+                        (self.w, self.h), cv2.CV_32FC1)
+            self.stereomaps = [map1, map2, map3, map4]
+        else:
+            self.stereomaps = None
 
     def process_motion(self, motion):
         motionlist = []
@@ -116,7 +133,8 @@ class TartanVOInference(object):
         # model_name = rospy.get_param('~model_name', '43_6_2_vonet_30000_wo_pwc.pkl') # 43_6_2_vonet_30000.pkl
         # network_type = rospy.get_param('~network_type', '2') # 0
         model_name = self.curdir + '/models/' + self.modelname
-        resize_factor = self.input_w/(self.w-2*self.crop_w)
+        # resize_factor = float(self.input_w)/(self.w-2*self.crop_w)
+        resize_factor = self.resize_w/self.w  # debug vo
         self.tartanvo = TartanSVO(model_name, network=self.network_type, blxfx=self.fxbl*resize_factor)
 
     def process(self, traj_root_folder, vo_output_folder):
@@ -130,6 +148,7 @@ class TartanVOInference(object):
         self.load_dataset(traj_root_folder)
         motionlist = []
         poselist = [[0.,0.,0.,0.,0.,0.,1.0]]
+        count = 0
         while True: # loop just for visualization
 
             starttime = time.time()
@@ -137,13 +156,15 @@ class TartanVOInference(object):
                 sample = self.testDataiter.next()
             except StopIteration:
                 break
-            motion = self.tartanvo.test_batch(sample, vis=False)
+            # import ipdb;ipdb.set_trace()
+            motion = self.tartanvo.test_batch(sample, vis=self.visualize)
             print(motion)
             # import ipdb;ipdb.set_trace()
-            print('Inference time: {}'.format(time.time()-starttime))
+            print('{}. VO inference time: {}'.format(count, time.time()-starttime))
             motions, poses = self.process_motion(motion)
             motionlist.extend(motions)
             poselist.extend(poses)
+            count += len(motion)
 
         np.savetxt(outdir + '/motions.txt', np.array(motionlist))
         np.savetxt(outdir + '/poses.txt', np.array(poselist))
@@ -153,4 +174,5 @@ class TartanVOInference(object):
 # python imgs2odom.py --model-name 43_6_2_vonet_30000_wo_pwc.pkl --network-type 2  --image-input-w 640 --image-input-h 448
 if __name__ == '__main__':
     node = TartanVOInference()
-    node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_298', vo_output_folder = 'tartanvo_odom')
+    # node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210805_slope2', vo_output_folder = 'tartanvo_odom')
+    node.process(traj_root_folder='/cairo/arl_bag_files/SARA/arl0608/wanda_cmu_0', vo_output_folder = 'tartanvo_odom')

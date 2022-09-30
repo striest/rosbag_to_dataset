@@ -1,7 +1,7 @@
 import numpy as np
 from math import ceil
 import time
-from cscrollgrid import voxel_filter
+from .cscrollgrid import voxel_filter
 from multiprocessing import Pool
 
 FLOATMAX = 1000000.0

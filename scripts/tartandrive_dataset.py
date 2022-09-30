@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('--bag_list', type=str, default="", help='Path to the bag file to get data from')
     parser.add_argument('--bag_fp', type=str, default="", help='Path to the bag file to get data from')
     parser.add_argument('--save_to', type=str, required=True, help='Name of the dir to save the result to')
+    parser.add_argument('--del_exist', action='store_true', default=False, help='Delete existing trajectory folder if exsits')
 
     args = parser.parse_args()
 
@@ -54,6 +55,8 @@ if __name__ == '__main__':
 
         # create foldersoutfolders
         trajoutfolder = args.save_to+'/'+outfolder
+        if args.del_exist:
+            maybe_rmdir(trajoutfolder)
         maybe_mkdir(trajoutfolder)
         for k, folder in outfolders.items():
             maybe_mkdir(trajoutfolder+'/'+folder)

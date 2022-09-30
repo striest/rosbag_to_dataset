@@ -16,21 +16,21 @@ class StereoVONet(nn.Module):
         super(StereoVONet, self).__init__()
 
         if network==0: # PSM + PWC
-            from PWC import PWCDCNet as FlowNet
-            from PSM import stackhourglass as StereoNet
+            from .PWC import PWCDCNet as FlowNet
+            from .PSM import stackhourglass as StereoNet
             self.flowNet   = FlowNet()
         if network==1: # 5_5 + PWC
-            from PWC import PWCDCNet as FlowNet
-            from StereoNet7 import StereoNet7 as StereoNet
+            from .PWC import PWCDCNet as FlowNet
+            from .StereoNet7 import StereoNet7 as StereoNet
             self.flowNet   = FlowNet()
         else:
-            from FlowNet2 import FlowNet2 as FlowNet
-            from StereoNet7 import StereoNet7 as StereoNet
+            from .FlowNet2 import FlowNet2 as FlowNet
+            from .StereoNet7 import StereoNet7 as StereoNet
             self.flowNet   = FlowNet(middleblock=3)
 
         self.stereoNet = StereoNet()
 
-        from VOFlowNet import VOFlowRes as FlowPoseNet
+        from .VOFlowNet import VOFlowRes as FlowPoseNet
         self.flowPoseNet = FlowPoseNet(intrinsic=intrinsic, down_scale=down_scale, config=config, stereo=True, autoDistTarget=autoDistTarget)
 
         self.network = network
@@ -93,7 +93,7 @@ class StereoVONet(nn.Module):
         # downscale the stereo input 
         x0_stereo = F.interpolate(x0_stereo, size=(256,256), mode='bilinear', align_corners=True)
         x1_stereo = F.interpolate(x1_stereo, size=(256,256), mode='bilinear', align_corners=True)
-        stereo_out = self.stereoNet(torch.cat((x0_stereo, x1_stereo),dim=1))
+        stereo_out, _ = self.stereoNet(torch.cat((x0_stereo, x1_stereo),dim=1))
 
         # scale the disparity size
         if self.network == 0: # psmnet, 3 outputs # deprecated since manually downscaled the input size
@@ -186,7 +186,7 @@ class StereoVONet(nn.Module):
         # downscale the stereo input 
         x0_stereo = F.interpolate(x0_stereo, size=(256,256), mode='bilinear', align_corners=True)
         x1_stereo = F.interpolate(x1_stereo, size=(256,256), mode='bilinear', align_corners=True)
-        stereo_out = self.stereoNet([x0_stereo, x1_stereo])
+        stereo_out, _ = self.stereoNet([x0_stereo, x1_stereo])
 
         # scale the disparity size
         if self.network == 0: # psmnet, 3 outputs # deprecated since manually downscaled the input size

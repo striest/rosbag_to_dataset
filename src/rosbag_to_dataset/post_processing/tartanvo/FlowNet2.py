@@ -2,7 +2,7 @@ import numpy as np
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
-from PSM import feature_extraction, Hourglass
+from .PSM import feature_extraction, Hourglass
 
 def predict_layer(in_planes, middle_planes, out_planes):
     return nn.Sequential( nn.Conv2d(in_planes,middle_planes,kernel_size=3,stride=1,padding=1,bias=True),
