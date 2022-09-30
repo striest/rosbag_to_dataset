@@ -4,14 +4,28 @@ import os
 
 from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
-from rosbag_to_dataset.util.os_util import maybe_mkdir
+from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir
+from os.path import isfile
 
-# python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/debug_offline.yaml --save_to test_output/20210903_298
+# python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
+# python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
+
 if __name__ == '__main__':
+    '''
+    bag_list is a text file with the following content: 
+      <Full path of the bagfile0> <Output folder name0>
+      <Full path of the bagfile1> <Output folder name1>
+      <Full path of the bagfile2> <Output folder name2>
+      ...
+    The extracted data will be stored in <save_to>/<Output folder name>
+
+    if no bag_list is specified, the code will look at bag_fp and process the single bagfile. The output folder is specified by the save_to param
+    '''
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--config_spec', type=str, required=True, help='Path to the yaml file that contains the dataset spec.')
-    parser.add_argument('--bag_fp', type=str, required=True, help='Path to the bag file to get data from. Can be directory or bagfile')
+    parser.add_argument('--bag_list', type=str, default="", help='Path to the bag file to get data from')
+    parser.add_argument('--bag_fp', type=str, default="", help='Path to the bag file to get data from')
     parser.add_argument('--save_to', type=str, required=True, help='Name of the dir to save the result to')
 
     args = parser.parse_args()
@@ -19,39 +33,35 @@ if __name__ == '__main__':
     print('setting up...')
     config_parser = ConfigParser()
     converters, outfolders, rates, dt, maintopic = config_parser.parse_from_fp(args.config_spec)
-    # import pdb;pdb.set_trace()
 
-    # Handle single bag file
-    if args.bag_fp.endswith(".bag"):
-
-        bag = rosbag.Bag(args.bag_fp)
-
-        # create folders
-        maybe_mkdir(args.save_to)
-        for k, folder in outfolders.items():
-            maybe_mkdir(os.path.join(args.save_to, folder))
-            # maybe_mkdir(args.save_to+'/'+folder)
-
-        converter = ConverterToFiles(args.save_to, dt, converters, outfolders, rates)
-        dataset = converter.convert_bag(bag, main_topic=maintopic)
-    
-    # Handle directory full of bag files
+    # the input bagfiles
+    if args.bag_list != "" and isfile(args.bag_list): # process multiple files specified in the text file
+        with open(args.bag_list, 'r') as f:
+            lines = f.readlines()
+        bagfilelist = [line.strip().split(' ') for line in lines]
+    elif(isfile(args.bag_fp)): # process one file 
+        bagfilelist = [[args.bag_fp, ""]]
     else:
-        files = os.listdir(args.bag_fp)
-        files = [f for f in files if f.endswith(".bag")]
-        
-        for i, f in enumerate(files):
-            root_save_dir = args.save_to
-            traj_path = f"{i:06}"
-            maybe_mkdir(os.path.join(root_save_dir, "Trajectories"))
-            save_dir = os.path.join(root_save_dir, "Trajectories", traj_path)
+        print("No input bagfiles specified..")
+        exit()
 
-            bag_fp = os.path.join(args.bag_fp, f)
-            bag = rosbag.Bag(bag_fp)
+    maybe_mkdir(args.save_to)
+    for bagfile, outfolder in bagfilelist:
+        # bagfile, outfolder = line.strip().split(' ')
+        print('Reading bagfile {}'.format(bagfile))
+        bag = rosbag.Bag(bagfile)
+        print('Bagfile loaded')
 
-            maybe_mkdir(save_dir)
-            for k, folder in outfolders.items():
-                maybe_mkdir(os.path.join(save_dir, folder))
+        # create foldersoutfolders
+        trajoutfolder = args.save_to+'/'+outfolder
+        maybe_mkdir(trajoutfolder)
+        for k, folder in outfolders.items():
+            maybe_mkdir(trajoutfolder+'/'+folder)
 
-            converter = ConverterToFiles(save_dir, dt, converters, outfolders, rates)
-            dataset = converter.convert_bag(bag, main_topic=maintopic)
+        converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
+        suc = dataset = converter.convert_bag(bag, main_topic=maintopic)
+
+        if not suc: 
+            print('Convert bagfile {} failure..'.format(bagfile))
+            maybe_rmdir(trajoutfolder)
+

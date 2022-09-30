@@ -63,9 +63,9 @@ ROOT
 
 Note that inside each modality folder, there is a `timestamps.txt` file, specifying the corresponding timestamps of each frame. 
 
-## Offline
+## Run the Extraction Code
 
-To generate offline data, do the following:
+To generate data for a single bagfile, do the following:
 
 ```
 python scripts/tartandrive_dataset.py --bag_fp <ARG> --config_spec <ARG> --save_to <ARG>
@@ -76,8 +76,24 @@ python scripts/tartandrive_dataset.py --bag_fp <ARG> --config_spec <ARG> --save_
     --bag_fp: path to bagfile
     --save_to: new dir to save data files in
 
-### Output
-This will produce a torch file for each bag in the directory.
+To process multiple bagfiles at once, you can first generate a text file with a list of input bagfiles and output folder:
+
+```
+<Full path of the bagfile 0> <Output folder name 0>
+<Full path of the bagfile 1> <Output folder name 1>
+<Full path of the bagfile 2> <Output folder name 2>
+...
+```
+
+And run the following command: 
+```
+python scripts/tartandrive_dataset.py --bag_list <ARG> --config_spec <ARG> --save_to <ARG>
+```
+
+### Args
+    --config_spec: path to the configuration file
+    --bag_list: path to text file listing multiple bagfiles and output folders
+    --save_to: new dir to save all the trajectories in
 
 # Code Notes
 This code is derived from the Tartan_cost branch. The main feature is to store the data into files instead of returning as numpy array. Another key change is the way of aligning the timestamps. A main-topic is defined in the spec file, other topics are aligned with the main-topic by finding the msg with the closest timestamps. 
