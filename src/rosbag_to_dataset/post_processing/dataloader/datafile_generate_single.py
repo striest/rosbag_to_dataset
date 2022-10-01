@@ -1,5 +1,6 @@
 from os.path import isfile, join, isdir
 from os import listdir
+from tqdm import tqdm
 # import numpy as np
 
 # == Generate txt file for tartan dataset ===
@@ -47,7 +48,7 @@ def run(root_dir):
 
     single_trajlist = enumerate_trajs(root_dir)
 
-    for i in range(len(single_trajlist)):
+    for i in tqdm(range(len(single_trajlist))):
 
         # data_root_dir = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2'
         data_root_dir = join(root_dir,single_trajlist[i])

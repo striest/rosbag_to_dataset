@@ -41,8 +41,11 @@ def enumerate_trajs(data_root_dir):
     print('Detected {} trajs'.format(len(trajfolders)))
     return trajfolders
 
-data_root_dir = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2'
-outfile = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2/trainframes.txt'
+# data_root_dir = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2'
+# outfile = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2/trainframes.txt'
+
+data_root_dir = '/project/learningphysics/parv_dataset/affix_sys_id/extracted_tartan_bags'
+outfile = '/project/learningphysics/parv_dataset/affix_sys_id/extracted_tartan_bags/trainframes.txt'
 
 f = open(outfile, 'w')
 
