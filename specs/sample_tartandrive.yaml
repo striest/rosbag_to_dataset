@@ -44,6 +44,12 @@
         options:
             mode: action
 
+    "/velodyne_cloud_registered_with_features":
+        type: PointCloud
+        folder: "pointcloud"
+        options:
+            fields: ["x", "y", "z"]  # ["x", "y", "z", "h", "s", "v"]
+
     # "/wheel_rpm":
     #     type: RPWheelEncoders
     #     remap: "wheel_rpm"

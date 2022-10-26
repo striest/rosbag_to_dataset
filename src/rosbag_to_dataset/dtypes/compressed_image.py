@@ -10,13 +10,11 @@ class CompressedImageConvert(Dtype):
     """
     For image, we'll rescale and 
     """
-    def __init__(self, nchannels, output_resolution, is_compressed=False):
+    def __init__(self, nchannels, output_resolution):
         """
         Args:
             nchannels: The number of channels in the image
             output_resolution: The size to rescale the image to
-            aggregate: One of {'none', 'bigendian', 'littleendian'}. Whether to leave the number of channels alone, or to combine with MSB left-to-right or right-to-left respectively.
-            empty_value: A value signifying no data. Replace with the 99th percentile value to make learning simpler.
         """
         self.nchannels = nchannels
         self.output_resolution = output_resolution

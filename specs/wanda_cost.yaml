@@ -53,6 +53,6 @@
             nchannels: 3
             savetype: 'npy'
 
-    "/traversability_cost":
-        type: FloatStamped
-        folder: "cost"
+    # "/traversability_cost":
+    #     type: FloatStamped
+    #     folder: "cost"

@@ -8,7 +8,7 @@ from rosbag_to_dataset.dtypes.base import Dtype
 
 class BoolConvert(Dtype):
     """
-    Convert an odometry message into a 13d vec.
+    Convert an boolean message into a 1d vec.
     """
     def __init__(self, stamped=False):
         self.stamped = stamped
@@ -41,7 +41,7 @@ class BoolConvert(Dtype):
         np.save(filename+'/bool.npy', data)
 
 if __name__ == "__main__":
-    c = Float64Convert()
-    msg = Float64()
+    c = BoolConvert()
+    msg = Bool()
 
     print(c.ros_to_numpy(msg))

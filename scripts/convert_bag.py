@@ -22,8 +22,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print('setting up...')
+    import pdb;pdb.set_trace()
     config_parser = ConfigParser()
     spec, converters, remap, rates = config_parser.parse_from_fp(args.config_spec)
+
     bag = rosbag.Bag(args.bag_fp)
 
     converter = Converter(spec, converters, remap, rates, args.use_stamps)

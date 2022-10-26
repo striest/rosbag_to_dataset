@@ -17,15 +17,14 @@ class Dtype:
     @abc.abstractmethod
     def rosmsg_type(self):
         """
-        Get the type of the rosmsg we should be reading
-        Note that certain dtypes may have multiplt rosmsgs. I'm not sire how to handle that cleanly yet.
+        Get the type of the rosmsg we should be reading.
         """
         pass
 
     @abc.abstractmethod
     def ros_to_numpy(self, msg):
         """
-        Convert an instance of the rsomsg to a numpy array.
+        Convert an instance of the rosmsg to a numpy array.
         """
         pass
 

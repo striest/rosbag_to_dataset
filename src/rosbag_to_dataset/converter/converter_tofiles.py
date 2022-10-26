@@ -11,50 +11,56 @@ from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 
 class ConverterToFiles:
     """
-    Rosnode that converts to numpy and saves to files using the format specified by the config spec.
-    Because the recording time and the msg timestamp can be very different (in the case of re-recording the bags), 
-    we only look at the timestamps in the messages. 
+    Class that converts a data in a rosbag to numpy arrays and saves to files using the format specified by the config spec. Because the recording time and the msg timestamp can be very different (in the case of re-recording the bags), we only look at the timestamps in the messages. To convert a file, we: 
     1. find the starting time
     2. go through the bagfile the first time, find and store all the timestamps for each topic
     3. align the timestamps
     4. cut the sequence, fill the missing frames
     5. go through the bagfile the second time, save files to hard drive 
     """
-    def __init__(self, outputdir, dt, converters, outfolders, rates):
+    def __init__(self, output_dir, dt, converters, out_folders, rates):
         """
         Args:
-            spec: As provided by the ConfigParser module, the sizes of the observation/action fields.
-            converters: As provided by the ConfigParser module, the converters from ros to numpy.
+            output_dir: 
+                String, directory where the data for a specific rosbag trajectory will be saved
+            dt:
+                Float, sampling period (1/sampling frequency) of the main topic, specified by user in the config_spec YAML file, or passed to this class by ConfigParser output
+            converters:
+                OrderedDict, output of ConfigParser specifying the class converter class for wach of the topics in the bag, as specified in the config_spec YAML file.
+            out_folders:
+                Dictionary, specifies the name of the folders for each of the topic names in the dataset.
+            rates:
+                Dictionary, specifies the sampling period (1/sampling frequency) for each topic (e.g. IMU data may be sampled 10x faster than camera data, which is usually the main topic).
         """
-        self.outputdir = outputdir
+        self.output_dir = output_dir
         self.dt = dt
         self.converters = converters
-        self.outfolders = outfolders
+        self.out_folders = out_folders
         self.rates = rates
 
     def reset_queue(self):
         self.queue = {}
         self.timesteps = {}
-        self.bagtimestamps = {}
+        self.bag_timestamps = {}
         self.topics = self.converters.keys()
 
         for k,v in self.converters.items():
             self.queue[k] = []
             self.timesteps[k] = [] 
-            self.bagtimestamps[k] = [] 
+            self.bag_timestamps[k] = [] 
         
     def find_first_msg_time(self, maintopic):
-        self.start_timestamps = {tt: self.bagtimestamps[tt][0] for tt in self.topics}
-        starttime_list = [self.bagtimestamps[tt][0] for tt in self.topics]
+        self.start_timestamps = {tt: self.bag_timestamps[tt][0] for tt in self.topics}
+        starttime_list = [self.bag_timestamps[tt][0] for tt in self.topics]
         max_starttime = max(starttime_list)
-        main_topic_idx = np.searchsorted(self.bagtimestamps[maintopic], max_starttime)
-        starttime = self.bagtimestamps[maintopic][main_topic_idx]
+        main_topic_idx = np.searchsorted(self.bag_timestamps[maintopic], max_starttime)
+        starttime = self.bag_timestamps[maintopic][main_topic_idx]
 
         for topic in self.topics: # find the closest time with startttime for each topic
-            idx = np.searchsorted(self.bagtimestamps[topic], starttime) 
-            diff1 = abs(starttime - self.bagtimestamps[topic][idx-1]) if idx>0 else 1000000
-            diff2 = abs(starttime - self.bagtimestamps[topic][idx]) if idx<len(self.bagtimestamps[topic]) else 100000
-            self.start_timestamps[topic] = self.bagtimestamps[topic][idx-1] if diff1<diff2 else self.bagtimestamps[topic][idx]
+            idx = np.searchsorted(self.bag_timestamps[topic], starttime) 
+            diff1 = abs(starttime - self.bag_timestamps[topic][idx-1]) if idx>0 else 1000000
+            diff2 = abs(starttime - self.bag_timestamps[topic][idx]) if idx<len(self.bag_timestamps[topic]) else 100000
+            self.start_timestamps[topic] = self.bag_timestamps[topic][idx-1] if diff1<diff2 else self.bag_timestamps[topic][idx]
         return starttime
 
     def extract_timestamps_from_bag(self, bag):
@@ -70,14 +76,14 @@ class ConverterToFiles:
             else: 
                 stamp = t
             stamp_sec = stamp.to_sec()
-            self.bagtimestamps[topic].append(stamp_sec)
+            self.bag_timestamps[topic].append(stamp_sec)
             # assert stamp_sec > last_time[topic], "Topic {} timestamp has gone back!".format(topic)
             # if stamp_sec <= last_time[topic]:
             #     import ipdb;ipdb.set_trace()
             last_time[topic] = stamp_sec
 
         for tt in self.topics:
-            print('  {} \t {} \t {} - {}'.format( tt, len(self.bagtimestamps[tt]), self.bagtimestamps[tt][0], self.bagtimestamps[tt][-1]))
+            print('  {} \t {} \t {} - {}'.format( tt, len(self.bag_timestamps[tt]), self.bag_timestamps[tt][0], self.bag_timestamps[tt][-1]))
 
         return stamp_sec
 
@@ -99,13 +105,13 @@ class ConverterToFiles:
 
         self.extract_timestamps_from_bag(bag)
         starttime = self.find_first_msg_time(main_topic)
-        endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
+        endtime = min([self.bag_timestamps[tt][-1] for tt in self.topics])
         print("  starting time {}, ending time {}, duration {}".format(starttime, endtime, endtime-starttime))
         if starttime + self.rates[main_topic] >= endtime:
             print("Could not find enough overlap between topics!")
             return False
 
-        # # each topic samples from its own starting timestamp, to avoid the occilation problem
+        # # each topic samples from its own starting timestamp, to avoid the oscilation problem
         # self.timesteps = {k:np.arange(self.start_timestamps[k], endtime, self.rates[k]) for k in self.topics} 
         # each topic samples from a fixed starting timestamp 
         self.timesteps = {k:np.arange(starttime, endtime, self.rates[k]) for k in self.topics}
@@ -113,7 +119,7 @@ class ConverterToFiles:
 
         # find the topics with closest timestamps for the desired rates
         for topic in self.topics: 
-            bagtimestamplist = self.bagtimestamps[topic]
+            bagtimestamplist = self.bag_timestamps[topic]
             difflist = []
             for k, timestep in enumerate(self.timesteps[topic]):
                 idx = np.searchsorted(bagtimestamplist, timestep)
@@ -234,16 +240,16 @@ class ConverterToFiles:
                 stamp = t
 
             while tidx < len(self.timesteps[topic]) and abs(stamp.to_sec() - self.timesteps[topic][tidx])<10e-5: 
-                filename = self.outputdir + '/' + self.outfolders[topic] + '/' + str(tidx).zfill(6) 
+                filename = self.output_dir + '/' + self.out_folders[topic] + '/' + str(tidx).zfill(6) 
                 self.queue[topic].append(self.converters[topic].save_file_one_msg(msg, filename) )
                 topic_curr_idx[topic] = topic_curr_idx[topic] + 1
                 tidx = topic_curr_idx[topic]
 
         for topic in self.topics:
             assert len(self.queue[topic]) == self.timesteps[topic].shape[0], 'convert_queue error: queuelen {} != timestep_len {}'.format(len(self.queue[topic]), self.timesteps[topic].shape[0])
-            filefolder = self.outputdir + '/' + self.outfolders[topic] 
+            filefolder = self.output_dir + '/' + self.out_folders[topic] 
             self.converters[topic].save_file(self.queue[topic], filefolder)
-            np.savetxt(self.outputdir + '/' + self.outfolders[topic] + '/timestamps.txt', np.array(self.timesteps[topic]))
+            np.savetxt(self.output_dir + '/' + self.out_folders[topic] + '/timestamps.txt', np.array(self.timesteps[topic]))
 
 
 if __name__ == '__main__':
@@ -253,7 +259,7 @@ if __name__ == '__main__':
     parser.add_argument('--bag_fp', type=str, required=True, help='Path to the bag file to get data from')
     parser.add_argument('--save_to', type=str, required=True, help='Name of the dir to save the result to')
     parser.add_argument('--save_as', type=str, required=True, help='Name of the file to save as')
-    parser.add_argument('--use_stamps', type=str2bool, required=False, default=True, help='Whether to use the time provided in the stamps or just the rosbag time')
+    parser.add_argument('--use_stamps', type=str, required=False, default=True, help='Whether to use the time provided in the stamps or just the rosbag time')
 
     args = parser.parse_args()
 
@@ -274,5 +280,5 @@ if __name__ == '__main__':
     except:
         print('No actions')
 
-    fp = os.path.join(args.save_to, args.save_as)
-    np.savez(fp, **dataset)
+    # fp = os.path.join(args.save_to, args.save_as)
+    # np.savez(fp, **dataset)

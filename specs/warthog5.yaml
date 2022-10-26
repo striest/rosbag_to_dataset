@@ -1,0 +1,46 @@
+---
+  main_topic: "/warthog5/stereo_left/image_rect_color/compressed"
+  dt: 0.1
+  data: 
+    "/warthog5/stereo_left/image_rect_color/compressed":
+        type: CompressedImage
+        folder: image_left
+        options: 
+            output_resolution: [1024, 544]
+            nchannels: 3
+
+    "/warthog5/stereo_right/image_rect_color/compressed":
+        type: CompressedImage
+        folder: image_right
+        options: 
+            output_resolution: [1024, 544]
+            nchannels: 3
+    
+    "/warthog5/odom":
+        type: Odometry
+        folder: "odom"
+        options:
+            use_vel: True
+
+    "/warthog5/imu/data":
+        type: Imu
+        folder: "imu"
+        N_per_step: 10
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+
+    # "/warthog5/cmd_vel":
+    #     type: Twist
+    #     folder: "cmd"
+    #     options:
+    #         mode: action
+
+    "/warthog5/lidar_points":
+        type: PointCloud
+        folder: "pointcloud"
+        options:
+            fields: ["x", "y", "z"]  # ["x", "y", "z", "h", "s", "v"]
+
+
