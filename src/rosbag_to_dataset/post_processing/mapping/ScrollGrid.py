@@ -60,7 +60,7 @@ class ScrollGrid(object):
         mean_sq = np.zeros((self.xnum, self.ynum)).astype(np.float32)
         points_count = np.zeros((self.xnum, self.ynum)).astype(np.uint16)
         self.emem, self.cmem = fast_min_max(self.emem, self.cmem, grid_inds, zgrid, colors, mean_sq, points_count, self.xnum, self.ynum)
-        self.emem[:, :, 3] = np.sqrt(self.emem[:, :, 3])
+        self.emem[:, :, 3] = np.sqrt(np.abs(self.emem[:, :, 3]))# due to precision error, the std value can be very small negative value
         # for i, ind in enumerate(grid_inds):
         #     if ind[0]>=0 and ind[0]<self.xnum and ind[1]>=0 and ind[1]<self.ynum:
         #         if points[i, 2] < self.emem[ind[0], ind[1], 0]:

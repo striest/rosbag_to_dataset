@@ -117,7 +117,7 @@ python setup.py built_ext --inplace
 Run the mapping code: 
 
 ```
-python scripts/tartandrive_postprocessing.py --root <ARG> --bag_list <ARG>
+python scripts/tartandrive_postprocessing.py --root <ARG> --bag_list <ARG> --vo --stereo --mapping
 ```
 
 Args
@@ -125,6 +125,12 @@ Args
     --root: path to the data folder, generated from the last step
 
     --bag_list: same file used in the last step, listing bagfiles and the output directories. 
+    
+    --vo: generate odometry result
+    
+    --stereo: generate stereo matching result
+    
+    --mapping: generate height map and rgb map.
 
 Mapping parameters: 
 

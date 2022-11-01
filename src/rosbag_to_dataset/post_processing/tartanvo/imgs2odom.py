@@ -47,8 +47,8 @@ from .TartanSVO import TartanSVO
 class TartanVOInference(object):
     def __init__(self):
         '''
-        Two options are: model_name = 43_6_2_vonet_30000.pkl, network = 2
-                         model_name = 43_6_2_vonet_30000_wo_pwc.pkl, network = 0
+        Two options are: model_name = 43_6_2_vonet_30000.pkl, network = 1
+                         model_name = 43_6_2_vonet_30000_wo_pwc.pkl, network = 2
         '''
         self.curdir = dirname(realpath(__file__))
 

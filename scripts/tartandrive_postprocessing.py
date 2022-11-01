@@ -57,4 +57,4 @@ if __name__ == '__main__':
 
         if args.mapping:
             mappingnode = LocalMappingRegisterNode()
-            mappingnode.process(trajdir, heightmap_output_folder='height_map_vo', rgbmap_output_folder='rgb_map_vo')
+            mappingnode.process(trajdir, heightmap_output_folder='height_map', rgbmap_output_folder='rgb_map')

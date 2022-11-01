@@ -43,8 +43,8 @@ if __name__ == '__main__':
         if not isdir(trajdir):
             print('!!! Trajectory Not Found {}'.format(trajdir))
             continue
-        rgbmapfolder = trajdir + '/rgb_map_vo' if isdir(trajdir + '/rgb_map_vo') else rgbmapfolder
-        hightmapfolder = trajdir + '/height_map_vo' if isdir(trajdir + '/height_map_vo') else trajdir + '/height_map'
+        rgbmapfolder = trajdir + '/rgb_map_vo' if isdir(trajdir + '/rgb_map_vo') else (trajdir + '/rgb_map')
+        hightmapfolder = trajdir + '/height_map_vo' if isdir(trajdir + '/height_map_vo') else (trajdir + '/height_map')
 
         if not isdir(trajdir + '/image_left_color') or \
              not isdir(trajdir + '/cmd') or \
