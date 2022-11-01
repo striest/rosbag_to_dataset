@@ -37,8 +37,8 @@ from torch.utils.data import DataLoader
 import time
 from os import mkdir
 from os.path import isdir, dirname, realpath
-from .arguments_wanda import *
-# from .arguments import *
+# from .arguments_wanda import *
+from .arguments import *
 
 from .TrajFolderDataset import TrajFolderDataset
 from .utils import se2SE, SO2quat, se2quat
