@@ -45,18 +45,37 @@ from os import listdir
 #     'mppi_test_run',
 # ]
 
-rootfolder = '/project/learningphysics/corl_sara/2022-06-19'
-subfolders = [
-    'exp1_warehouse_baseline_1',
-    'exp1_warehouse_baseline_2',
-    'exp1_warehouse_baseline_3',
-    'exp1_warehouse_both_warehouse_1',
-    'exp1_warehouse_both_warehouse_2',
-    'exp2_figure8_both',
-    'exp2_figure8_both_part2',
-]
+# rootfolder = '/project/learningphysics/corl_sara/2022-06-19'
+# subfolders = [
+#     'exp1_warehouse_baseline_1',
+#     'exp1_warehouse_baseline_2',
+#     'exp1_warehouse_baseline_3',
+#     'exp1_warehouse_both_warehouse_1',
+#     'exp1_warehouse_both_warehouse_2',
+#     'exp2_figure8_both',
+#     'exp2_figure8_both_part2',
+# ]
 
-outtxt = open('trajlist_corl2.txt','w')
+# outtxt = open('trajlist_corl2.txt','w')
+# for k, subfolder in enumerate(subfolders):
+#     subdir = rootfolder + '/' + subfolder
+#     bagfiles = listdir(subdir)
+#     bagfiles = [bb for bb in bagfiles if bb.endswith('.bag')]
+#     bagfiles.sort()
+#     print('find {} bagfiles in {}'.format(len(bagfiles), subdir))
+
+#     for k,bag in enumerate(bagfiles):
+#         outtxt.write(subdir + '/' + bag)
+#         outtxt.write(' ')
+#         outtxt.write(subfolder+'_'+ str(k))
+#         outtxt.write('\n')
+# outtxt.close()
+
+rootfolder = '/project/learningphysics/2022-06-28/aggresive'
+subfolders = ['run1', 'run10', 'run11', 'run12', 'run13', 'run14', 'run15', 'run16', 'run2', 'run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9']
+rootfolder2 = '/project/learningphysics/2022-06-28/sara-obs'
+
+outtxt = open('trajlist_062822.txt','w')
 for k, subfolder in enumerate(subfolders):
     subdir = rootfolder + '/' + subfolder
     bagfiles = listdir(subdir)
@@ -67,7 +86,17 @@ for k, subfolder in enumerate(subfolders):
     for k,bag in enumerate(bagfiles):
         outtxt.write(subdir + '/' + bag)
         outtxt.write(' ')
-        outtxt.write(subfolder+'_'+ str(k))
+        outtxt.write(subfolder)
         outtxt.write('\n')
-outtxt.close()
 
+bagfiles = listdir(rootfolder2)
+bagfiles = [bb for bb in bagfiles if bb.endswith('.bag')]
+bagfiles.sort()
+print('find {} bagfiles in {}'.format(len(bagfiles), subdir))
+for k,bag in enumerate(bagfiles):
+    outtxt.write(rootfolder2 + '/' + bag)
+    outtxt.write(' ')
+    outtxt.write('sara_obs_'+str(k))
+    outtxt.write('\n')
+
+outtxt.close()

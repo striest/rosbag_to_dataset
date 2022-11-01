@@ -43,14 +43,16 @@ if __name__ == '__main__':
         if not isdir(trajdir):
             print('!!! Trajectory Not Found {}'.format(trajdir))
             continue
+        rgbmapfolder = trajdir + '/rgb_map_vo' if isdir(trajdir + '/rgb_map_vo') else (trajdir + '/rgb_map')
+        hightmapfolder = trajdir + '/height_map_vo' if isdir(trajdir + '/height_map_vo') else (trajdir + '/height_map')
 
         if not isdir(trajdir + '/image_left_color') or \
              not isdir(trajdir + '/cmd') or \
              not isdir(trajdir + '/tartanvo_odom') or \
              not isdir(trajdir + '/odom') or \
              not isdir(trajdir + '/depth_left') or \
-             not isdir(trajdir + '/rgb_map') or \
-             not isdir(trajdir + '/height_map'):
+             not isdir(rgbmapfolder) or \
+             not isdir(hightmapfolder):
              print('!!! Missing data folders')
 
         outvidfile = args.save_to + '/' + outfolder + '.mp4'
@@ -65,20 +67,23 @@ if __name__ == '__main__':
         depthlist = [trajdir + '/depth_left/' + img for img in depthlist if img.endswith('.npy')]
         depthlist.sort()
 
-        rgbmaplist = listdir(trajdir + '/rgb_map')
-        rgbmaplist = [trajdir + '/rgb_map/' + img for img in rgbmaplist if img.endswith('.npy')]
+        rgbmaplist = listdir(rgbmapfolder)
+        rgbmaplist = [rgbmapfolder + '/' + img for img in rgbmaplist if img.endswith('.npy')]
         rgbmaplist.sort()
 
-        heightmaplist = listdir(trajdir + '/height_map')
-        heightmaplist = [trajdir + '/height_map/' + img for img in heightmaplist if img.endswith('.npy')]
+        heightmaplist = listdir(hightmapfolder)
+        heightmaplist = [hightmapfolder + '/' + img for img in heightmaplist if img.endswith('.npy')]
         heightmaplist.sort()
 
         cmds = np.load(trajdir + '/cmd/twist.npy')
         motions = np.load(trajdir + '/tartanvo_odom/motions.npy')
         motions = np.concatenate((motions, motions[-1:,:])) # add one more frame
         odoms = np.load(trajdir + '/odom/odometry.npy')
-        costs = np.load(trajdir + '/cost/cost.npy')
-
+        if isfile(trajdir + '/cost/cost.npy'):
+            costs = np.load(trajdir + '/cost/cost.npy')
+        else:
+            costs = None
+            
         datanum = len(imglist)
         for k in range(datanum):
             # import ipdb;ipdb.set_trace()
@@ -108,7 +113,7 @@ if __name__ == '__main__':
             cmd = cmds[k] 
             motion = motions[k]
             odom = odoms[k]
-            cost = costs[k]
+            cost = costs[k] if costs is not None else -1
 
             velx = motion[0] / dt
             _, _, yaw = Rotation.from_quat(motion[3:7]).as_euler("XYZ", degrees=True)
