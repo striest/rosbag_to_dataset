@@ -30,6 +30,18 @@ def tensor2img(tensImg,mean,std):
 def so2SO(so_data):
     return R.from_rotvec(so_data).as_matrix()
 
+def SE2euler(se_data):
+    '''
+    4 x 4 -> 6
+    '''
+    res = np.zeros(6)
+    SO = se_data[:3,:3]
+    euler = R.as_euler(SO, 'XYZ', degrees=False)
+    res[:3] = se_data[:3,3] 
+    res[3:] = euler
+    return res
+
+
 def se2SE(se_data):
     '''
     6 -> 4 x 4

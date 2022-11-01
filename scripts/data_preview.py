@@ -108,7 +108,7 @@ if __name__ == '__main__':
             cmd = cmds[k] 
             motion = motions[k]
             odom = odoms[k]
-            cost = cost[k]
+            cost = costs[k]
 
             velx = motion[0] / dt
             _, _, yaw = Rotation.from_quat(motion[3:7]).as_euler("XYZ", degrees=True)

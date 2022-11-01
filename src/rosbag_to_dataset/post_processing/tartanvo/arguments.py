@@ -13,8 +13,8 @@ common_args['image_compressed'] = False
 common_args['stereo_maps']      = '' 
 
 vo_args = {}
-vo_args['model_name']           = '43_6_2_vonet_30000_wo_pwc.pkl' # 'The name of the pretrained model, located in the model folder. 
-vo_args['network_type']         = 2 # Load different architecture of vonet
+vo_args['model_name']           = '43_6_2_vonet_30000.pkl' # 'The name of the pretrained model, located in the model folder. 
+vo_args['network_type']         = 1 # Load different architecture of vonet
 vo_args['image_crop_w']         = 102 # crop out the image because of vignette effect
 vo_args['image_crop_h']         = 0 # crop out the image because of vignette effect
 vo_args['image_resize_w']       = 844 # the width of the input image into the model

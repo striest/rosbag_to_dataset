@@ -37,8 +37,8 @@ from torch.utils.data import DataLoader
 import time
 from os import mkdir
 from os.path import isdir, dirname, realpath
-from .arguments_wanda import *
-# from .arguments import *
+# from .arguments_wanda import *
+from .arguments import *
 
 from .TrajFolderDataset import TrajFolderDataset
 from .utils import se2SE, SO2quat, se2quat
@@ -47,8 +47,8 @@ from .TartanSVO import TartanSVO
 class TartanVOInference(object):
     def __init__(self):
         '''
-        Two options are: model_name = 43_6_2_vonet_30000.pkl, network = 2
-                         model_name = 43_6_2_vonet_30000_wo_pwc.pkl, network = 0
+        Two options are: model_name = 43_6_2_vonet_30000.pkl, network = 1
+                         model_name = 43_6_2_vonet_30000_wo_pwc.pkl, network = 2
         '''
         self.curdir = dirname(realpath(__file__))
 

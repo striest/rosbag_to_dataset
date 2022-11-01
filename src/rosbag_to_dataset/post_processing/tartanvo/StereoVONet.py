@@ -19,7 +19,7 @@ class StereoVONet(nn.Module):
             from .PWC import PWCDCNet as FlowNet
             from .PSM import stackhourglass as StereoNet
             self.flowNet   = FlowNet()
-        if network==1: # 5_5 + PWC
+        elif network==1: # 5_5 + PWC
             from .PWC import PWCDCNet as FlowNet
             from .StereoNet7 import StereoNet7 as StereoNet
             self.flowNet   = FlowNet()
