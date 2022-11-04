@@ -1,0 +1,2 @@
+/home/mateo/Data/SARA/manual_auto_test/2022-06-12/2022-06-12-18-19-08_1.bag
+/home/mateo/Data/SARA/manual_auto_test/2022-06-13/2022-06-13-19-40-17_0.bag

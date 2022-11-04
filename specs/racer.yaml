@@ -1,0 +1,19 @@
+---
+    main_topic: "/ground/estimated"
+    dt: 0.1
+    data: 
+      
+      "/integrated_to_init":
+          type: Odometry
+          folder: "odom"
+          options:
+              use_vel: True
+
+      "/ground/estimated":
+          type: PointCloud
+          folder: "pointcloud"
+          options:`
+              fields: ["x", "y", "z"]  # ["x", "y", "z", "h", "s", "v"]
+  
+  
+  

@@ -3,12 +3,12 @@
 echo Preprocessing and processing directory of bags
 
 # Pre-preocessing variables
-DATASET_DIR=/home/mateo/Data/SARA/arl_data_collect/
-TXT_OUTPUT_FILE=/home/mateo/Data/SARA/arl_data_collect/preprocess.txt
+DATASET_DIR=/home/mateo/Data/RACER/FieldTesting/dhfe2/snippets
+TXT_OUTPUT_FILE=/home/mateo/Data/RACER/FieldTesting/dhfe2/snippets/preprocess.txt
 
 # Processing variables
-CONFIG_SPEC=/home/mateo/rosbag_to_dataset/specs/warthog5.yaml
-SAVE_TO=/home/mateo/Data/SARA/arl_data_collect_dataset/
+CONFIG_SPEC=/home/mateo/rosbag_to_dataset/specs/racer.yaml
+SAVE_TO=/home/mateo/Data/RACER/FieldTesting/dhfe2/snippets/static_dataset
 
 # Define python version and directories for script
 EXE_PYTHON=python3
