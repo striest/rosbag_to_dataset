@@ -53,7 +53,7 @@ def main(args, target_topics):
         lines = f.readlines()
     bag_file_list = [line.strip() for line in lines]
 
-    dates = [line.strip().split("/")[6] for line in lines]
+    dates = [line.strip().split("/")[3] for line in lines]
     dates_dict = {date:[] for date in dates}
 
     # import pdb;pdb.set_trace()
