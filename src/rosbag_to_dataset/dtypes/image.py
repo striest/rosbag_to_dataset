@@ -74,6 +74,9 @@ class ImageConvert(Dtype):
         elif self.savetype == 'npy':
             np.save(filename+'.npy', data)
 
+    def save_file(self, data, filename):
+        pass
+
 if __name__ == "__main__":
     c = ImageConvert(nchannels=1, output_resolution=[32, 32])
     msg = Image(width=64, height=64, data=np.arange(64**2).astype(np.uint8))

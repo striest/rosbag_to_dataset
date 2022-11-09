@@ -271,6 +271,10 @@ class PointCloudConvert(Dtype):
                             maxDistColor, np.array([0, 0, 0]).reshape((-1,1)), 
                             self.pt_format, self.gen_rgb )
 
+    def save_file(self, data, filename):
+        pass
+
+
 if __name__ == "__main__":
     points = np.random.random((3,1600*16)).astype(np.float32)
     fn = '/home/amigo/tmp/test'
