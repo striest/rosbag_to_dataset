@@ -97,7 +97,6 @@
 /project/learningphysics/2022-06-30/data/run4/2022-06-30-11-58-40_0.bag 20220630_4
 /project/learningphysics/2022-06-30/data/run5/2022-06-30-12-01-21_0.bag 20220630_5
 /project/learningphysics/2022-06-30/data/run6/2022-06-30-12-02-45_0.bag 20220630_6
-/project/learningphysics/2022-06-30/data/run7/2022-06-30-12-04-55_0.bag 20220630_7
 /project/learningphysics/2022-06-30/data/run8/2022-06-30-12-06-15_0.bag 20220630_8
 /project/learningphysics/2022-06-30/data/run9/2022-06-30-12-08-19_0.bag 20220630_9
 /project/learningphysics/2022-06-30/uturns/2022-06-30-11-55-23_0.bag 20220630_uturns
