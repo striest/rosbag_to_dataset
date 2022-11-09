@@ -34,3 +34,8 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def rm_file(fp):
+    if os.path.isfile:
+        os.remove(fp)
+        print("Removed {}".format(fp))

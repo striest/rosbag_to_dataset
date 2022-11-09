@@ -3,11 +3,27 @@ import rosbag
 
 from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
-from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir
+from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir, rm_file
 from os.path import isfile
 
 # python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
 # python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
+
+def mergebags(baglist, outputbag):
+    '''
+    Combine a list of bags that are temporally continuous
+    '''
+    baglist.sort()
+    outbag = rosbag.Bag(outputbag, 'w')
+    try:
+        for bagfile in baglist:
+            print("Merge {} to {}..".format(bagfile, outputbag))
+            bag = rosbag.Bag(bagfile)
+            for topic, msg, t in bag.read_messages():
+                outbag.write(topic, msg, t)
+    finally:
+        outbag.close()
+    outbag.close()
 
 if __name__ == '__main__':
     '''
@@ -45,25 +61,46 @@ if __name__ == '__main__':
         print("No input bagfiles specified..")
         exit()
 
-    maybe_mkdir(args.save_to)
+    # we have many time-split bags, combine those bags while extracting the data
+    bagfilelist_combine_split = []
+    sublist = []
+    lastfolder = bagfilelist[0][1]
     for bagfile, outfolder in bagfilelist:
-        # bagfile, outfolder = line.strip().split(' ')
-        print('Reading bagfile {}'.format(bagfile))
-        bag = rosbag.Bag(bagfile)
-        print('Bagfile loaded')
+        if outfolder == lastfolder:
+            sublist.append(bagfile)
+        else:
+            bagfilelist_combine_split.append([sublist, lastfolder])
+            sublist = [bagfile]
+            lastfolder = outfolder
+    if len(sublist)>0:
+        bagfilelist_combine_split.append([sublist, lastfolder])
 
-        # create foldersoutfolders
+    print("Find {} bagfiles, {} trajectories".format(len(bagfilelist), len(bagfilelist_combine_split)))
+
+    maybe_mkdir(args.save_to)
+    for bagfiles, outfolder in bagfilelist_combine_split:
+        # create folders
         trajoutfolder = args.save_to+'/'+outfolder
         if args.del_exist:
-            maybe_rmdir(trajoutfolder)
+            maybe_rmdir(trajoutfolder, force=True)
         maybe_mkdir(trajoutfolder)
         for k, folder in outfolders.items():
             maybe_mkdir(trajoutfolder+'/'+folder)
 
+        # merge the bagfiles
+        if len(bagfiles) > 1:
+            bagfile = trajoutfolder + '/merge_temp.bag'
+            mergebags(bagfiles, bagfile)
+        else:
+            bagfile = bagfiles[0]
+
+        bag = rosbag.Bag(bagfile)
         converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
-        suc = dataset = converter.convert_bag(bag, main_topic=maintopic)
+        suc = converter.convert_bag(bag, main_topic=maintopic)
+        if bagfile.endswith('merge_temp.bag'): # remove the temp file
+            rm_file(bagfile)
 
         if not suc: 
             print('Convert bagfile {} failure..'.format(bagfile))
-            maybe_rmdir(trajoutfolder)
+            maybe_rmdir(trajoutfolder, force=True)
 

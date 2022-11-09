@@ -45,7 +45,8 @@ class ImageConvert(Dtype):
             fill_value = np.percentile(data[~mask], 99)
             data[mask] = fill_value
 
-        data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
+        if self.output_resolution[0] != msg.width or self.output_resolution[1] != msg.height:
+            data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
 
         if self.aggregate == 'littleendian':
             data = sum([data[:, :, i] * (256**i) for i in range(self.nchannels)])

@@ -1,4 +1,5 @@
 from os import listdir
+from os.path import join, isdir
 
 # rootfolder = '/project/learningphysics/dataset'
 # subfolders = ['20210812','20210812_interventions','20210826_bags','20210828','20210902','20210903','20210910_bags','gascola_laps']
@@ -71,32 +72,88 @@ from os import listdir
 #         outtxt.write('\n')
 # outtxt.close()
 
-rootfolder = '/project/learningphysics/2022-06-28/aggresive'
-subfolders = ['run1', 'run10', 'run11', 'run12', 'run13', 'run14', 'run15', 'run16', 'run2', 'run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9']
-rootfolder2 = '/project/learningphysics/2022-06-28/sara-obs'
+# rootfolder = '/project/learningphysics/2022-06-28/aggresive'
+# subfolders = ['run1', 'run10', 'run11', 'run12', 'run13', 'run14', 'run15', 'run16', 'run2', 'run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9']
+# rootfolder2 = '/project/learningphysics/2022-06-28/sara-obs'
 
-outtxt = open('trajlist_062822.txt','w')
+# outtxt = open('trajlist_062822.txt','w')
+# for k, subfolder in enumerate(subfolders):
+#     subdir = rootfolder + '/' + subfolder
+#     bagfiles = listdir(subdir)
+#     bagfiles = [bb for bb in bagfiles if bb.endswith('.bag')]
+#     bagfiles.sort()
+#     print('find {} bagfiles in {}'.format(len(bagfiles), subdir))
+
+#     for k,bag in enumerate(bagfiles):
+#         outtxt.write(subdir + '/' + bag)
+#         outtxt.write(' ')
+#         outtxt.write(subfolder)
+#         outtxt.write('\n')
+
+# bagfiles = listdir(rootfolder2)
+# bagfiles = [bb for bb in bagfiles if bb.endswith('.bag')]
+# bagfiles.sort()
+# print('find {} bagfiles in {}'.format(len(bagfiles), subdir))
+# for k,bag in enumerate(bagfiles):
+#     outtxt.write(rootfolder2 + '/' + bag)
+#     outtxt.write(' ')
+#     outtxt.write('sara_obs_'+str(k))
+#     outtxt.write('\n')
+
+# outtxt.close()
+
+def listfolder(folderdir):
+    print(folderdir)
+    baglist = []
+    files = listdir(folderdir)
+    bagfiles = [bb for bb in files if bb.endswith('.bag')]
+    subfolders = [ff for ff in files if isdir(join(folderdir,ff))]
+    # import ipdb;ipdb.set_trace()
+    if len(bagfiles) > 0:
+        bagfiles.sort()
+        for bag in bagfiles:
+            baglist.append(join(folderdir, bag))
+
+    if len(subfolders) > 0:
+        subfolders.sort()
+        for subfolder in subfolders:
+            subfolderdir = join(folderdir, subfolder)
+            subbags = listfolder(subfolderdir)
+            baglist.extend(subbags)
+
+    return baglist
+
+# organize 2022 data
+rootfolder = '/project/learningphysics'
+subfolders = ['2022-04-15',
+            '2022-05-02',
+            '2022-05-05',
+            '2022-05-31',
+            '2022-06-04',
+            '2022-06-12',
+            '2022-06-13',
+            '2022-06-16',
+            '2022-06-28',
+            '2022-06-30',
+            '2022-07-13',
+            '2022-07-20',
+            '2022-07-22',
+            '2022-07-27',
+            '2022-07-31',
+            '2022-08-16',
+            '2022-09-08',
+            '2022-09-27',
+            '2022-10-04',]
+# rootfolder = '/cairo/arl_bag_files'
+# subfolders = ['SARA', 'racer']
+
+outtxt = open('trajlist_2022.txt','w')
 for k, subfolder in enumerate(subfolders):
-    subdir = rootfolder + '/' + subfolder
-    bagfiles = listdir(subdir)
-    bagfiles = [bb for bb in bagfiles if bb.endswith('.bag')]
-    bagfiles.sort()
-    print('find {} bagfiles in {}'.format(len(bagfiles), subdir))
-
+    subdir = join(rootfolder, subfolder)
+    bagfiles = listfolder(subdir)
+    import ipdb;ipdb.set_trace()
     for k,bag in enumerate(bagfiles):
-        outtxt.write(subdir + '/' + bag)
-        outtxt.write(' ')
-        outtxt.write(subfolder)
+        outtxt.write(bag)
         outtxt.write('\n')
-
-bagfiles = listdir(rootfolder2)
-bagfiles = [bb for bb in bagfiles if bb.endswith('.bag')]
-bagfiles.sort()
-print('find {} bagfiles in {}'.format(len(bagfiles), subdir))
-for k,bag in enumerate(bagfiles):
-    outtxt.write(rootfolder2 + '/' + bag)
-    outtxt.write(' ')
-    outtxt.write('sara_obs_'+str(k))
-    outtxt.write('\n')
 
 outtxt.close()
