@@ -127,6 +127,7 @@ if __name__ == '__main__':
 
         if not suc: 
             logfile.logline('Convert bagfile {} failure..'.format(bagfile))
+            logfile.close()
             maybe_rmdir(trajoutfolder, force=True)
-
-        logfile.close()
+        else:
+            logfile.close()

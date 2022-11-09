@@ -32,12 +32,10 @@
 /project/learningphysics/2022-05-31/lowvel_gravel/20220531_lowvel_1.bag 20220531_lowvel_1
 /project/learningphysics/2022-05-31/lowvel_gravel/20220531_lowvel_2.bag 20220531_lowvel_2
 /project/learningphysics/2022-05-31/mediumvel_gravel/20220531_medium_0.bag 20220531_medium_0
-/project/learningphysics/2022-05-31/mediumvel_gravel/20220531_medium_1.bag 20220531_medium_1
 /project/learningphysics/2022-05-31/mediumvel_gravel/20220531_medium_2.bag 20220531_medium_2
 /project/learningphysics/2022-05-31/mediumvel_gravel/20220531_medium_3.bag 20220531_medium_3
 /project/learningphysics/2022-05-31/mediumvel_gravel/20220531_medium_4.bag 20220531_medium_4
 /project/learningphysics/2022-05-31/mediumvel_gravel/20220531_medium_5.bag 20220531_medium_5
-/project/learningphysics/2022-06-12/2022-06-12-18-28-16_0.bag 20220612_0
 /project/learningphysics/2022-06-12/data_collect1/2022-06-12-17-51-59_0.bag 20220612_1
 /project/learningphysics/2022-06-12/data_collect1/2022-06-12-17-53-59_1.bag 20220612_1
 /project/learningphysics/2022-06-12/data_collect1/2022-06-12-17-55-59_2.bag 20220612_1
