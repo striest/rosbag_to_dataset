@@ -57,8 +57,8 @@ class ConverterToFiles:
             self.start_timestamps[topic] = self.bagtimestamps[topic][idx-1] if diff1<diff2 else self.bagtimestamps[topic][idx]
         return starttime
 
-    def extract_timestamps_from_bag(self, bag):
-        print('reading timestamps...')
+    def extract_timestamps_from_bag(self, bag, logfile):
+        logfile.logline('reading timestamps...')
         last_time = {k:0 for k in self.topics}
         for topic, msg, t in bag.read_messages(topics=list(self.topics)):
             has_stamp = hasattr(msg, 'header') and msg.header.stamp.to_sec() > 1000.
@@ -77,32 +77,32 @@ class ConverterToFiles:
             last_time[topic] = stamp_sec
 
         for tt in self.topics:
-            print('  {} \t {} \t {} - {}'.format( tt, len(self.bagtimestamps[tt]), self.bagtimestamps[tt][0], self.bagtimestamps[tt][-1]))
+            logfile.logline('  {} \t {} \t {} - {}'.format( tt, len(self.bagtimestamps[tt]), self.bagtimestamps[tt][0], self.bagtimestamps[tt][-1]))
 
         return stamp_sec
 
-    def convert_bag(self, bag, main_topic='/multisense/left/image_rect_color'):
+    def convert_bag(self, bag, main_topic, logfile):
         """
         Convert a bag into numpy arrays and save to files. 
         Assume the timestamps in the bagfile for each topic are ordered
         main_topic: use the time of the first frame of main_topic as the starting time
         """
-        print('extracting messages...')
+        logfile.logline('extracting messages...')
         self.reset_queue()
 
         bagtopics = bag.get_type_and_topic_info()[1].keys() # topics in the bagfile
         for k in self.topics:
             if k not in bagtopics:
-                print("Could not find topic {} from envspec in the list of topics for this bag.".format(k))
+                logfile.logline("Could not find topic {} from envspec in the list of topics for this bag.".format(k))
                 return False
             # assert k in bagtopics, "Could not find topic {} from envspec in the list of topics for this bag.".format(k)
 
-        self.extract_timestamps_from_bag(bag)
+        self.extract_timestamps_from_bag(bag, logfile)
         starttime = self.find_first_msg_time(main_topic)
         endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
-        print("  starting time {}, ending time {}, duration {}".format(starttime, endtime, endtime-starttime))
+        logfile.logline("  starting time {}, ending time {}, duration {}".format(starttime, endtime, endtime-starttime))
         if starttime + self.rates[main_topic] >= endtime:
-            print("Could not find enough overlap between topics!")
+            logfile.logline("Could not find enough overlap between topics!")
             return False
 
         # # each topic samples from its own starting timestamp, to avoid the occilation problem
@@ -145,11 +145,11 @@ class ConverterToFiles:
                     self.timesteps[topic][k] = -1
 
         # import ipdb;ipdb.set_trace()
-        self.preprocess_queue()
+        self.preprocess_queue(logfile)
         self.convert_queue(bag)
         return True
 
-    def preprocess_queue(self, ):
+    def preprocess_queue(self, logfile):
         """
         Do some smart things to fill in missing data if necessary.
         """
@@ -162,7 +162,7 @@ class ConverterToFiles:
         # plt.show()
         
         #Start the dataset at the point where all topics become available
-        print('preprocessing...')
+        logfile.logline('queue preprocessing...')
         data_exists = {}
         strides = {}
         start_idxs = {}
@@ -197,12 +197,12 @@ class ConverterToFiles:
                     last_avail = t
                 else:
                     self.timesteps[k][t] = self.timesteps[k][last_avail]
-                    print('   -- {} filled missing frame {} - {}'.format(k, t, self.timesteps[k][t]))
+                    logfile.logline('   -- {} filled missing frame {} - {}'.format(k, t, self.timesteps[k][t]))
             # import ipdb;ipdb.set_trace()
             data_exists[k] = [x>=0 for x in self.timesteps[k]]
             assert np.array(data_exists[k][start_frame: end_frame]).sum()==end_frame-start_frame, "Error in preprocessing queue! "
         
-            print("  frames {}, \t start time {}, end time {}, topic {}".format((end_idx-start_idx)*strides[k], 
+            logfile.logline("  frames {}, \t start time {}, end time {}, topic {}".format((end_idx-start_idx)*strides[k], 
                                      self.timesteps[k][start_idx*strides[k]], 
                                      self.timesteps[k][end_idx*strides[k]-1], k))
         
@@ -212,7 +212,7 @@ class ConverterToFiles:
         """
         Actually convert the queue into files.
         """
-        print('converting...')
+        print('converting the queue into files...')
         # out = {
         #     'observation':{},
         #     'action':{},

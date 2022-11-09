@@ -5,9 +5,30 @@ from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir, rm_file
 from os.path import isfile
-
+import time
 # python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
 # python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
+
+class FileLogger():
+    def __init__(self, filename, overwrite=False):
+        if isfile(filename):
+            if overwrite:
+                print('Overwrite existing file {}'.format(filename))
+            else:
+                timestr = time.strftime('%m%d_%H%M%S',time.localtime())
+                filename = filename+'_'+timestr
+        self.f = open(filename, 'w')
+
+    def log(self, logstr):
+        print(logstr)
+        self.f.write(logstr)
+
+    def logline(self, logstr):
+        print(logstr)
+        self.f.write(logstr+'\n')
+
+    def close(self,):
+        self.f.close()
 
 def mergebags(baglist, outputbag):
     '''
@@ -94,13 +115,18 @@ if __name__ == '__main__':
         else:
             bagfile = bagfiles[0]
 
+        logfilepath = trajoutfolder + '/data_extraction.log'
+        logfile = FileLogger(logfilepath,overwrite=False)
+        logfile.logline("Process bagfile {}".format(bagfiles[0]))
+
         bag = rosbag.Bag(bagfile)
         converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
-        suc = converter.convert_bag(bag, main_topic=maintopic)
+        suc = converter.convert_bag(bag, main_topic=maintopic, logfile=logfile)
         if bagfile.endswith('merge_temp.bag'): # remove the temp file
             rm_file(bagfile)
 
         if not suc: 
-            print('Convert bagfile {} failure..'.format(bagfile))
+            logfile.logline('Convert bagfile {} failure..'.format(bagfile))
             maybe_rmdir(trajoutfolder, force=True)
 
+        logfile.close()
