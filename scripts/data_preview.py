@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import argparse
 from os import listdir
-from os.path import isdir, isfile
+from os.path import isdir, isfile, join
 from rosbag_to_dataset.post_processing.tartanvo.utils import disp2vis
 from scipy.spatial.transform import Rotation
 from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir
@@ -23,6 +23,7 @@ if __name__ == '__main__':
     parser.add_argument('--root', type=str, required=True, default="", help='Path to the trajectories data')
     parser.add_argument('--bag_list', type=str, required=True, default="", help='List of bagfiles and output folders')
     parser.add_argument('--save_to', type=str, required=True, default="", help='Path to save the preview video')
+    parser.add_argument('--cost_folder', type=str, default="cost", help='Cost folder name')
 
     args = parser.parse_args()
 
@@ -35,8 +36,13 @@ if __name__ == '__main__':
             lines = f.readlines()
         bagfilelist = [line.strip().split(' ') for line in lines]
 
+    # find unique values of the folder
+    outfolderlist = [bb[1] for bb in bagfilelist]
+    outfolders = set(outfolderlist)
+    print('Find {} trajectories'.format(len(outfolders)))
+
     maybe_mkdir(args.save_to)
-    for bagfile, outfolder in bagfilelist:
+    for outfolder in outfolders:
         print('--- {} ---'.format(outfolder))
         trajdir = args.root + '/' + outfolder
 
@@ -55,15 +61,15 @@ if __name__ == '__main__':
              not isdir(hightmapfolder):
              print('!!! Missing data folders')
 
-        outvidfile = args.save_to + '/' + outfolder + '.mp4'
+        outvidfile = join(args.save_to, outfolder + '.mp4')
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')
         fout=cv2.VideoWriter(outvidfile, fourcc, 1.0/dt, (768, 512))
 
-        imglist = listdir(trajdir + '/image_left_color')
+        imglist = listdir(join(trajdir, 'image_left_color'))
         imglist = [trajdir + '/image_left_color/' + img for img in imglist if img.endswith('.png')]
         imglist.sort()
 
-        depthlist = listdir(trajdir + '/depth_left')
+        depthlist = listdir(join(trajdir, 'depth_left'))
         depthlist = [trajdir + '/depth_left/' + img for img in depthlist if img.endswith('.npy')]
         depthlist.sort()
 
@@ -79,8 +85,9 @@ if __name__ == '__main__':
         motions = np.load(trajdir + '/tartanvo_odom/motions.npy')
         motions = np.concatenate((motions, motions[-1:,:])) # add one more frame
         odoms = np.load(trajdir + '/odom/odometry.npy')
-        if isfile(trajdir + '/cost/cost.npy'):
-            costs = np.load(trajdir + '/cost/cost.npy')
+        costfile = join(trajdir, args.cost_folder, 'cost.npy')
+        if isfile(costfile):
+            costs = np.load(costfile)
         else:
             costs = None
             
