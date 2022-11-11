@@ -79,7 +79,7 @@ if __name__ == "__main__":
         bagfilelist = [line.strip().split(' ') for line in lines]
 
         # find unique values of the folder
-        outfolderlist = [bb[1] for bb in bagfilelist]
+        outfolderlist = [os.path.join(trajectories_dir, bb[1]) for bb in bagfilelist]
         traj_dirs = set(outfolderlist)
         print('Find {} trajectories'.format(len(traj_dirs)))
     else:
