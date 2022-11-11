@@ -34,6 +34,9 @@ class CompressedImageConvert(Dtype):
 
         data = cv2.imdecode(data, cv2.IMREAD_UNCHANGED)
 
+        if self.output_resolution[0] == 0 or self.output_resolution[1] == 0:
+            return data
+            
         data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
 
         # data = np.moveaxis(data, 2, 0) #Switch to channels-first

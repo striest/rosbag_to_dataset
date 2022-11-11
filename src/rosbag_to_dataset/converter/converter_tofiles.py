@@ -114,13 +114,30 @@ class ConverterToFiles:
         # find the topics with closest timestamps for the desired rates
         for topic in self.topics: 
             bagtimestamplist = self.bagtimestamps[topic]
+
+            # filter the backward timestamp for warthog
+            bagtimestamp_sort = []
+            bagindex_sort = []
+            lasttime, lastind = -1.0, -1
+            for k, timestamp in enumerate(bagtimestamplist):
+                if timestamp > lasttime:
+                    bagtimestamp_sort.append(timestamp)
+                    bagindex_sort.append(k)
+                    lasttime = timestamp
+                    lastind = k
+                else:
+                    bagtimestamp_sort.append(lasttime)
+                    bagindex_sort.append(lastind)
+                    print("topic {} time stamp going back frame {}".format(topic, k))
+
             difflist = []
             for k, timestep in enumerate(self.timesteps[topic]):
-                idx = np.searchsorted(bagtimestamplist, timestep)
-                diff1 = abs(timestep - bagtimestamplist[idx-1]) if idx>0 else 1000000
-                diff2 = abs(timestep - bagtimestamplist[idx]) if idx<len(bagtimestamplist) else 100000
-                self.matched_idxs[topic][k] = idx-1 if diff1<diff2 else idx
+                idx = np.searchsorted(bagtimestamp_sort, timestep)
+                diff1 = abs(timestep - bagtimestamp_sort[idx-1]) if idx>0 else 1000000
+                diff2 = abs(timestep - bagtimestamp_sort[idx]) if idx<len(bagtimestamp_sort) else 100000
+                self.matched_idxs[topic][k] = bagindex_sort[idx-1] if diff1<diff2 else bagindex_sort[idx]
                 difflist.append(min(diff1, diff2))
+            
             # sort out the conflicts
             idx = 0
             while idx<len(self.timesteps[topic]): # go through the timesteps list again
@@ -140,7 +157,7 @@ class ConverterToFiles:
             # update the timesteps to the actual time from the bag
             for k, timestep in enumerate(self.timesteps[topic]):
                 if self.matched_idxs[topic][k] >= 0:
-                    self.timesteps[topic][k] = bagtimestamplist[self.matched_idxs[topic][k]]
+                    self.timesteps[topic][k] = bagtimestamp_sort[self.matched_idxs[topic][k]]
                 else:
                     self.timesteps[topic][k] = -1
 
