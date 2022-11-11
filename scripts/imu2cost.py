@@ -5,6 +5,7 @@ from scipy.signal import welch
 from scipy.integrate import simps
 
 import os
+from os.path import isfile
 # import matplotlib.pyplot as plt
 
 def bandpower(data, sf, band, window_sec=None, relative=False):
@@ -63,6 +64,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--data_dir', type=str, required=True, help='Path to the directory that contains the data split up into trajectories.')
     parser.add_argument('--cost_folder', type=str, default="cost", help='Path to the directory that contains the data split up into trajectories.')
+    parser.add_argument('--bag_list', type=str, default="", help='Path to the bag file to get data from')
     args = parser.parse_args()
 
     print("Input arguments are the following: ")
@@ -70,7 +72,19 @@ if __name__ == "__main__":
 
     trajectories_dir = args.data_dir
     cost_folder = args.cost_folder
-    traj_dirs = list(filter(os.path.isdir, [os.path.join(trajectories_dir,x) for x in sorted(os.listdir(trajectories_dir))]))
+
+    if args.bag_list != "" and isfile(args.bag_list): # process multiple files specified in the text file
+        with open(args.bag_list, 'r') as f:
+            lines = f.readlines()
+        bagfilelist = [line.strip().split(' ') for line in lines]
+
+        # find unique values of the folder
+        outfolderlist = [bb[1] for bb in bagfilelist]
+        traj_dirs = set(outfolderlist)
+        print('Find {} trajectories'.format(len(traj_dirs)))
+    else:
+        traj_dirs = list(filter(os.path.isdir, [os.path.join(trajectories_dir,x) for x in sorted(os.listdir(trajectories_dir))]))
+        print('Find {} trajectories under the data dir {}'.format(len(traj_dirs), trajectories_dir))
 
     min_freq = 0
     max_freq = 10

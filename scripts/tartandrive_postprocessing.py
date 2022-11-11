@@ -33,10 +33,14 @@ if __name__ == '__main__':
             lines = f.readlines()
         bagfilelist = [line.strip().split(' ') for line in lines]
 
-    # find unique values of the folder
-    outfolderlist = [bb[1] for bb in bagfilelist]
-    outfolders = set(outfolderlist)
-    print('Find {} trajectories'.format(len(outfolders)))
+        # find unique values of the folder
+        outfolderlist = [bb[1] for bb in bagfilelist]
+        outfolders = set(outfolderlist)
+        print('Find {} trajectories'.format(len(outfolders)))
+
+    else:
+        print('Find no trajectory in the bag list file {}'.format(args.bag_list))
+        exit()
 
     for outfolder in outfolders:
         print('--- {} ---'.format(outfolder))

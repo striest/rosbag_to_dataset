@@ -125,33 +125,35 @@ def listfolder(folderdir):
 
 # organize 2022 data
 rootfolder = '/project/learningphysics'
-subfolders = ['2022-04-15',
-            '2022-05-02',
-            '2022-05-05',
-            '2022-05-31',
-            '2022-06-04',
-            '2022-06-12',
-            '2022-06-13',
-            '2022-06-16',
-            '2022-06-28',
-            '2022-06-30',
-            '2022-07-13',
-            '2022-07-20',
-            '2022-07-22',
-            '2022-07-27',
-            '2022-07-31',
-            '2022-08-16',
-            '2022-09-08',
-            '2022-09-27',
-            '2022-10-04',]
+subfolders = [
+            # '2022-04-15',
+            # '2022-05-02',
+            # '2022-05-05',
+            # '2022-05-31',
+            # '2022-06-04',
+            # '2022-06-12',
+            # '2022-06-13',
+            # '2022-06-16',
+            # '2022-06-28',
+            # '2022-06-30',
+            # '2022-07-13',
+            # '2022-07-20',
+            # '2022-07-22',
+            # '2022-07-27',
+            # '2022-07-31',
+            # '2022-08-16',
+            # '2022-09-08',
+            # '2022-09-27',
+            # '2022-10-04',
+            '2022-11-09']
 # rootfolder = '/cairo/arl_bag_files'
 # subfolders = ['SARA', 'racer']
 
-outtxt = open('trajlist_2022.txt','w')
+outtxt = open('trajlist_2022_2.txt','w')
 for k, subfolder in enumerate(subfolders):
     subdir = join(rootfolder, subfolder)
     bagfiles = listfolder(subdir)
-    import ipdb;ipdb.set_trace()
+    # import ipdb;ipdb.set_trace()
     for k,bag in enumerate(bagfiles):
         outtxt.write(bag)
         outtxt.write('\n')
