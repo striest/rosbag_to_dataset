@@ -234,7 +234,7 @@ class DataLoaderUtil:
 		return num_batches
 	
 	def convert_obs_to_traj(self, num_batches = None):
-		if self.num_workers > 0 :
+		if self.num_workers > 1 :
 			self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size, num_workers = self.num_workers , persistent_workers = self.persistent_workers , shuffle=self.shuffle)
 		else:
 			self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=self.shuffle)
@@ -269,7 +269,7 @@ class DataLoaderUtil:
 						temp_torch_traj[k] = torch.squeeze(torch_traj[k][i],dim=0)
 				
 				traj_list.append(temp_torch_traj)
-		if self.num_workers > 0 :
+		if self.num_workers > 1 :
 			temp_dataloader._shutdown_workers()
 		return traj_list
 

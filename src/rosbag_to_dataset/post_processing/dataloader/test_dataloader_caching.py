@@ -33,6 +33,7 @@ from rosbag_to_dataset.util.dataloader_util import DataLoaderUtil, BackgroundLoa
 import argparse
 from datetime import datetime
 import os
+import wandb
 
 if __name__ == '__main__':
 	
@@ -42,10 +43,11 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	
 
-	config = yaml.load(open(args.config_fp, 'r'), Loader=yaml.FullLoader)	
+	config = yaml.load(open(args.config_fp, 'r'), Loader=yaml.FullLoader)
+	wandb.init(project=config['project'],config = config)
 	now = datetime.now()
 	config["experiment_fp"] = os.path.join(
-            config["experiment_fp"], f'{now.strftime("%m-%d-%Y,%H-%M-%S")}')
+			config["experiment_fp"], f'{now.strftime("%m-%d-%Y,%H-%M-%S")}')
 	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 	os.environ["CUDA_VISIBLE_DEVICES"] = config["output_device"]+","+config["device_ids"]
 
