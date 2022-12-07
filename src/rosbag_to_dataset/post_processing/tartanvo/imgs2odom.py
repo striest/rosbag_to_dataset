@@ -154,7 +154,7 @@ class TartanVOInference(object):
 
             starttime = time.time()
             try:
-                sample = self.testDataiter.next()
+                sample = next(self.testDataiter)
             except StopIteration:
                 break
             # import ipdb;ipdb.set_trace()

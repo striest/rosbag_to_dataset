@@ -263,7 +263,7 @@ class StereoInference:
         while True: # for all the images in the trajectory
             # starttime0 = time.time()
             try:
-                sample = self.testDataiter.next()
+                sample = next(self.testDataiter)
             except StopIteration:
                 break
             # print('Data load time {}'.format(time.time()-starttime0))
