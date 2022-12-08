@@ -61,8 +61,8 @@ class TartanVOInference(object):
         # self.imgbuf = []
         # self.scale = 1.0
 
-    def load_dataset(self, traj_root_folder):
-        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder="", forvo=True, \
+    def load_dataset(self, traj_root_folder, left_input_folder, right_input_folder):
+        testDataset = TrajFolderDataset(traj_root_folder, leftfolder=left_input_folder, rightfolder=right_input_folder, colorfolder="", forvo=True, \
                                         imgw=self.w, imgh=self.h, crop_w=self.crop_w, crop_h_low=self.crop_h, crop_h_high= self.crop_h, resize_w=self.resize_w, resize_h=self.resize_h, \
                                         focalx=self.focalx, focaly=self.focaly, centerx=self.pu, centery=self.pv, blxfx=self.fxbl,stereomaps=self.stereomaps)
 
@@ -138,7 +138,7 @@ class TartanVOInference(object):
         resize_factor = self.resize_w/self.w  # debug vo
         self.tartanvo = TartanSVO(model_name, network=self.network_type, blxfx=self.fxbl*resize_factor)
 
-    def process(self, traj_root_folder, vo_output_folder):
+    def process(self, traj_root_folder, vo_output_folder, left_input_folder='image_left', right_input_folder='image_right'):
         # prepare output folder
         if vo_output_folder is not None:
             outdir = traj_root_folder + '/' + vo_output_folder
@@ -146,7 +146,7 @@ class TartanVOInference(object):
                 mkdir(outdir)
                 print('Create folder: {}'.format(outdir))
 
-        self.load_dataset(traj_root_folder)
+        self.load_dataset(traj_root_folder, left_input_folder, right_input_folder)
         motionlist = []
         poselist = [[0.,0.,0.,0.,0.,0.,1.0]]
         count = 0

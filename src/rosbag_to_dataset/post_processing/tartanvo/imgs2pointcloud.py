@@ -113,8 +113,8 @@ class StereoInference:
         self.atvmask = self.atvmask < 10 # a threshold
         self.mask_boarder_points()
 
-    def load_dataset(self, traj_root_folder):
-        testDataset = TrajFolderDataset(traj_root_folder, leftfolder='image_left', rightfolder='image_right', colorfolder=self.colored_folder, 
+    def load_dataset(self, traj_root_folder, left_input_folder, right_input_folder):
+        testDataset = TrajFolderDataset(traj_root_folder, leftfolder=left_input_folder, rightfolder=right_input_folder, colorfolder=self.colored_folder, 
                                         forvo=False,  crop_w=self.crop_w, crop_h_low=self.crop_h_low, crop_h_high= self.crop_h_high, resize_w=self.input_w, resize_h=self.input_h, 
                                         stereomaps=self.stereomaps)
         testDataloader = DataLoader(testDataset, batch_size=self.batch_size, 
@@ -245,8 +245,8 @@ class StereoInference:
         points_data = np.concatenate((point_array, color_array), axis=1)
         np.save(filename, points_data)
 
-    def process(self, traj_root_folder, depth_output_folder=None, points_output_folder=None):
-        self.load_dataset(traj_root_folder)
+    def process(self, traj_root_folder, left_input_folder='image_left', right_input_folder='image_right', depth_output_folder=None, points_output_folder=None):
+        self.load_dataset(traj_root_folder, left_input_folder, right_input_folder)
         # prepare output folder
         if depth_output_folder is not None:
             outdir = traj_root_folder + '/' + depth_output_folder
@@ -314,6 +314,7 @@ if __name__ == '__main__':
     # node.process(traj_root_folder='/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210805_slope2', 
     #             depth_output_folder='depth_left', points_output_folder='points_left')
     node.process(traj_root_folder='/cairo/arl_bag_files/SARA/arl0608/wanda_cmu_0', 
+                left_input_folder='image_left', right_input_folder='image_right',
                 depth_output_folder='depth_left', points_output_folder='points_left')
     # rospy.spin()
 

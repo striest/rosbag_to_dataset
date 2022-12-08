@@ -1,14 +1,17 @@
 # this image correction is used for correcting the exposure for the warthog data
+# Note that the original image_left and image_right folder will be renamed !!
+
+from operator import le
 import numpy as np
 import cv2
 import argparse
-from os import listdir
+from os import listdir, system
 from os.path import isdir, isfile, join, split
 from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir
 import time
 
-# python scripts/data_preview.py --root /project/learningphysics/tartandrive_trajs --bag_list scripts/trajlist.txt --save_to /project/learningphysics/tartandrive_preview
-# python scripts/data_preview.py --root test_output --bag_list scripts/trajlist_local.txt --save_to test_output
+# python3 image_correction.py --root /project/learningphysics/arl_20220922_traj --bag_list trajlist_arl.txt --save_to /project/learningphysics/arl_20220922_preview
+# python scripts/image_correction.py --root /cairo/arl_bag_files/sara_traj --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/arl_20220922_preview
 
 def gammaCorrection(img_original, img_additional=None, roi=None, vis=False):
     if roi is None:
@@ -47,10 +50,10 @@ def autowhitebalance(img_original, img_additional=None, vis=False):
         res2 = np.clip(img_additional*128.0/meanvalue.reshape(1,1,3), 0, 255).astype(np.uint8)
         res = (res, res2)
 
-    if vis:
-        cv2.imshow('awb', cv2.hconcat([img_small, img_mean, img_percentile]))
-        cv2.waitKey(0)
-        cv2.imwrite('/home/wenshan/tmp/arl_data/image_correction/'+str(np.random.randint(100))+'.png', cv2.hconcat([img_small, img_mean, img_percentile]))
+    # if vis:
+    #     cv2.imshow('awb', cv2.hconcat([img_small, img_mean, img_percentile]))
+    #     cv2.waitKey(0)
+    #     cv2.imwrite('/home/wenshan/tmp/arl_data/image_correction/'+str(np.random.randint(100))+'.png', cv2.hconcat([img_small, img_mean, img_percentile]))
     return res
 
 def test_speed():
@@ -107,13 +110,28 @@ def main():
         if not isdir(trajdir):
             print('!!! Trajectory Not Found {}'.format(trajdir))
             continue
+
+        # mv the raw folder
         leftfolder = trajdir + '/image_left'
         rightfolder = trajdir + '/image_right' 
+        if isdir(leftfolder + '_raw') or isdir(rightfolder + '_raw'):
+            print("Raw folder already exists.. please check the folders")
+            continue
+        system('mv ' + leftfolder + ' ' + leftfolder + '_raw')
+        system('mv ' + rightfolder + ' ' + rightfolder + '_raw')
+        leftfolder = trajdir + '/image_left_raw'
+        rightfolder = trajdir + '/image_right_raw' 
 
-        leftfolder_correction = trajdir + '/image_left_correction_awb'
-        rightfolder_correction = trajdir + '/image_right_correction_awb' 
+        leftfolder_correction = trajdir + '/image_left'#'/image_left_correction'
+        rightfolder_correction = trajdir + '/image_right'#'/image_right_correction' 
         maybe_mkdir(leftfolder_correction)
         maybe_mkdir(rightfolder_correction)
+
+        # for debugging
+        maybe_rmdir(trajdir + '/image_left_correction_awb')
+        maybe_rmdir(trajdir + '/image_right_correction_awb')
+        maybe_rmdir(trajdir + '/image_left_correction')
+        maybe_rmdir(trajdir + '/image_right_correction')
 
         outvidfile = join(args.save_to, outfolder + '_color_correction_awb.mp4')
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')
@@ -124,7 +142,7 @@ def main():
         leftimglist.sort()
 
         rightimglist = listdir(rightfolder)
-        rightimglist = [leftfolder + '/' + img for img in rightimglist if img.endswith('.png')]
+        rightimglist = [rightfolder + '/' + img for img in rightimglist if img.endswith('.png')]
         rightimglist.sort()
             
         datanum = len(leftimglist)
