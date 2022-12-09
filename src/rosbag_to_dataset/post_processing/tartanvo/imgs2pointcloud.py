@@ -296,7 +296,7 @@ class StereoInference:
                     self.save_as_points_file(dispk, colored_np[k], filestrpc+'.npy', uncertainty=unc)
 
                     # if self.visualize: # save visualization file to the folder
-                    dispvis = self.disp2vis(dispk, scale=3)
+                    dispvis = self.disp2vis(dispk, scale=2)
                     cv2.imwrite(filestr+'.jpg',dispvis)
 
             if self.visualize:
