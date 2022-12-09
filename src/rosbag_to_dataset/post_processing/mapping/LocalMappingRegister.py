@@ -19,20 +19,20 @@ def coord_transform(points, R, T):
     points_trans = np.matmul(R.transpose(1,0), points.transpose(1,0)) - T
     return points_trans.transpose(1, 0)
 
-def transform_ground(points):
+def transform_ground(points, R, T):
     # the R and T come from gound calibration
     # SO2quat(R) = array([ 0.99220717,  0.00153886, -0.12397937,  0.01231552])
     # starttime = time.time()
-    R = np.array([[ 0.9692535,   0.00610748, -0.24598853],
-                  [ 0.,         -0.99969192, -0.02482067],
-                  [-0.24606434, 0.02405752,  -0.96895489]] )
-    T = np.array([[-5.55111512e-17], [-6.93889390e-18], [1.77348523e+00]])
-    points_trans = np.matmul(R, points.transpose(1,0)) + T
+    # R = np.array([[ 0.9692535,   0.00610748, -0.24598853],
+    #               [ 0.,         -0.99969192, -0.02482067],
+    #               [-0.24606434, 0.02405752,  -0.96895489]] )
+    # T = np.array([[-5.55111512e-17], [-6.93889390e-18], [1.77348523e+00]])
+    points_trans = np.matmul(R, points.transpose(1,0)) + T.transpose(1,0)
     # rospy.loginfo("transform ground pt num {} time {}".format(points.shape[0], time.time()-starttime))
     return points_trans.transpose(1, 0)
 
 class LocalMappingRegisterNode(object):
-    def __init__(self):
+    def __init__(self, platform):
         self.curdir = dirname(realpath(__file__))
         self.parse_params()
 
@@ -50,10 +50,26 @@ class LocalMappingRegisterNode(object):
                                       [-1, 0, 0],
                                       [ 0, 0, 1]])
 
-        self.R_gd = np.array([[ 0.9692535 ,  0.        , -0.24606434],
-                                [ 0.00610748, -0.99969192,  0.02405752],
-                                [-0.24598853, -0.02482067, -0.96895489]] )
-        self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 1.77348523e+00]])
+        self.platform = platform
+        self.align_gravity = True
+        if platform == 'yamaha':
+            self.R_gd = np.array([[ 0.9692535 ,  0.        , -0.24606434],
+                                    [ 0.00610748, -0.99969192,  0.02405752],
+                                    [-0.24598853, -0.02482067, -0.96895489]] )
+            self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 1.77348523e+00]])
+
+        elif platform == 'racer':
+            self.R_gd = np.array([[ 0.90630779 ,  0., -0.42261826],
+                                    [ 0., -1.,  0.],
+                                    [-0.42261826, 0., -0.90630779]] )
+            self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 1.77348523e+00]])
+
+        elif platform == 'warthog':
+            self.R_gd = np.array([[ 1.0 ,  0., 0.],
+                                    [ 0., -1.,  0.],
+                                    [ 0., 0., -1]] )
+            self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 0.77348523]])
+            self.align_gravity = False
 
     def parse_params(self):
         self.resolution = mapping_args['resolution']  # ', 0.05)
@@ -133,7 +149,9 @@ class LocalMappingRegisterNode(object):
         points_aligned = points @ R + T
         return points_aligned
 
-    def process(self, traj_root_folder, heightmap_output_folder=None, rgbmap_output_folder=None):
+    def process(self, traj_root_folder, 
+                points_folder = 'points_left', vo_folder = 'tartanvo_odom', odom_folder = 'odom', 
+                heightmap_output_folder=None, rgbmap_output_folder=None):
         if heightmap_output_folder is not None:
             heightoutdir = traj_root_folder + '/' + heightmap_output_folder
             if not isdir(heightoutdir):
@@ -145,7 +163,7 @@ class LocalMappingRegisterNode(object):
                 mkdir(rgboutdir)
                 print('Create folder: {}'.format(rgboutdir))
 
-        pointsfiles, motions, odoms, filenames = self.load_data(traj_root_folder)
+        pointsfiles, motions, odoms, filenames = self.load_data(traj_root_folder, points_folder, vo_folder, odom_folder)
         for k in range(len(filenames)):
             starttime = time.time()
             points = np.load(pointsfiles[k])
@@ -165,7 +183,10 @@ class LocalMappingRegisterNode(object):
                 self.xyz_register = xyz_array
                 self.color_register = color_array
 
-            xyz_register_ground = self.gravity_align2(self.xyz_register, odoms[k])
+            if self.align_gravity:
+                xyz_register_ground = self.gravity_align2(self.xyz_register, odoms[k])
+            else:
+                xyz_register_ground = transform_ground(self.xyz_register, self.R_gd, self.T_gd)
             # xyz_register_ground1 = self.gravity_align(self.xyz_register, odoms[k])
             # xyz_register_ground3 = self.gravity_align3(self.xyz_register, odoms[k])
             # import ipdb;ipdb.set_trace()
