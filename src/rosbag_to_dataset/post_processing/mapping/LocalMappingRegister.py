@@ -68,7 +68,7 @@ class LocalMappingRegisterNode(object):
             self.R_gd = np.array([[ 1.0 ,  0., 0.],
                                     [ 0., -1.,  0.],
                                     [ 0., 0., -1]] )
-            self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 0.77348523]])
+            self.T_gd = np.array([[-5.55111512e-17, -6.93889390e-18, 1.14]])
             self.align_gravity = False
 
     def parse_params(self):

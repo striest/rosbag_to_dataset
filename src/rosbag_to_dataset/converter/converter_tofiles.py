@@ -81,11 +81,13 @@ class ConverterToFiles:
 
         return stamp_sec
 
-    def convert_bag(self, bag, main_topic, logfile):
+    def convert_bag(self, bag, main_topic, logfile, preload_timestamps=None):
         """
         Convert a bag into numpy arrays and save to files. 
         Assume the timestamps in the bagfile for each topic are ordered
         main_topic: use the time of the first frame of main_topic as the starting time
+        If preload_timestamps is provided, use it as the sampling reference. 
+            Note that the new sampled topics could be with different length and will be filled. 
         """
         logfile.logline('extracting messages...')
         self.reset_queue()
@@ -108,7 +110,13 @@ class ConverterToFiles:
         # # each topic samples from its own starting timestamp, to avoid the occilation problem
         # self.timesteps = {k:np.arange(self.start_timestamps[k], endtime, self.rates[k]) for k in self.topics} 
         # each topic samples from a fixed starting timestamp 
-        self.timesteps = {k:np.arange(starttime, endtime, self.rates[k]) for k in self.topics}
+        if preload_timestamps is None:
+            self.timesteps = {k:np.arange(starttime, endtime, self.rates[k]) for k in self.topics}
+        else:
+            self.timesteps = {k:preload_timestamps for k in self.topics}
+            if starttime > preload_timestamps[0] or endtime < preload_timestamps[-1]:
+                logfile.logline("Sample with preloaded timestamps, but it is out of the topic range {} - {}".format(starttime, endtime))
+
         self.matched_idxs = {k:np.zeros_like(self.timesteps[k], dtype=np.int32) for k in self.topics}
 
         # find the topics with closest timestamps for the desired rates
