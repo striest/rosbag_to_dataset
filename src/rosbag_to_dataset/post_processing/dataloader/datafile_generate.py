@@ -41,9 +41,12 @@ def enumerate_trajs(data_root_dir):
     print('Detected {} trajs'.format(len(trajfolders)))
     return trajfolders
 
-data_root_dir = '/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output'
-outfile = 'tartandrive_train.txt'
-f = open(outfile, 'w')
+# data_root_dir = '/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output'
+# outfile = 'tartandrive_train.txt'
+
+data_root_dir = '/home/parvm/RISS/data/percepton_data'
+outfile = 'tartandrive_test.txt'
+f = open(join(data_root_dir, outfile), 'w')
 
 trajlist = enumerate_trajs(data_root_dir)
 for trajdir in trajlist:
