@@ -1,0 +1,50 @@
+---
+  main_topic: "/ros_talon/current_position"
+  dt: 0.16
+  data: 
+    "/odometry/filtered_odom":
+        type: Odometry
+        folder: "odom"
+        options:
+            use_vel: True
+
+    "/ros_talon/current_position":
+        type: Float64
+        folder: "delta"
+    
+    "/online_sysid/parameters":
+        type: AffixlogKBMParameters
+        folder: "params"
+
+    "/multisense/left/image_rect_color":
+        type: Image
+        folder: "image_left_color"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 3
+
+
+    "/cmd":
+        type: Twist
+        options:
+            mode: action
+    
+    "/multisense/imu/imu_data":
+        type: Imu
+        folder: "imu"
+        N_per_step: 10
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+    
+
+    # "/wheel_rpm":
+    #     type: RPWheelEncoders
+    #     remap: "wheel_rpm"
+    #     N_per_step: 20
+
+    # "/shock_pos":
+    #     type: RPShockSensors
+    #     remap: "shock_travel"
+    #     N_per_step: 20
