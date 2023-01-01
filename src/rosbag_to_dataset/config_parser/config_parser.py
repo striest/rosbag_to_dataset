@@ -18,6 +18,7 @@ from rosbag_to_dataset.dtypes.pointcloud import PointCloudConvert
 from rosbag_to_dataset.dtypes.float_stamped import FloatStampedConvert
 from rosbag_to_dataset.dtypes.float32 import Float32Convert
 from rosbag_to_dataset.dtypes.racepak_sensors import RPControlsConvert, RPWheelEncodersConvert, RPShockSensorsConvert
+from rosbag_to_dataset.dtypes.affix_params import AffixParamsConvert
 
 class ConfigParser:
     """
@@ -80,6 +81,7 @@ class ConfigParser:
         "RPControls":RPControlsConvert,
         "RPWheelEncoders":RPWheelEncodersConvert,
         "RPShockSensors":RPShockSensorsConvert,
+        "AffixlogKBMParameters":AffixParamsConvert
     }
 
 # class ParseObject:
