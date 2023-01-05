@@ -216,13 +216,13 @@ class DataLoaderUtil:
 				# if k in ['heightmap']:
 				# 	res['observation'][k] = res['observation'][k][...,:self.heightmap_num_channels]
 				# 	res['observation'][k] = torch.clamp(res['observation'][k],self.min_height,self.max_height)
-				res['observation'][k] = res['observation'][k].moveaxis(-1, -3)
+				res['observation'][k] = res['observation'][k].moveaxis(-1, -3).moveaxis(-1, -2)
 				# map_data = res['next_observation'][k]
 				# map_data[~torch.isfinite(map_data)] = fill_value
 				# if k in ['heightmap']:
 				# 	res['next_observation'][k] = res['next_observation'][k][...,:self.heightmap_num_channels]
 				# 	res['next_observation'][k] = torch.clamp(res['next_observation'][k],self.min_height,self.max_height)
-				res['next_observation'][k] = res['next_observation'][k].moveaxis(-1, -3)
+				res['next_observation'][k] = res['next_observation'][k].moveaxis(-1, -3).moveaxis(-1, -2)
 		return res
 	
 	def calc_num_batches(self, capacity):

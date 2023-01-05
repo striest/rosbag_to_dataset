@@ -31,7 +31,7 @@ class DatasetBase(Dataset):
         modalitylens = [1,1,1,1,1,1,1,1,10], \
         transform=None, \
         imu_freq = 10, \
-        frame_skip = 0, frame_stride = 1, config = None, remap = None):
+        frame_skip = 0, frame_stride = 1, config = None, remap = None,img_path_debug = False):
 
         super(DatasetBase, self).__init__()
         self.framelistfile = framelistfile
@@ -70,6 +70,8 @@ class DatasetBase(Dataset):
         
         self.config = config
         self.remap_obs = remap
+
+        self.img_path_debug = img_path_debug
 
     def parse_inputfile(self, inputfile, frame_skip):
         '''
@@ -201,6 +203,8 @@ class DatasetBase(Dataset):
         framestrlist = [self.framelist[k] for k in frameindlist]
 
         sample = {}
+        if self.img_path_debug:
+            sample['traj_frames'] = (trajstr,framestrlist)
         for datatype, datalen in zip(self.datatypelist, self.modalitylenlist): 
             datafilelist = self.getDataPath(trajstr, framestrlist[:datalen], datatype)
             if datatype == 'img0' or datatype == 'img1' or datatype == 'imgc':
