@@ -16,6 +16,8 @@ from rosbag_to_dataset.dtypes.pose import PoseConvert
 from rosbag_to_dataset.dtypes.vector3 import Vector3Convert
 from rosbag_to_dataset.dtypes.pointcloud import PointCloudConvert
 from rosbag_to_dataset.dtypes.float_stamped import FloatStampedConvert
+from rosbag_to_dataset.dtypes.float32 import Float32Convert
+from rosbag_to_dataset.dtypes.racepak_sensors import RPControlsConvert, RPWheelEncodersConvert, RPShockSensorsConvert
 
 class ConfigParser:
     """
@@ -74,6 +76,10 @@ class ConfigParser:
         "Twist":TwistConvert,
         "Vector3":Vector3Convert,
         "FloatStamped":FloatStampedConvert,
+        "Float32":Float32Convert,
+        "RPControls":RPControlsConvert,
+        "RPWheelEncoders":RPWheelEncodersConvert,
+        "RPShockSensors":RPShockSensorsConvert,
     }
 
 # class ParseObject:
