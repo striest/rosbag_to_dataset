@@ -55,7 +55,7 @@ class DatasetBase(Dataset):
         self.acc_seqlen = [0,] + np.cumsum(self.seqnumlist).tolist() # [0, num[0], num[0]+num[1], ..]
         self.acc_imulen = [0,] + np.cumsum(self.imulenlist).tolist() # [0, num[0], num[0]+num[1], ..]
         print('Loaded {} sequences from {}...'.format(self.N, framelistfile))
-
+        
         if 'cmd' in self.datatypelist:
             self.cmdlist = self.loadDataFromFile(self.trajlist, 'cmd/twist.npy')
         if 'odom' in self.datatypelist:
@@ -287,10 +287,10 @@ class DatasetBase(Dataset):
         for k, trajdir in enumerate(trajlist): 
             trajpath = self.dataroot + '/' + trajdir
             cmds = np.load(trajpath + '/' + data_folder_and_filename).astype(np.float32) # framenum
-            datalist.extend(cmds)
+            datalist.append(cmds)
             if k%100==0:
                 print('    Processed {} trajectories...'.format(k))
-        return np.array(datalist)
+        return np.concatenate(tuple(datalist),axis=0)
 
 
 if __name__ == '__main__':
