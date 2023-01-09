@@ -1,10 +1,11 @@
 import argparse
 import rosbag
 
+import numpy as np
 from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir, rm_file
-from os.path import isfile
+from os.path import isfile, join, isdir
 import time
 # python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
 # python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
@@ -46,6 +47,12 @@ def mergebags(baglist, outputbag):
         outbag.close()
     outbag.close()
 
+def load_timestamp(topicfolder):
+    timestampfile = join(topicfolder, 'timestamps.txt')
+    if not isfile(timestampfile):
+        return None
+    return np.loadtxt(timestampfile)
+
 if __name__ == '__main__':
     '''
     bag_list is a text file with the following content: 
@@ -64,6 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--bag_fp', type=str, default="", help='Path to the bag file to get data from')
     parser.add_argument('--save_to', type=str, required=True, help='Name of the dir to save the result to')
     parser.add_argument('--del_exist', action='store_true', default=False, help='Delete existing trajectory folder if exsits')
+    parser.add_argument('--preload_timestamp_folder', type=str, default="", help='Use existing timestamps, this is used in adding new modalities')
 
     args = parser.parse_args()
 
@@ -101,12 +109,20 @@ if __name__ == '__main__':
     maybe_mkdir(args.save_to)
     for bagfiles, outfolder in bagfilelist_combine_split:
         # create folders
-        trajoutfolder = args.save_to+'/'+outfolder
+        trajoutfolder = join(args.save_to, outfolder)
         if args.del_exist:
             maybe_rmdir(trajoutfolder, force=True)
         maybe_mkdir(trajoutfolder)
         for k, folder in outfolders.items():
             maybe_mkdir(trajoutfolder+'/'+folder)
+
+        # load existing timestamps in the incremental extraction mode
+        timestamps = None
+        if args.preload_timestamp_folder != "":
+            maintopicfolder = join(trajoutfolder, args.preload_timestamp_folder)
+            assert isdir(maintopicfolder), "Cannot find folder for the timestamp file {}".format(maintopicfolder)
+            timestamps = load_timestamp(maintopicfolder)
+
 
         # merge the bagfiles
         if len(bagfiles) > 1:
@@ -121,7 +137,7 @@ if __name__ == '__main__':
 
         bag = rosbag.Bag(bagfile)
         converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
-        suc = converter.convert_bag(bag, main_topic=maintopic, logfile=logfile)
+        suc = converter.convert_bag(bag, main_topic=maintopic, logfile=logfile, preload_timestamps=timestamps)
         if bagfile.endswith('merge_temp.bag'): # remove the temp file
             rm_file(bagfile)
 
