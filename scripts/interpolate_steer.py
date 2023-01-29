@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
         overlap_idx = np.logical_and(dest_timestamps >= delta_timestamps[0], dest_timestamps <= delta_timestamps[-1])
 
-        final_delta = np.concatenate((missed_first_delta,interpolated_delta(dest_timestamps[overlap_idx]),missed_last_delta))
+        final_delta = np.concatenate((missed_first_delta,interpolated_delta(dest_timestamps[overlap_idx]),missed_last_delta)).reshape((-1,1))
         maybe_mkdir(join(dest_traj_fp,'delta'))
         np.save(join(dest_traj_fp,'delta','float.npy'),final_delta)
         np.savetxt(join(dest_traj_fp,'delta','timestamps.txt'),dest_timestamps)
