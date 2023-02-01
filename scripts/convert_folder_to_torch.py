@@ -10,43 +10,60 @@ import cv2
 from PIL import Image
 from numpy import asarray
 from tqdm import tqdm
-from rosbag_to_dataset.util.os_util import maybe_mkdir
+from rosbag_to_dataset.util.os_util import maybe_mkdirs
+from copy import deepcopy
 
+from datetime import datetime
 
 
 class ConvertToTorchTraj:
 
     def __init__(self,config):
         self.config = config
-        self.observation = self.config['observation'].keys()
-        self.action = self.config['action'].keys()
+        self.observation = list(self.config['observation'].keys())
+        self.action = list(self.config['action'].keys())
         self.remap = {'odom':'state','delta':'delta','imu':'imu', 'cmd':'cmd','rgb_map': 'rgbmap', 'height_map':'heightmap','image_left_color':'image_rgb'}
         self.strides = dict([(x,1) for x in self.action + self.observation])
         if 'imu' in self.strides.keys():
             self.strides['imu'] = self.config['observation']['imu']['stride']
         self.dt = self.config['dt']
         self.res = dict([(k,x['res']) for k,x in self.config['observation'].items() if 'res' in x.keys()])
-        self.reset() 
-        #TODO - normalize images, other modalities
+        self.reset()         
         
-        
-
     def reset(self):
         self.queue = dict([(self.remap[x],None) for x in self.action + self.observation])
-        
-
     
     def resize_image(self,x,output_res,key):
+        if 'rgb' in key:
+            x = x.astype(np.uint8)
+        else:
+            x = x.astype(np.float32)
         if key == 'height_map':
-            if 'empty_value' in self.config['observation']['height_map'].keys():
+            if 'num_channels' in self.config['observation']['height_map'].keys():
+                num_channels = self.config['observation']['height_map']['num_channels']
+                x = x[...,num_channels]
+            if 'empty_value' in self.config['observation'][key].keys():
                 mask = np.isclose(abs(x), self.config["observation"]['height_map']['empty_value'])
-                fill_value = np.percentile(x[~mask], 99)
+                if self.config['observation'][key]['fill_value'] is not None:
+                    fill_value = self.config['observation'][key]['fill_value']
+                else:
+                    fill_value = np.percentile(x[~mask], 99)
                 x[mask] = fill_value
+                mask = np.any(mask,axis=-1,keepdims=True).astype(np.float32)
+                mask_normal = cv2.resize(mask, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
+                mask_int = cv2.resize(mask, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_NEAREST)
+                assert(len(mask_normal.shape) == 2)
+                
+                mask_normal = np.expand_dims(mask_normal,axis = -1)
+                mask_int = np.expand_dims(mask_int,axis = -1)
 
-        return cv2.resize(x, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
+                x = cv2.resize(x, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
+                x = np.concatenate((x,mask_normal,mask_int),axis=-1)
+            return x
+        else:
+            return cv2.resize(x, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
 
 
-    
     def load_maps_img(self,fp,last = 'npy',key = 'height_map'):
         all_frames = [join(fp,x) for x in listdir(fp) if x.endswith(last)]
         all_frames.sort()
@@ -171,15 +188,8 @@ class ConvertToTorchTraj:
         for k in traj['observation'].keys():
             if k not in ['state','imu','delta']:
                 # import pdb;pdb.set_trace()
-                if k == 'heightmap':
-                    if 'num_channels' in self.config['observation']['height_map'].keys():
-                        num_channels = self.config['observation']['height_map']['num_channels']
-                        
-                        traj['observation'][k] = traj['observation'][k][...,num_channels]
-                        traj['next_observation'][k] = traj['next_observation'][k][...,num_channels]
-
                 if 'rgb' in k:
-                    og_key = [key for key,x in self.observation.items() if x == k][0]
+                    og_key = [key for key,x in self.remap.items() if x == k][0]
                     if self.config['observation'][og_key]['normalize']:
                         traj['observation'][k] = traj['observation'][k]/255.
                         traj['next_observation'][k] = traj['next_observation'][k]/255.
@@ -205,20 +215,26 @@ if __name__ =='__main__':
 
     parser.add_argument('--source_fp', type=str, required=True, help='Path to the source directory')
     parser.add_argument('--save_fp', type=str, required=True, help='Path to the destination trajectory')
-
+    config = yaml.load(open('folder_to_traj.yaml', 'r'), Loader=yaml.FullLoader)
     args = parser.parse_args()
 
     root_source_fp = args.source_fp
     root_save_fp = args.save_fp
 
-    maybe_mkdir(root_save_fp, force=False)
+    now = datetime.now()
+    program_time = f'{now.strftime("%m-%d-%Y,%H-%M-%S")}'
+
+    root_save_fp = join(root_save_fp,program_time)
+
+    maybe_mkdirs(root_save_fp, force=False)
     
-    cvt = ConvertToTorchTraj()
+    cvt = ConvertToTorchTraj(config)
 
     traj_name = [x for x in listdir(root_source_fp) if isdir(join(root_source_fp,x))]
+    traj_name.sort()
 
     for x in tqdm(traj_name):
         source_fp = join(root_source_fp,x)
         save_fp = join(root_save_fp,f'{x}.pt')
         cvt.convert_to_torch(cvt,source_fp,save_fp)
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()

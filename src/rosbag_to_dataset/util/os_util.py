@@ -13,7 +13,13 @@ def maybe_mkdir(fp, force=True):
         x = input('{} already exists. Hit enter to continue and overwrite. Q to exit.'.format(fp))
         if x.lower() == 'q':
             exit(0)
-
+def maybe_mkdirs(fp, force=True):
+    if not os.path.exists(fp):
+        os.makedirs(fp)
+    elif not force:
+        x = input('{} already exists. Hit enter to continue and overwrite. Q to exit.'.format(fp))
+        if x.lower() == 'q':
+            exit(0)
 def maybe_rmdir(fp, force=True):
     if os.path.exists(fp) and force:
         shutil.rmtree(fp)
