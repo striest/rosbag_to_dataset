@@ -62,9 +62,10 @@ class DataLoaderUtil:
 						self.observation.append(key)
 						break
 				if v['topic'] == 'heightmap':
-					self.min_height = v['clipping'][0]
-					self.max_height = v['clipping'][1]
-					self.heightmap_num_channels = v['num_channels']
+					if 'num_channels' in v.keys():
+						self.heightmap_num_channels = v['num_channels']
+					else:
+						self.heightmap_num_channels = None
 		self.action = ['cmd']
 		self.observation.append('odom') #since odom is not added as modality
 		self.remapped_obs = [self.remap[i] for i in self.observation]
@@ -213,14 +214,17 @@ class DataLoaderUtil:
 			if k not in ['state','imu']:
 				# map_data = res['observation'][k]
 				# map_data[~torch.isfinite(map_data)] = fill_value
-				# if k in ['heightmap']:
-				# 	res['observation'][k] = res['observation'][k][...,:self.heightmap_num_channels]
+				if k in ['heightmap']:
+					# import pdb;pdb.set_trace()
+					if self.heightmap_num_channels is not None:
+						res['observation'][k] = res['observation'][k][...,:self.heightmap_num_channels]
+						res['next_observation'][k] = res['next_observation'][k][...,:self.heightmap_num_channels]
+
 				# 	res['observation'][k] = torch.clamp(res['observation'][k],self.min_height,self.max_height)
+				# import pdb;pdb.set_trace()
 				res['observation'][k] = res['observation'][k].moveaxis(-1, -3).moveaxis(-1, -2)
 				# map_data = res['next_observation'][k]
 				# map_data[~torch.isfinite(map_data)] = fill_value
-				# if k in ['heightmap']:
-				# 	res['next_observation'][k] = res['next_observation'][k][...,:self.heightmap_num_channels]
 				# 	res['next_observation'][k] = torch.clamp(res['next_observation'][k],self.min_height,self.max_height)
 				res['next_observation'][k] = res['next_observation'][k].moveaxis(-1, -3).moveaxis(-1, -2)
 		return res

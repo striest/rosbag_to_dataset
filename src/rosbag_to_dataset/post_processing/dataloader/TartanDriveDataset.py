@@ -259,6 +259,10 @@ class DatasetBase(Dataset):
             disp = np.load(self.dataroot + '/' + fn)
             for modality in self.config["modalities"].keys():
                 if self.remap_obs[datatype] == self.config["modalities"][modality]["topic"]:
+                    if "empty_value" in self.config["modalities"][modality].keys():
+                        mask = np.isclose(abs(disp), self.config["modalities"][modality]['empty_value'])
+                        fill_value = np.percentile(disp[~mask], 99)
+                        disp[mask] = fill_value
                     if "output_resolution" in self.config["modalities"][modality].keys():
                         output_resolution = self.config["modalities"][modality]["output_resolution"]
                         disp = cv2.resize(disp, dsize=(output_resolution[0], output_resolution[1]), interpolation=cv2.INTER_AREA)
