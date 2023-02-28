@@ -1,35 +1,7 @@
 from os.path import isfile, join, isdir
 from os import listdir
-# == Generate txt file for tartan dataset ===
-
-def process_traj(trajdir, folderstr = 'image_left'):
-    imglist = listdir(join(trajdir, folderstr))
-    imglist = [ff for ff in imglist if ff[-3:]=='png']
-    imglist.sort()
-    imgnum = len(imglist)
-
-    lastfileind = -1
-    outlist = []
-    framelist = []
-    for k in range(imgnum):
-        filename = imglist[k]
-        framestr = filename.split('_')[0].split('.')[0]
-        frameind = int(framestr)
-
-        if frameind==lastfileind+1: # assume the index are continuous
-            framelist.append(framestr)
-        else:
-            if len(framelist) > 0:
-                outlist.append(framelist)
-                framelist = []
-        lastfileind = frameind
-
-    if len(framelist) > 0:
-        outlist.append(framelist)
-        framelist = []
-    print('Find {} trajs, traj len {}'.format(len(outlist), [len(ll) for ll in outlist]))
-
-    return outlist 
+from datafile_generate import process_traj
+# == Generate txt file for tartan dataset from csv (in tartan drive repo) 
 
 def enumerate_trajs_data_partition(file):
     trajfolders = file.readline()

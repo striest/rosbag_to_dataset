@@ -1,7 +1,5 @@
 from os.path import isfile, join, isdir
 from os import listdir
-# import numpy as np
-
 # == Generate txt file for tartan dataset ===
 
 def process_traj(trajdir, folderstr = 'image_left'):
@@ -41,24 +39,22 @@ def enumerate_trajs(data_root_dir):
     print('Detected {} trajs'.format(len(trajfolders)))
     return trajfolders
 
-# data_root_dir = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2'
-# outfile = '/home/parvm/RISS/affix_data/combined_sysid/experiment/rosbag_sync_test/only_traj_2/trainframes.txt'
+if __name__ == '__main__':
+    data_root_dir = '/project/learningphysics/parv_dataset/affix_sys_id/extracted_test_param_bags'
+    outfile = '/project/learningphysics/parv_dataset/affix_sys_id/extracted_test_param_bags/frames.txt'
 
-data_root_dir = '/project/learningphysics/parv_dataset/affix_sys_id/extracted_test_param_bags'
-outfile = '/project/learningphysics/parv_dataset/affix_sys_id/extracted_test_param_bags/frames.txt'
+    f = open(outfile, 'w')
 
-f = open(outfile, 'w')
-
-trajlist = enumerate_trajs(data_root_dir)
-for trajdir in trajlist:
-    trajindlist = process_traj(data_root_dir + '/' +trajdir,folderstr = 'image_left_color')
-    for trajinds in trajindlist:
-        f.write(trajdir)
-        f.write(' ')
-        f.write(str(len(trajinds)))
-        f.write('\n')
-        for ind in trajinds:
-            f.write(ind)
+    trajlist = enumerate_trajs(data_root_dir)
+    for trajdir in trajlist:
+        trajindlist = process_traj(data_root_dir + '/' +trajdir,folderstr = 'image_left_color')
+        for trajinds in trajindlist:
+            f.write(trajdir)
+            f.write(' ')
+            f.write(str(len(trajinds)))
             f.write('\n')
-f.close()
+            for ind in trajinds:
+                f.write(ind)
+                f.write('\n')
+    f.close()
 
