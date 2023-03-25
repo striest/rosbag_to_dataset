@@ -35,7 +35,7 @@
         type: Image
         folder: "image_left"
         options:
-            output_resolution: [1024, 544]
+            output_resolution: [64, 64]
             nchannels: 1
 
     # "/cmd":

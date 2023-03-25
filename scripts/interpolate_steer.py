@@ -22,6 +22,9 @@ if __name__ == '__main__':
     for traj_name in traj_folders:
         source_traj_fp = join(source_fp,traj_name)
         dest_traj_fp = join(save_fp,traj_name)
+        
+        if isdir(join(dest_traj_fp,'delta')):
+            continue
         source_delta = np.load(join(source_traj_fp,'delta','float.npy'))
         delta_timestamps = np.loadtxt(join(source_traj_fp,'delta','timestamps.txt'))
 
