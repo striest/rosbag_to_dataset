@@ -41,10 +41,13 @@ class ConvertToTorchTraj:
         if key == 'height_map':
             if 'num_channels' in self.config['observation']['height_map'].keys():
                 num_channels = self.config['observation']['height_map']['num_channels']
-                x = x[...,num_channels]
+                if len(num_channels) > 1:
+                    x = x[...,num_channels]
+                else:
+                    x = x[...,[num_channels[0]]]
             if 'empty_value' in self.config['observation'][key].keys():
                 mask = np.isclose(abs(x), self.config["observation"]['height_map']['empty_value'])
-                if self.config['observation'][key]['fill_value'] is not None:
+                if self.config['observation'][key]['fill_value'] != "None":
                     fill_value = self.config['observation'][key]['fill_value']
                 else:
                     fill_value = np.percentile(x[~mask], 99)
@@ -58,6 +61,8 @@ class ConvertToTorchTraj:
                 mask_int = np.expand_dims(mask_int,axis = -1)
 
                 x = cv2.resize(x, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
+                if (len(x.shape) == 2):
+                    x = np.expand_dims(x,axis = -1)
                 x = np.concatenate((x,mask_normal,mask_int),axis=-1)
             return x
         else:
@@ -104,6 +109,14 @@ class ConvertToTorchTraj:
             
             if not flag:
                 self.queue[self.remap[x]] = np.load(join(traj,fname))
+                if x == 'odom':
+                    idx = np.arange(self.queue[self.remap[x]].shape[-1])
+                    idx[0] = 1
+                    idx[1] = 0
+                    idx[7] = 8
+                    idx[8] = 7
+                    self.queue[self.remap[x]]=self.queue[self.remap[x]][...,idx]
+                    self.queue[self.remap[x]][...,[1,8]] *= -1
 
 
     def convert_queue(self):
@@ -138,7 +151,6 @@ class ConvertToTorchTraj:
 
         #-1 to account for next_observation
         trajlen = min(traj['action'].shape[0], min([traj['observation'][k].shape[0] for k in traj['observation'].keys()])) - 1
-
         #Nan check
         max_nan_idx=-1
         for t in range(trajlen):
@@ -158,18 +170,19 @@ class ConvertToTorchTraj:
 
         return torch_traj
 
-    def preprocess_pose(self, traj, zero_init=True):
+    def preprocess_pose(self, traj, zero_init=True,sliding_window = True):
         """
         Do a sliding window to smooth it out a bit
         """
-        N = 2
-        T = traj['observation']['state'].shape[0]
-        pad_states = torch.cat([traj['observation']['state'][[0]]] * N + [traj['observation']['state']] + [traj['observation']['state'][[-1]]] * N)
-        smooth_states = torch.stack([pad_states[i:T+i] for i in range(N*2 + 1)], dim=-1).mean(dim=-1)[:, :3]
-        pad_next_states = torch.cat([traj['next_observation']['state'][[0]]] * N + [traj['next_observation']['state']] + [traj['next_observation']['state'][[-1]]] * N)
-        smooth_next_states = torch.stack([pad_next_states[i:T+i] for i in range(N*2 + 1)], dim=-1).mean(dim=-1)[:, :3]
-        traj['observation']['state'][:, :3] = smooth_states
-        traj['next_observation']['state'][:, :3] = smooth_next_states
+        if sliding_window:
+            N = 2
+            T = traj['observation']['state'].shape[0]
+            pad_states = torch.cat([traj['observation']['state'][[0]]] * N + [traj['observation']['state']] + [traj['observation']['state'][[-1]]] * N)
+            smooth_states = torch.stack([pad_states[i:T+i] for i in range(N*2 + 1)], dim=-1).mean(dim=-1)[:, :3]
+            pad_next_states = torch.cat([traj['next_observation']['state'][[0]]] * N + [traj['next_observation']['state']] + [traj['next_observation']['state'][[-1]]] * N)
+            smooth_next_states = torch.stack([pad_next_states[i:T+i] for i in range(N*2 + 1)], dim=-1).mean(dim=-1)[:, :3]
+            traj['observation']['state'][:, :3] = smooth_states
+            traj['next_observation']['state'][:, :3] = smooth_next_states
 
         if zero_init:
             init_state = traj['observation']['state'][0, :3]
@@ -203,7 +216,7 @@ class ConvertToTorchTraj:
         cvt.load_queue(source_fp)
         torch_traj = cvt.convert_queue()
         torch_traj = cvt.traj_to_torch(torch_traj)
-        torch_traj = cvt.preprocess_pose(torch_traj)
+        torch_traj = cvt.preprocess_pose(torch_traj,sliding_window = False)
         torch_traj = cvt.preprocess_observations(torch_traj)
         torch_traj['dt'] = torch.ones(torch_traj['action'].shape[0]) * self.dt
         torch.save(torch_traj,save_fp)
