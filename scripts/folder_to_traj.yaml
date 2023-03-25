@@ -6,9 +6,10 @@ observation:
   delta : {}
   height_map:
     res: [64,64]
-    num_channels: [0,1]
+    num_channels: [0]
     empty_value: 1000000
-    fill_value: 0.
+    # fill_value: 0.
+    fill_value: None
   image_left_color:
     res: [128,128]
     normalize: True
