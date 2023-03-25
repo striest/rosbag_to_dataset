@@ -7,6 +7,7 @@ from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import maybe_mkdir, maybe_rmdir, rm_file
 from os.path import isfile, join, isdir
 import time
+from tqdm import tqdm
 # python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
 # python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
 
@@ -107,7 +108,7 @@ if __name__ == '__main__':
     print("Find {} bagfiles, {} trajectories".format(len(bagfilelist), len(bagfilelist_combine_split)))
 
     maybe_mkdir(args.save_to)
-    for bagfiles, outfolder in bagfilelist_combine_split:
+    for bagfiles, outfolder in tqdm(bagfilelist_combine_split):
         # create folders
         trajoutfolder = join(args.save_to, outfolder)
         if args.del_exist:

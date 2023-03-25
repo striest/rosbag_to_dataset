@@ -58,9 +58,9 @@ subfolders = [
 ]
 '''
 
-rootfolder = '/home/parvm/RISS/data'
+rootfolder = '/project/learningphysics/parv_dataset/affix_sys_id'
 subfolders = [
-    'test_single_tartan',
+    'train_tartan_bags',
     # 'exp1_warehouse_baseline_2',
     # 'exp1_warehouse_baseline_3',
     # 'exp1_warehouse_both_warehouse_1',
@@ -68,7 +68,7 @@ subfolders = [
     # 'exp2_figure8_both',
     # 'exp2_figure8_both_part2',
 ]
-outtxt = open('trajlist_tartan_single.txt','w')
+outtxt = open('trajlist_tartan_train.txt','w')
 for k, subfolder in enumerate(subfolders):
     subdir = rootfolder + '/' + subfolder
     bagfiles = listdir(subdir)
