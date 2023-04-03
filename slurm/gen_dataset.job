@@ -1,0 +1,14 @@
+#!/bin/bash
+#echo commands to stdout
+set -x
+# create sigularity container
+source /etc/profile.d/modules.sh
+SIF=/project/learningphysics/saich/pt-1.11.0-pyg.sif
+S_EXEC="singularity exec --nv ${SIF}"
+# implement the job in the container
+
+YOUR_SCRIPT=$1
+
+${S_EXEC} 'bash' ${YOUR_SCRIPT}
+
+#END
