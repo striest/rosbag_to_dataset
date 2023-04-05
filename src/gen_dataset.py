@@ -29,6 +29,8 @@ parser.add_argument('--motion_subpath', type=str,
                     help='Sub-path containing motion information.');
 parser.add_argument('--pose_subpath', type=str, 
                     help='Sub-path containing pose information.');
+parser.add_argument('--max_n_frames', type=int, default=-1,
+                    help='Maximum number of frames to process in each trajectory to avoid OOM error.');
 parser.add_argument('--out_dir', type=str, 
                     help='directory to save the maps.');                                                            
 
@@ -51,6 +53,7 @@ class TemporalDataGenerator(object) :
         image_ext: str = '.png',
         pc_subdir: str = 'pc',
         image_subdir: str = 'images',
+        max_n_frames: int = -1,
     ) -> None :
 
         super().__init__();
@@ -82,6 +85,8 @@ class TemporalDataGenerator(object) :
         self.ymin, self.ymax = y_minmax;
         self.int_max = np.iinfo(np.int64).max;
         self.res = res;
+
+        self.max_n_frames = max_n_frames;
         
         self.dense_traj_map_file_name = 'dense_map_wrt_first_frame.bin';
         # gravity aligned
@@ -108,6 +113,8 @@ class TemporalDataGenerator(object) :
         self.body_to_novatel = self.body_to_novatel.astype(self.dtype);
         self.R_ground = self.R_ground.astype(self.dtype);
         self.T_ground = self.T_ground.astype(self.dtype);
+    
+        self.count_oob = 0;
 
 
     def get_pts_loader(self) :
@@ -489,7 +496,18 @@ class TemporalDataGenerator(object) :
                 self.get_traj_file_list_single(traj_dir);
         motions = self.pose_loader(motion_filepath);                
         odoms = self.pose_loader(pose_filepath);                
-           
+
+        if (self.max_n_frames>0) and len(pts_file_list) > self.max_n_frames :
+            print(f"Total #frames ({len(pts_file_list)}) > max #frames allowed ({self.max_n_frames}), so not processing");
+            return;
+
+            print(f"Total #frames ({len(pts_file_list)}) > max #frames allowed ({self.max_n_frames}), so clamping ...");
+
+            pts_file_list = pts_file_list[:self.max_n_frames];
+            motions = motions[:self.max_n_frames-1]
+            odoms = odoms[:self.max_n_frames]
+            sys.exit();              
+
         self.gen_data_single_pair(
             pts_file_list, 
             motions, 
@@ -501,7 +519,12 @@ class TemporalDataGenerator(object) :
             full_map_dir=tmp_out_dir,
             pc_out_dir=osp.join(tmp_out_dir, self.pc_subdir),
             image_out_dir=osp.join(tmp_out_dir, self.image_subdir),
-        );   
+        );  
+
+        print(f"#OOB points in this trajectory = {self.count_oob}");
+        self.count_oob = 0;
+
+
             
     def load_pts(self, fpath: str, dim: int = 7) :
         assert osp.isfile(fpath);
@@ -698,7 +721,17 @@ class TemporalDataGenerator(object) :
         pts_file_list, motion_filepath, pose_filepath = \
                 self.get_traj_file_list_single(traj_dir);
         motions = self.pose_loader(motion_filepath);                
-        odoms = self.pose_loader(pose_filepath);                
+        odoms = self.pose_loader(pose_filepath);  
+
+        if (self.max_n_frames>0) and len(pts_file_list) > self.max_n_frames :
+            print(f"Total #frames ({len(pts_file_list)}) > max #frames allowed ({self.max_n_frames}), so not processing");
+            return;
+        
+            print(f"Total #frames ({len(pts_file_list)}) > max #frames allowed ({self.max_n_frames}), so clamping ...");
+
+            pts_file_list = pts_file_list[:self.max_n_frames];
+            motions = motions[:self.max_n_frames-1];
+            odoms = odoms[:self.max_n_frames];            
 
         if downsample_stride is None :
             downsample_stride = len(pts_file_list);
@@ -823,6 +856,7 @@ def main() :
                     args.motion_subpath,
                     args.pose_subpath,
                     args.out_dir,
+                    max_n_frames=args.max_n_frames,
     );
 
     data_gen.run();
