@@ -39,6 +39,7 @@ class ConvertToTorchTraj:
         else:
             x = x.astype(np.float32)
         if key == 'height_map':
+            import pdb;pdb.set_trace()
             if 'num_channels' in self.config['observation']['height_map'].keys():
                 num_channels = self.config['observation']['height_map']['num_channels']
                 if len(num_channels) > 1:
@@ -63,7 +64,7 @@ class ConvertToTorchTraj:
                 x = cv2.resize(x, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
                 if (len(x.shape) == 2):
                     x = np.expand_dims(x,axis = -1)
-                x = np.concatenate((x,mask_normal,mask_int),axis=-1)
+                x = np.concatenate((x,mask_normal,mask_int),axis=-1) # appending normal and bool mask 
             return x
         else:
             return cv2.resize(x, dsize=(output_res[0],output_res[1]), interpolation=cv2.INTER_AREA)
@@ -228,24 +229,56 @@ if __name__ =='__main__':
 
     parser.add_argument('--source_fp', type=str, required=True, help='Path to the source directory')
     parser.add_argument('--save_fp', type=str, required=True, help='Path to the destination trajectory')
+    parser.add_argument('--traj_file', type=str, required=False,default = "None", help='Path to the traj listy')
+    parser.add_argument('--program_time', type=bool, required=False,default = False, help='Append program time to save path')
+    parser.add_argument('--no_of_segments', type=int, required=False,default = 1, help='Number of segments')
+    parser.add_argument('--segment_index', type=int, required=False,default = 0, help='Segemnet number indexed at 0')
+
+
     config = yaml.load(open('folder_to_traj.yaml', 'r'), Loader=yaml.FullLoader)
     args = parser.parse_args()
 
     root_source_fp = args.source_fp
     root_save_fp = args.save_fp
+    traj_file = args.traj_file
+
+    no_of_segments = args.no_of_segments
+    segment_index = args.segment_index
 
     now = datetime.now()
     program_time = f'{now.strftime("%m-%d-%Y,%H-%M-%S")}'
+    if args.program_time:
+        root_save_fp = join(root_save_fp,program_time)
 
-    root_save_fp = join(root_save_fp,program_time)
-
-    maybe_mkdirs(root_save_fp, force=False)
+    maybe_mkdirs(root_save_fp, force=True)
     
     cvt = ConvertToTorchTraj(config)
 
-    traj_name = [x for x in listdir(root_source_fp) if isdir(join(root_source_fp,x))]
+    if traj_file == "None":
+        traj_name = [x for x in listdir(root_source_fp) if isdir(join(root_source_fp,x))]
+    else:
+        traj_file = open(traj_file)
+        traj_list = traj_file.read()
+        traj_name = traj_list.split(', ')
+    
+    already_extracted_traj_name = [x[:-3] for x in listdir(root_save_fp) if x.endswith('.pt')]
+    print("before ", len(traj_name))
+
+    start_idx = int ( len(traj_name) * segment_index / no_of_segments)
+    end_idx = int(len(traj_name) * (segment_index + 1) / no_of_segments)
+
+    traj_name =  traj_name[start_idx:end_idx]
+
+    traj_name = [x for x in traj_name if x not in set(already_extracted_traj_name)]
+
+
+
+
+
     traj_name.sort()
 
+    print(already_extracted_traj_name)
+    print("after ", len(traj_name))
     for x in tqdm(traj_name):
         source_fp = join(root_source_fp,x)
         save_fp = join(root_save_fp,f'{x}.pt')
