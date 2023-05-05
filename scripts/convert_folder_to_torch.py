@@ -22,14 +22,20 @@ class ConvertToTorchTraj:
         self.config = config
         self.observation = list(self.config['observation'].keys())
         self.action = list(self.config['action'].keys())
-        self.remap = {'odom':'state','delta':'delta','imu':'imu', 'cmd':'cmd','rgb_map': 'rgbmap', 'height_map':'heightmap','image_left_color':'image_rgb'}
-        self.folder_names = {k:k for k in self.remap.keys()}
-        for k,v in self.config['observation'].keys():
+        self.remap = {'odom':'state','delta':'delta','imu':'imu', 'cmd':'cmd','rgb_map': 'rgbmap', 'height_map':'heightmap','image_left_color':'image_rgb','wheel_rpm':'wheel_rpm','shock_travel':'shock_travel','intervention':'intervention'}
+        self.folder_name = {k:k for k in self.remap.keys()}
+        for k,v in self.config['observation'].items():
             if 'folder' in v.keys():
                 self.folder_name[k] = v['folder']
         self.strides = dict([(x,1) for x in self.action + self.observation])
-        if 'imu' in self.strides.keys():
-            self.strides['imu'] = self.config['observation']['imu']['stride']
+
+        for x in self.observation:
+            if 'stride' in self.config['observation'][x].keys():
+                self.strides[x] = self.config['observation'][x]['stride']
+
+        for x in self.action:
+            if 'stride' in self.config['action'][x].keys():
+                self.strides[x] = self.config['action'][x]['stride']
         self.dt = self.config['dt']
         self.res = dict([(k,x['res']) for k,x in self.config['observation'].items() if 'res' in x.keys()])
         self.reset()         
@@ -43,7 +49,6 @@ class ConvertToTorchTraj:
         else:
             x = x.astype(np.float32)
         if key == 'height_map':
-            import pdb;pdb.set_trace()
             if 'num_channels' in self.config['observation']['height_map'].keys():
                 num_channels = self.config['observation']['height_map']['num_channels']
                 if len(num_channels) > 1:
@@ -104,14 +109,22 @@ class ConvertToTorchTraj:
                 fname = 'twist.npy'
             elif x == 'delta':
                 fname = 'float.npy'
-            else:
+            elif x == 'wheel_rpm':
+                fname = 'encoder.npy'
+            elif x == 'shock_travel':
+                fname = 'shock.npy'
+            elif x == 'intervention':
+                fname = 'control.npy'
+            elif x in ['height_map','image_left_color','rgb_map']:
                 flag = True
                 if 'map' in x:
                     last = 'npy'
                 else:
                     last = 'png'
                 self.load_maps_img(traj,last = last,key = x)
-            
+            else:
+                print(f'{x} is a wrong key')
+                import pdb;pdb.set_trace()
             if not flag:
                 self.queue[self.remap[x]] = np.load(join(traj,fname))
                 if x == 'odom':
@@ -204,9 +217,9 @@ class ConvertToTorchTraj:
             2. Replacing nans with a fill value (we should add a mask channel)
         """
         for k in traj['observation'].keys():
-            if k not in ['state','imu','delta']:
+            if k in ['heightmap','rgbmap','image_rgb']:
                 # import pdb;pdb.set_trace()
-                if 'rgb' in k:
+                if k in ['rgbmap','iamge_rgb']:
                     og_key = [key for key,x in self.remap.items() if x == k][0]
                     if self.config['observation'][og_key]['normalize']:
                         traj['observation'][k] = traj['observation'][k]/255.

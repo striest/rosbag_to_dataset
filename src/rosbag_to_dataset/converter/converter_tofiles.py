@@ -121,6 +121,15 @@ class ConverterToFiles:
             if starttime > preload_timestamps[0] or endtime < preload_timestamps[-1]:
                 logfile.logline("Sample with preloaded timestamps, but it is out of the topic range {} - {}".format(starttime, endtime))
 
+        for k in self.timesteps.keys():
+            modality_shape = self.timesteps[k].shape
+            N_per_step = int(self.dt / self.rates[k])
+            print(k,N_per_step)
+            if N_per_step > 1 and modality_shape[0]%N_per_step != 0:
+                num_missing_frames = N_per_step - modality_shape[0]%N_per_step
+                st_missing_frames = self.timesteps[k][-1]+self.rates[k]
+                self.timesteps[k] = np.concatenate((self.timesteps[k],np.arange(st_missing_frames, st_missing_frames+self.rates[k] *(num_missing_frames - 0.1),self.rates[k])))
+
         self.matched_idxs = {k:np.zeros_like(self.timesteps[k], dtype=np.int32) for k in self.topics}
 
         # find the topics with closest timestamps for the desired rates

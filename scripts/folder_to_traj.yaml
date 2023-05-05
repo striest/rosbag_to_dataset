@@ -2,7 +2,16 @@ dt: 0.1
 observation:
   odom : {}
   imu:
-    stride: 10
+    stride: 20
+    folder: imu_20
+  wheel_rpm:
+    stride: 20
+    folder: wheel_rpm_20
+  shock_travel:
+    stride: 20
+    folder: shock_travel_20
+  intervention : 
+    folder: intervention_200
   delta : {}
   height_map:
     res: [64,64]
