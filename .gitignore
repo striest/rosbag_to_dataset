@@ -139,3 +139,4 @@ src/rosbag_to_dataset/post_processing/mapping/cscrollgrid.c
 
 .catkin_tools/
 *.vscode*
+scripts/trajlist_test_baseline_200.txt
