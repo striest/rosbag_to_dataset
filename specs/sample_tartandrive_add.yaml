@@ -1,0 +1,25 @@
+---
+  main_topic: "/multisense/left/image_rect"
+  dt: 0.1
+  data: 
+    "/wheel_rpm":
+        type: RPWheelEncoders
+        folder: "wheel_rpm"
+
+    "/shock_pos":
+        type: RPShockSensors
+        folder: "shock_travel"
+
+    "/controls":
+        type: RPControls
+        folder: "intervention"
+        options:
+            mode: "identity"
+
+    "/ros_talon/steering_angle":
+        type: Float32
+        folder: "steering_angle"
+
+    "/ros_talon/current_position":
+        type: Float32
+        folder: "current_position"

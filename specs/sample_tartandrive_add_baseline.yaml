@@ -1,0 +1,31 @@
+---
+  main_topic: "/multisense/left/image_rect"
+  dt: 0.1
+  data: 
+    "/wheel_rpm":
+        type: RPWheelEncoders
+        folder: "wheel_rpm_20"
+        N_per_step: 20
+
+    "/shock_pos":
+        type: RPShockSensors
+        folder: "shock_travel_20"
+        N_per_step: 20
+
+
+    "/controls":
+        type: RPControls
+        folder: "intervention_200"
+        options:
+            mode: "intervention"
+            intervention_threshold: 200.
+
+    
+    "/multisense/imu/imu_data":
+        type: Imu
+        folder: "imu_20"
+        N_per_step: 20
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True

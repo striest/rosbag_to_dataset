@@ -100,20 +100,24 @@ class ConverterToFiles:
             # assert k in bagtopics, "Could not find topic {} from envspec in the list of topics for this bag.".format(k)
 
         self.extract_timestamps_from_bag(bag, logfile)
-        starttime = self.find_first_msg_time(main_topic)
-        endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
-        logfile.logline("  starting time {}, ending time {}, duration {}".format(starttime, endtime, endtime-starttime))
-        if starttime + self.rates[main_topic] >= endtime:
-            logfile.logline("Could not find enough overlap between topics!")
-            return False
+        # import ipdb;ipdb.set_trace()
 
         # # each topic samples from its own starting timestamp, to avoid the occilation problem
         # self.timesteps = {k:np.arange(self.start_timestamps[k], endtime, self.rates[k]) for k in self.topics} 
         # each topic samples from a fixed starting timestamp 
         if preload_timestamps is None:
+            starttime = self.find_first_msg_time(main_topic)
+            endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
+            logfile.logline("  starting time {}, ending time {}, duration {}".format(starttime, endtime, endtime-starttime))
+            if starttime + self.rates[main_topic] >= endtime:
+                logfile.logline("Could not find enough overlap between topics!")
+                return False
             self.timesteps = {k:np.arange(starttime, endtime, self.rates[k]) for k in self.topics}
         else:
-            self.timesteps = {k:preload_timestamps for k in self.topics}
+            self.timesteps = {k:np.arange(preload_timestamps[0], preload_timestamps[-1] + self.rates[k], self.rates[k]) for k in self.topics}
+            # self.timesteps = {k:preload_timestamps for k in self.topics}
+            starttime = max([self.bagtimestamps[tt][0] for tt in self.topics])
+            endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
             if starttime > preload_timestamps[0] or endtime < preload_timestamps[-1]:
                 logfile.logline("Sample with preloaded timestamps, but it is out of the topic range {} - {}".format(starttime, endtime))
 
@@ -188,50 +192,49 @@ class ConverterToFiles:
         
         #Start the dataset at the point where all topics become available
         logfile.logline('queue preprocessing...')
-        data_exists = {}
-        strides = {}
-        start_idxs = {}
-        end_idxs = {}
-        # import pdb; pdb.set_trace()
-        for k in self.topics:
-            data_exists[k] = [x>=0 for x in self.timesteps[k]]
-            strides[k] = int(self.dt/self.rates[k])
-            start_idxs[k] = (data_exists[k].index(True) -1 )// strides[k] +1 # cut off the imcomplete frames 
-            end_idxs[k] = len(data_exists[k]) //strides[k]
+        # data_exists = {}
+        # strides = {}
+        # start_idxs = {}
+        # end_idxs = {}
+        # for k in self.topics:
+            # strides[k] = int(self.dt/self.rates[k])
+            # start_idxs[k] = (data_exists[k].index(True) -1 )// strides[k] +1 # cut off the imcomplete frames 
+            # end_idxs[k] = len(data_exists[k]) //strides[k]
 
         #This trick doesn't work with differing dts
         #thankfully, index gives first occurrence of value.
-        start_idx = max(start_idxs.values())
-        end_idx = min(end_idxs.values())
+        # start_idx = max(start_idxs.values())
+        # end_idx = min(end_idxs.values())
 
-        #import pdb;pdb.set_trace()
+        # import ipdb; ipdb.set_trace()
 
         #For now, just search backward to fill in missing data.
         #This is most similar to the online case, where you'll have stale data if the sensor doesn't return.
 
         for k in self.topics:
-            start_frame = start_idxs[k] * strides[k]
-            end_frame = end_idxs[k] * strides[k]
+            data_exists = [x>=0 for x in self.timesteps[k]]
+            framenum = len(data_exists)
+            start_frame = data_exists.index(True) #start_idxs[k] * strides[k]
             last_avail = start_frame
-            for tt in range(start_frame, start_idx * strides[k]):
-                if data_exists[k][tt]:
-                    last_avail = tt
+            for tt in range(0, start_frame): # fill the missing frames at the beginning
+                self.timesteps[k][tt] = self.timesteps[k][last_avail]
 
-            for t in range(start_idx* strides[k], end_frame):
-                if data_exists[k][t]:
+            for t in range(start_frame, framenum):
+                if data_exists[t]:
                     last_avail = t
                 else:
                     self.timesteps[k][t] = self.timesteps[k][last_avail]
-                    logfile.logline('   -- {} filled missing frame {} - {}'.format(k, t, self.timesteps[k][t]))
+                    logfile.logline('   -- {} filled missing frame {} <- {}: {}'.format(k, t, last_avail, self.timesteps[k][t]))
             # import ipdb;ipdb.set_trace()
-            data_exists[k] = [x>=0 for x in self.timesteps[k]]
-            assert np.array(data_exists[k][start_frame: end_frame]).sum()==end_frame-start_frame, "Error in preprocessing queue! "
+            data_exists = [x>=0 for x in self.timesteps[k]]
+            assert np.array(data_exists).sum()==framenum, "Error in preprocessing queue! "
         
-            logfile.logline("  frames {}, \t start time {}, end time {}, topic {}".format((end_idx-start_idx)*strides[k], 
-                                     self.timesteps[k][start_idx*strides[k]], 
-                                     self.timesteps[k][end_idx*strides[k]-1], k))
+            logfile.logline("  frames {}, \t start time {}, end time {}, topic {}".format(framenum, 
+                                     self.timesteps[k][0], 
+                                     self.timesteps[k][framenum-1], 
+                                     k))
         
-        self.timesteps = {k:v[start_idx*strides[k]: end_idx*strides[k]] for k,v in self.timesteps.items()}
+        # self.timesteps = {k:v[start_idx*strides[k]: end_idx*strides[k]] for k,v in self.timesteps.items()}
 
     def convert_queue(self, bag):
         """
@@ -278,7 +281,7 @@ if __name__ == '__main__':
     parser.add_argument('--bag_fp', type=str, required=True, help='Path to the bag file to get data from')
     parser.add_argument('--save_to', type=str, required=True, help='Name of the dir to save the result to')
     parser.add_argument('--save_as', type=str, required=True, help='Name of the file to save as')
-    parser.add_argument('--use_stamps', type=str2bool, required=False, default=True, help='Whether to use the time provided in the stamps or just the rosbag time')
+    parser.add_argument('--use_stamps', type=bool, required=False, default=True, help='Whether to use the time provided in the stamps or just the rosbag time')
 
     args = parser.parse_args()
 
@@ -287,7 +290,7 @@ if __name__ == '__main__':
     spec, converters, remap, rates = config_parser.parse_from_fp(args.config_spec)
     bag = rosbag.Bag(args.bag_fp)
 
-    converter = ConverterToFiles(spec, converters, remap, rates, args.use_stamps)
+    converter = ConverterToFiles(spec, converters, remap, rates)
 
     dataset = converter.convert_bag(bag)
 
