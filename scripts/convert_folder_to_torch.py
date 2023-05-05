@@ -23,6 +23,10 @@ class ConvertToTorchTraj:
         self.observation = list(self.config['observation'].keys())
         self.action = list(self.config['action'].keys())
         self.remap = {'odom':'state','delta':'delta','imu':'imu', 'cmd':'cmd','rgb_map': 'rgbmap', 'height_map':'heightmap','image_left_color':'image_rgb'}
+        self.folder_names = {k:k for k in self.remap.keys()}
+        for k,v in self.config['observation'].keys():
+            if 'folder' in v.keys():
+                self.folder_name[k] = v['folder']
         self.strides = dict([(x,1) for x in self.action + self.observation])
         if 'imu' in self.strides.keys():
             self.strides['imu'] = self.config['observation']['imu']['stride']
@@ -90,7 +94,7 @@ class ConvertToTorchTraj:
     def load_queue(self, fp):
         self.reset()
         for x in self.observation+self.action:
-            traj = join(fp,x)
+            traj = join(fp,self.folder_name[x])
             flag = False
             if x == 'odom':
                 fname = 'odometry.npy'
