@@ -44,8 +44,8 @@ class ConverterToFiles:
             self.bagtimestamps[k] = [] 
         
     def find_first_msg_time(self, maintopic):
-        self.start_timestamps = {tt: self.bagtimestamps[tt][0] for tt in self.topics}
-        starttime_list = [self.bagtimestamps[tt][0] for tt in self.topics]
+        self.start_timestamps = {tt: min(self.bagtimestamps[tt]) for tt in self.topics}
+        starttime_list = [min(self.bagtimestamps[tt]) for tt in self.topics]
         max_starttime = max(starttime_list)
         main_topic_idx = np.searchsorted(self.bagtimestamps[maintopic], max_starttime)
         starttime = self.bagtimestamps[maintopic][main_topic_idx]
@@ -77,7 +77,7 @@ class ConverterToFiles:
             last_time[topic] = stamp_sec
 
         for tt in self.topics:
-            logfile.logline('  {} \t {} \t {} - {}'.format( tt, len(self.bagtimestamps[tt]), self.bagtimestamps[tt][0], self.bagtimestamps[tt][-1]))
+            logfile.logline('  {} \t {} \t {} - {}'.format( tt, len(self.bagtimestamps[tt]), min(self.bagtimestamps[tt]), max(self.bagtimestamps[tt])))
 
         return stamp_sec
 
@@ -107,7 +107,7 @@ class ConverterToFiles:
         # each topic samples from a fixed starting timestamp 
         if preload_timestamps is None:
             starttime = self.find_first_msg_time(main_topic)
-            endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
+            endtime = min([max(self.bagtimestamps[tt]) for tt in self.topics])
             logfile.logline("  starting time {}, ending time {}, duration {}".format(starttime, endtime, endtime-starttime))
             if starttime + self.rates[main_topic] >= endtime:
                 logfile.logline("Could not find enough overlap between topics!")
@@ -116,10 +116,19 @@ class ConverterToFiles:
         else:
             self.timesteps = {k:np.arange(preload_timestamps[0], preload_timestamps[-1] + self.rates[k], self.rates[k]) for k in self.topics}
             # self.timesteps = {k:preload_timestamps for k in self.topics}
-            starttime = max([self.bagtimestamps[tt][0] for tt in self.topics])
-            endtime = min([self.bagtimestamps[tt][-1] for tt in self.topics])
+            starttime = max([min(self.bagtimestamps[tt]) for tt in self.topics])
+            endtime = min([max(self.bagtimestamps[tt]) for tt in self.topics])
             if starttime > preload_timestamps[0] or endtime < preload_timestamps[-1]:
                 logfile.logline("Sample with preloaded timestamps, but it is out of the topic range {} - {}".format(starttime, endtime))
+
+        for k in self.timesteps.keys():
+            modality_shape = self.timesteps[k].shape
+            N_per_step = int(self.dt / self.rates[k])
+            print(k,N_per_step)
+            if N_per_step > 1 and modality_shape[0]%N_per_step != 0:
+                num_missing_frames = N_per_step - modality_shape[0]%N_per_step
+                st_missing_frames = self.timesteps[k][-1]+self.rates[k]
+                self.timesteps[k] = np.concatenate((self.timesteps[k],np.arange(st_missing_frames, st_missing_frames+self.rates[k] *(num_missing_frames - 0.1),self.rates[k])))
 
         self.matched_idxs = {k:np.zeros_like(self.timesteps[k], dtype=np.int32) for k in self.topics}
 
