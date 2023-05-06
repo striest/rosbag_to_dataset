@@ -124,7 +124,7 @@ def listfolder(folderdir):
     return baglist
 
 # organize 2022 data
-rootfolder = '/project/learningphysics'
+rootfolder = '/home/offroad/parv_code/data/test_baseline_extract'
 subfolders = [
             # '2022-04-15',
             # '2022-05-02',
@@ -145,17 +145,18 @@ subfolders = [
             # '2022-09-08',
             # '2022-09-27',
             # '2022-10-04',
-            '2022-11-09']
+            'bagfiles']
 # rootfolder = '/cairo/arl_bag_files'
 # subfolders = ['SARA', 'racer']
 
-outtxt = open('trajlist_2022_2.txt','w')
+outtxt = open('trajlist_test.txt','w')
 for k, subfolder in enumerate(subfolders):
     subdir = join(rootfolder, subfolder)
     bagfiles = listfolder(subdir)
     # import ipdb;ipdb.set_trace()
     for k,bag in enumerate(bagfiles):
         outtxt.write(bag)
+        outtxt.write(' ')
+        outtxt.write(bag.split('/')[-1].split('.bag')[0])
         outtxt.write('\n')
-
 outtxt.close()

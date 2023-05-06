@@ -1,0 +1,3 @@
+/home/offroad/parv_code/data/test_baseline_extract/bagfiles/20210826_34.bag 20210826_34
+/home/offroad/parv_code/data/test_baseline_extract/bagfiles/20210826_35.bag 20210826_35
+/home/offroad/parv_code/data/test_baseline_extract/bagfiles/20210903_0.bag 20210903_0

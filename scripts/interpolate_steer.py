@@ -10,8 +10,7 @@ if __name__ == '__main__':
 
     '''
     This script is useful to correctly interpolate steer from dt = 0.16 to dt = 0.1
-    Here we assume source_fp has extracted delta at dt = 0.16 using normal extraction method 
-    #TODO check if only delta is sufficient
+    Here we assume source_fp has extracted delta at dt = 0.16 using normal extraction method - see readme 
     Then we allign the delta with odom timestamps with three cases
     1.If start of delta > start of odom : then pad final result at beginning with first delta element
     2.If end of delta < end of odom : then pad final result at endwith last delta element
