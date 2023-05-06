@@ -3,7 +3,7 @@ from os.path import join
 from os import listdir
 from tqdm import tqdm
 
-root_fp ='/project/learningphysics/parvm/torch_dataset/train'
+root_fp ='/project/learningphysics/parvm/torch_dataset_20/eval'
 traj_names = listdir(root_fp)
 
 for traj_name in tqdm(traj_names):

@@ -603,4 +603,3 @@
 /project/learningphysics/dataset/20210910_bags/20210910_6.bag 20210910_6
 /project/learningphysics/dataset/20210910_bags/20210910_7.bag 20210910_7
 /project/learningphysics/dataset/20210910_bags/20210910_8.bag 20210910_8
-/project/learningphysics/dataset/gascola_laps/20211021_0.bag 20211021_0
