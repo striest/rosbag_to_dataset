@@ -332,7 +332,6 @@
 /project/learningphysics/dataset/20210903/20210903_147.bag 20210903_147
 /project/learningphysics/dataset/20210903/20210903_148.bag 20210903_148
 /project/learningphysics/dataset/20210903/20210903_149.bag 20210903_149
-/project/learningphysics/dataset/20210903/20210903_15.bag 20210903_15
 /project/learningphysics/dataset/20210903/20210903_150.bag 20210903_150
 /project/learningphysics/dataset/20210903/20210903_151.bag 20210903_151
 /project/learningphysics/dataset/20210903/20210903_152.bag 20210903_152
@@ -343,7 +342,6 @@
 /project/learningphysics/dataset/20210903/20210903_157.bag 20210903_157
 /project/learningphysics/dataset/20210903/20210903_158.bag 20210903_158
 /project/learningphysics/dataset/20210903/20210903_159.bag 20210903_159
-/project/learningphysics/dataset/20210903/20210903_16.bag 20210903_16
 /project/learningphysics/dataset/20210903/20210903_160.bag 20210903_160
 /project/learningphysics/dataset/20210903/20210903_161.bag 20210903_161
 /project/learningphysics/dataset/20210903/20210903_162.bag 20210903_162
@@ -354,7 +352,6 @@
 /project/learningphysics/dataset/20210903/20210903_167.bag 20210903_167
 /project/learningphysics/dataset/20210903/20210903_168.bag 20210903_168
 /project/learningphysics/dataset/20210903/20210903_169.bag 20210903_169
-/project/learningphysics/dataset/20210903/20210903_17.bag 20210903_17
 /project/learningphysics/dataset/20210903/20210903_170.bag 20210903_170
 /project/learningphysics/dataset/20210903/20210903_171.bag 20210903_171
 /project/learningphysics/dataset/20210903/20210903_172.bag 20210903_172
@@ -365,7 +362,6 @@
 /project/learningphysics/dataset/20210903/20210903_177.bag 20210903_177
 /project/learningphysics/dataset/20210903/20210903_178.bag 20210903_178
 /project/learningphysics/dataset/20210903/20210903_179.bag 20210903_179
-/project/learningphysics/dataset/20210903/20210903_18.bag 20210903_18
 /project/learningphysics/dataset/20210903/20210903_180.bag 20210903_180
 /project/learningphysics/dataset/20210903/20210903_181.bag 20210903_181
 /project/learningphysics/dataset/20210903/20210903_182.bag 20210903_182
@@ -376,7 +372,6 @@
 /project/learningphysics/dataset/20210903/20210903_187.bag 20210903_187
 /project/learningphysics/dataset/20210903/20210903_188.bag 20210903_188
 /project/learningphysics/dataset/20210903/20210903_189.bag 20210903_189
-/project/learningphysics/dataset/20210903/20210903_19.bag 20210903_19
 /project/learningphysics/dataset/20210903/20210903_190.bag 20210903_190
 /project/learningphysics/dataset/20210903/20210903_191.bag 20210903_191
 /project/learningphysics/dataset/20210903/20210903_192.bag 20210903_192
@@ -388,7 +383,6 @@
 /project/learningphysics/dataset/20210903/20210903_198.bag 20210903_198
 /project/learningphysics/dataset/20210903/20210903_199.bag 20210903_199
 /project/learningphysics/dataset/20210903/20210903_2.bag 20210903_2
-/project/learningphysics/dataset/20210903/20210903_20.bag 20210903_20
 /project/learningphysics/dataset/20210903/20210903_200.bag 20210903_200
 /project/learningphysics/dataset/20210903/20210903_201.bag 20210903_201
 /project/learningphysics/dataset/20210903/20210903_202.bag 20210903_202
@@ -399,7 +393,6 @@
 /project/learningphysics/dataset/20210903/20210903_207.bag 20210903_207
 /project/learningphysics/dataset/20210903/20210903_208.bag 20210903_208
 /project/learningphysics/dataset/20210903/20210903_209.bag 20210903_209
-/project/learningphysics/dataset/20210903/20210903_21.bag 20210903_21
 /project/learningphysics/dataset/20210903/20210903_210.bag 20210903_210
 /project/learningphysics/dataset/20210903/20210903_211.bag 20210903_211
 /project/learningphysics/dataset/20210903/20210903_212.bag 20210903_212
@@ -410,7 +403,6 @@
 /project/learningphysics/dataset/20210903/20210903_217.bag 20210903_217
 /project/learningphysics/dataset/20210903/20210903_218.bag 20210903_218
 /project/learningphysics/dataset/20210903/20210903_219.bag 20210903_219
-/project/learningphysics/dataset/20210903/20210903_22.bag 20210903_22
 /project/learningphysics/dataset/20210903/20210903_220.bag 20210903_220
 /project/learningphysics/dataset/20210903/20210903_221.bag 20210903_221
 /project/learningphysics/dataset/20210903/20210903_222.bag 20210903_222
@@ -606,8 +598,6 @@
 /project/learningphysics/dataset/20210910_bags/20210910_30.bag 20210910_30
 /project/learningphysics/dataset/20210910_bags/20210910_31.bag 20210910_31
 /project/learningphysics/dataset/20210910_bags/20210910_32.bag 20210910_32
-/project/learningphysics/dataset/20210910_bags/20210910_33.bag 20210910_33
-/project/learningphysics/dataset/20210910_bags/20210910_34.bag 20210910_34
 /project/learningphysics/dataset/20210910_bags/20210910_4.bag 20210910_4
 /project/learningphysics/dataset/20210910_bags/20210910_5.bag 20210910_5
 /project/learningphysics/dataset/20210910_bags/20210910_6.bag 20210910_6

@@ -246,9 +246,9 @@ if __name__ =='__main__':
 
     parser.add_argument('--source_fp', type=str, required=True, help='Path to the source directory')
     parser.add_argument('--save_fp', type=str, required=True, help='Path to the destination trajectory')
-    parser.add_argument('--traj_file', type=str, required=False,default = "None", help='Path to the traj listy')
-    parser.add_argument('--program_time', type=bool, required=False,default = False, help='Append program time to save path')
-    parser.add_argument('--no_of_segments', type=int, required=False,default = 1, help='Number of segments')
+    parser.add_argument('--traj_file', type=str, required=False,default = "None", help='Path to the traj list. If None then entire source folder is converted')
+    parser.add_argument('--program_time', type=bool, required=False,default = False, help='Append program time to save_fp.')
+    parser.add_argument('--no_of_segments', type=int, required=False,default = 1, help='Number of segments to convert a lot of folders faster.')
     parser.add_argument('--segment_index', type=int, required=False,default = 0, help='Segemnet number indexed at 0')
 
 
@@ -279,7 +279,7 @@ if __name__ =='__main__':
         traj_name = traj_list.split(', ')
     
     already_extracted_traj_name = [x[:-3] for x in listdir(root_save_fp) if x.endswith('.pt')]
-    print("before ", len(traj_name))
+    print("According to Traj List ", len(traj_name))
 
     start_idx = int ( len(traj_name) * segment_index / no_of_segments)
     end_idx = int(len(traj_name) * (segment_index + 1) / no_of_segments)
@@ -288,14 +288,10 @@ if __name__ =='__main__':
 
     traj_name = [x for x in traj_name if x not in set(already_extracted_traj_name)]
 
-
-
-
-
     traj_name.sort()
 
     print(already_extracted_traj_name)
-    print("after ", len(traj_name))
+    print("Remaining after ignoring already extracted ", len(traj_name))
     for x in tqdm(traj_name):
         source_fp = join(root_source_fp,x)
         save_fp = join(root_save_fp,f'{x}.pt')

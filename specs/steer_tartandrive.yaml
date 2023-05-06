@@ -1,6 +1,6 @@
 ---
-  main_topic: "/multisense/left/image_rect"
-  dt: 0.1
+  main_topic: "/ros_talon/current_position"
+  dt: 0.16
   data: 
     # "/odometry/filtered_odom":
     #     type: Odometry
@@ -31,12 +31,12 @@
     #         output_resolution: [1024, 544]
     #         nchannels: 1
 
-    "/multisense/left/image_rect":
-        type: Image
-        folder: "image_left"
-        options:
-            output_resolution: [64, 64]
-            nchannels: 1
+    # "/multisense/left/image_rect":
+    #     type: Image
+    #     folder: "image_left"
+    #     options:
+    #         output_resolution: [64, 64]
+    #         nchannels: 1
 
     # "/cmd":
     #     type: Twist

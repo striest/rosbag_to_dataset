@@ -8,6 +8,16 @@ from rosbag_to_dataset.util.os_util import maybe_mkdir
 
 if __name__ == '__main__':
 
+    '''
+    This script is useful to correctly interpolate steer from dt = 0.16 to dt = 0.1
+    Here we assume source_fp has extracted delta at dt = 0.16 using normal extraction method 
+    #TODO check if only delta is sufficient
+    Then we allign the delta with odom timestamps with three cases
+    1.If start of delta > start of odom : then pad final result at beginning with first delta element
+    2.If end of delta < end of odom : then pad final result at endwith last delta element
+    3. In case of overlap - use SciPy to interpolate source delta to dt = 0.1 (st for odom timestamps)
+    '''
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--source_fp', type=str, required=True, help='Path to the source directory')
@@ -43,18 +53,3 @@ if __name__ == '__main__':
         maybe_mkdir(join(dest_traj_fp,'delta'))
         np.save(join(dest_traj_fp,'delta','float.npy'),final_delta)
         np.savetxt(join(dest_traj_fp,'delta','timestamps.txt'),dest_timestamps)
-
-        # plt.plot(delta_timestamps,source_delta,'r-',label='Original Steering')
-        # plt.plot(dest_timestamps,final_delta,'b.',label='Interploated Steering')
-        # plt.legend()
-        # plt.show()
-
-
-
-
-
-
-
-
-
-
