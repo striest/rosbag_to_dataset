@@ -5,7 +5,7 @@ import numpy as np
 import scipy.interpolate
 import matplotlib.pyplot as plt
 from rosbag_to_dataset.util.os_util import maybe_mkdir
-
+from tqdm import tqdm 
 if __name__ == '__main__':
 
     '''
@@ -28,12 +28,10 @@ if __name__ == '__main__':
     save_fp = args.save_fp
 
     traj_folders = [x for x in listdir(source_fp) if isdir(join(source_fp,x))]
-    for traj_name in traj_folders:
+    for traj_name in tqdm(traj_folders):
         source_traj_fp = join(source_fp,traj_name)
         dest_traj_fp = join(save_fp,traj_name)
         
-        if isdir(join(dest_traj_fp,'delta')):
-            continue
         source_delta = np.load(join(source_traj_fp,'delta','float.npy'))
         delta_timestamps = np.loadtxt(join(source_traj_fp,'delta','timestamps.txt'))
 
@@ -49,6 +47,9 @@ if __name__ == '__main__':
         overlap_idx = np.logical_and(dest_timestamps >= delta_timestamps[0], dest_timestamps <= delta_timestamps[-1])
 
         final_delta = np.concatenate((missed_first_delta,interpolated_delta(dest_timestamps[overlap_idx]),missed_last_delta)).reshape((-1,1))
-        maybe_mkdir(join(dest_traj_fp,'delta'))
-        np.save(join(dest_traj_fp,'delta','float.npy'),final_delta)
-        np.savetxt(join(dest_traj_fp,'delta','timestamps.txt'),dest_timestamps)
+        
+        dest_folder_name = 'current_position_10'
+        
+        maybe_mkdir(join(dest_traj_fp,dest_folder_name))
+        np.save(join(dest_traj_fp,dest_folder_name,'float.npy'),final_delta)
+        np.savetxt(join(dest_traj_fp,dest_folder_name,'timestamps.txt'),dest_timestamps)

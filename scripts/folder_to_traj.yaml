@@ -12,7 +12,8 @@ observation:
     folder: shock_travel_20
   intervention : 
     folder: intervention_200
-  delta : {}
+  delta : 
+    folder: current_position_10
   height_map:
     res: [64,64]
     num_channels: [0]

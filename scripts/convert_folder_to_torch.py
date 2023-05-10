@@ -219,7 +219,7 @@ class ConvertToTorchTraj:
         for k in traj['observation'].keys():
             if k in ['heightmap','rgbmap','image_rgb']:
                 # import pdb;pdb.set_trace()
-                if k in ['rgbmap','iamge_rgb']:
+                if k in ['rgbmap','image_rgb']:
                     og_key = [key for key,x in self.remap.items() if x == k][0]
                     if self.config['observation'][og_key]['normalize']:
                         traj['observation'][k] = traj['observation'][k]/255.
