@@ -22,7 +22,7 @@ class ConvertToTorchTraj:
         self.config = config
         self.observation = list(self.config['observation'].keys())
         self.action = list(self.config['action'].keys())
-        self.remap = {'odom':'state','delta':'delta','imu':'imu', 'cmd':'cmd','rgb_map': 'rgbmap', 'height_map':'heightmap','image_left_color':'image_rgb','wheel_rpm':'wheel_rpm','shock_travel':'shock_travel','intervention':'intervention'}
+        self.remap = {'odom':'state','steer_angle':'steer_angle','imu':'imu', 'cmd':'cmd','rgb_map': 'rgbmap', 'height_map':'heightmap','image_left_color':'image_rgb','wheel_rpm':'wheel_rpm','shock_travel':'shock_travel','intervention':'intervention'}
         self.folder_name = {k:k for k in self.remap.keys()}
         for k,v in self.config['observation'].items():
             if 'folder' in v.keys():
@@ -107,7 +107,7 @@ class ConvertToTorchTraj:
                 fname = 'imu.npy'
             elif x == 'cmd':
                 fname = 'twist.npy'
-            elif x == 'delta':
+            elif x == 'steer_angle':
                 fname = 'float.npy'
             elif x == 'wheel_rpm':
                 fname = 'encoder.npy'
