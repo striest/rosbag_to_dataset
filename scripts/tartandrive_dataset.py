@@ -145,6 +145,7 @@ if __name__ == '__main__':
         if not suc: 
             logfile.logline('Convert bagfile {} failure..'.format(bagfile))
             logfile.close()
-            maybe_rmdir(trajoutfolder, force=True)
+            if args.preload_timestamp_folder == "":
+                maybe_rmdir(trajoutfolder, force=True)
         else:
             logfile.close()
