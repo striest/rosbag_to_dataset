@@ -4,14 +4,14 @@ observation:
   imu:
     stride: 20
     folder: imu_20
-  wheel_rpm:
-    stride: 20
-    folder: wheel_rpm_20
-  shock_travel:
-    stride: 20
-    folder: shock_travel_20
-  intervention : 
-    folder: intervention_200
+  # wheel_rpm:
+  #   stride: 20
+  #   folder: wheel_rpm_20
+  # shock_travel:
+  #   stride: 20
+  #   folder: shock_travel_20
+  # intervention : 
+  #   folder: intervention_200
   steer_angle : 
     folder: current_position_10
   height_map:

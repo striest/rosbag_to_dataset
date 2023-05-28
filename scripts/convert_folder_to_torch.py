@@ -12,9 +12,40 @@ from numpy import asarray
 from tqdm import tqdm
 from rosbag_to_dataset.util.os_util import maybe_mkdirs
 from copy import deepcopy
-
+import multiprocessing
 from datetime import datetime
+import scipy
+def odom_tf(data,year):
+    idx = np.arange(data.shape[-1])
+    if year == '2021':
+        idx[0] = 1
+        idx[1] = 0
+    idx[3] = 4
+    idx[4] = 3
+    idx[7] = 8
+    idx[8] = 7
+    idx[10] = 11
+    idx[11] = 10
+    data = data[...,idx]
+    if year == '2021':
+        data[...,[1,4,8,11]] *= -1
+    else:
+        data[...,[4,8,11]] *= -1
+    return data
 
+def add_new_state(traj):
+    rot_matrix = scipy.spatial.transform.Rotation.from_quat(traj['observation']['state'][..., 3:7].view(-1,4)).as_matrix()
+    rot_6 = rot_matrix[...,[0,1]].reshape((*traj['observation']['state'].shape[:-1],6))
+    new_state = np.concatenate([traj['observation']['state'][...,:3],rot_6,traj['observation']['state'][...,7:]],axis=-1)
+
+    next_rot_matrix = scipy.spatial.transform.Rotation.from_quat(traj['next_observation']['state'][..., 3:7].view(-1,4)).as_matrix()
+    next_rot_6 = next_rot_matrix[...,[0,1]].reshape((*traj['next_observation']['state'].shape[:-1],6))
+    next_new_state = np.concatenate([traj['next_observation']['state'][...,:3],next_rot_6,traj['next_observation']['state'][...,7:]],axis=-1)
+
+    traj['observation']['new_state'] =  torch.from_numpy(new_state).to(torch.float32)
+    traj['next_observation']['new_state'] = torch.from_numpy(next_new_state).to(torch.float32)
+
+    return traj
 
 class ConvertToTorchTraj:
 
@@ -128,14 +159,7 @@ class ConvertToTorchTraj:
             if not flag:
                 self.queue[self.remap[x]] = np.load(join(traj,fname))
                 if x == 'odom':
-                    idx = np.arange(self.queue[self.remap[x]].shape[-1])
-                    idx[0] = 1
-                    idx[1] = 0
-                    idx[7] = 8
-                    idx[8] = 7
-                    self.queue[self.remap[x]]=self.queue[self.remap[x]][...,idx]
-                    self.queue[self.remap[x]][...,[1,8]] *= -1
-
+                    self.queue[self.remap[x]] = odom_tf(self.queue[self.remap[x]],"2022")
 
     def convert_queue(self):
         """
@@ -237,8 +261,8 @@ class ConvertToTorchTraj:
         torch_traj = cvt.preprocess_pose(torch_traj,sliding_window = False)
         torch_traj = cvt.preprocess_observations(torch_traj)
         torch_traj['dt'] = torch.ones(torch_traj['action'].shape[0]) * self.dt
+        torch_traj = add_new_state(torch_traj)
         torch.save(torch_traj,save_fp)
-
 
 if __name__ =='__main__':
     
@@ -292,8 +316,36 @@ if __name__ =='__main__':
 
     print(already_extracted_traj_name)
     print("Remaining after ignoring already extracted ", len(traj_name))
-    for x in tqdm(traj_name):
-        source_fp = join(root_source_fp,x)
-        save_fp = join(root_save_fp,f'{x}.pt')
-        cvt.convert_to_torch(cvt,source_fp,save_fp)
-        # import pdb;pdb.set_trace()
+    # for x in tqdm(traj_name):
+    #     source_fp = join(root_source_fp,x)
+    #     save_fp = join(root_save_fp,f'{x}.pt')
+    #     try:
+    #         cvt.convert_to_torch(cvt,source_fp,save_fp)
+    #     except Exception as e:
+    #         print(e)
+    #         print(x)
+    #         # import pdb;pdb.set_trace()
+    num_proc = 18
+    i=0
+    while i < len(traj_name):
+        print(i)
+        pool = multiprocessing.Pool(processes=num_proc)
+        for j in range(num_proc):
+            if (i+j) >=len(traj_name):
+                break
+            x = traj_name[i+j]
+
+            source_fp = join(root_source_fp,x)
+            save_fp = join(root_save_fp,f'{x}.pt')
+
+            try:
+                # cvt.convert_to_torch(cvt,source_fp,save_fp)
+                pool.apply_async(cvt.convert_to_torch,args=(cvt,source_fp,save_fp,))
+            except Exception as e:
+                print(e)
+                print(x)
+
+            
+        pool.close()
+        pool.join()
+        i+=num_proc
