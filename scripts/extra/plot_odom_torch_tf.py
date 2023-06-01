@@ -12,14 +12,19 @@ import scipy
 from rosbag_to_dataset.util.os_util import maybe_mkdirs
 
 
-path = '/project/learningphysics/parvm/torch_dataset_20_correct_steer/all'
-traj_list_fp = '/home/parvm/tartan_extract_ws/src/rosbag_to_dataset/scripts/trajlist_tartan_train.txt'
-dest = '/home/parvm/tartan_extract_ws/src/rosbag_to_dataset/scripts/extra/all'
+# path = '/project/learningphysics/parvm/torch_dataset_20_correct_steer/all'
+traj_list = '/home/parvm/ogpkg/src/wheeledsim_rl/scripts/world_models/data_split/perceptron/traj_2022_all.txt'
+dest = '/home/parvm/tartan_extract_ws/src/rosbag_to_dataset/scripts/extra/results/2022'
 maybe_mkdirs(dest)
-with open(traj_list_fp) as f:
-    traj_list = [x.strip().split(' ')[-1]+'.pt' for x in f.readlines()]
-for traj in tqdm(traj_list):
-    odom = torch.load(join(path, traj))['observation']['state']
+# with open(traj_list_fp) as f:
+#     traj_list = [x.strip().split(' ')[-1]+'.pt' for x in f.readlines()]
+
+with open(traj_list) as f:
+        fps = [x.strip() for x in f.readlines()]
+        fps.sort()
+for traj in tqdm(fps):
+    traj_name = traj.split('/')[-1].split('.')[0]
+    odom = torch.load(traj)['observation']['state']
     x,y,z,q0,q1,q2,q3,vx,vy,vz,wx,wy,wz = odom.moveaxis(-1,0)
     roll,pitch,yaw = np.moveaxis(scipy.spatial.transform.Rotation.from_quat(odom[..., 3:7]).as_rotvec(),-1,0)
     # if np.abs(pitch).max() < 0.3:
@@ -56,7 +61,7 @@ for traj in tqdm(traj_list):
     axs[3][2].legend(['yaw'])
     fig.tight_layout()
 
-    plt.savefig(join(dest,f'{traj}.png'))
+    plt.savefig(join(dest,f'{traj_name}.png'))
     plt.close()
 
 
