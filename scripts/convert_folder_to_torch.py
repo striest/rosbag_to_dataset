@@ -36,15 +36,34 @@ def odom_tf(data,year):
 def add_new_state(traj):
     rot_matrix = scipy.spatial.transform.Rotation.from_quat(traj['observation']['state'][..., 3:7].view(-1,4)).as_matrix()
     rot_6 = rot_matrix[...,[0,1]].reshape((*traj['observation']['state'].shape[:-1],6))
-    new_state = np.concatenate([traj['observation']['state'][...,:3],rot_6,traj['observation']['state'][...,7:]],axis=-1)
+    steer = traj['observation']['steer_angle'] * (30./415.) * (-torch.pi/180.)
+    new_state = np.concatenate([traj['observation']['state'][...,:3],rot_6,traj['observation']['state'][...,7:],steer],axis=-1)
 
     next_rot_matrix = scipy.spatial.transform.Rotation.from_quat(traj['next_observation']['state'][..., 3:7].view(-1,4)).as_matrix()
     next_rot_6 = next_rot_matrix[...,[0,1]].reshape((*traj['next_observation']['state'].shape[:-1],6))
-    next_new_state = np.concatenate([traj['next_observation']['state'][...,:3],next_rot_6,traj['next_observation']['state'][...,7:]],axis=-1)
+    next_steer = traj['next_observation']['steer_angle'] * (30./415.) * (-torch.pi/180.)
+    next_new_state = np.concatenate([traj['next_observation']['state'][...,:3],next_rot_6,traj['next_observation']['state'][...,7:],next_steer],axis=-1)
 
     traj['observation']['new_state'] =  torch.from_numpy(new_state).to(torch.float32)
     traj['next_observation']['new_state'] = torch.from_numpy(next_new_state).to(torch.float32)
 
+    return traj
+
+def handle_delay(traj,year):
+    if year == '2021':
+        delay_steps = 4
+    elif year == '2022':
+        delay_steps = 2
+    else:
+        raise NotImplementedError
+    for k in traj.keys():
+        if k == 'action':
+            steer = traj[k][...,[1]][delay_steps:]
+            throttle = traj[k][...,[0]][:-delay_steps]
+            traj[k] = torch.cat([throttle,steer],dim=-1)
+        else:
+            traj[k] = dict_map(traj[k],lambda x:x[delay_steps:])
+    
     return traj
 
 class ConvertToTorchTraj:
@@ -127,7 +146,7 @@ class ConvertToTorchTraj:
 
         self.queue[self.remap[key]] = final_queue
 
-    def load_queue(self, fp):
+    def load_queue(self, fp,year):
         self.reset()
         for x in self.observation+self.action:
             traj = join(fp,self.folder_name[x])
@@ -159,7 +178,7 @@ class ConvertToTorchTraj:
             if not flag:
                 self.queue[self.remap[x]] = np.load(join(traj,fname))
                 if x == 'odom':
-                    self.queue[self.remap[x]] = odom_tf(self.queue[self.remap[x]],"2022")
+                    self.queue[self.remap[x]] = odom_tf(self.queue[self.remap[x]],year)
 
     def convert_queue(self):
         """
@@ -254,20 +273,22 @@ class ConvertToTorchTraj:
         
         return traj
     
-    def convert_to_torch(self,cvt,source_fp,save_fp):
-        cvt.load_queue(source_fp)
+    def convert_to_torch(self,cvt,source_fp,save_fp,year):
+        cvt.load_queue(source_fp,year)
         torch_traj = cvt.convert_queue()
         torch_traj = cvt.traj_to_torch(torch_traj)
         torch_traj = cvt.preprocess_pose(torch_traj,sliding_window = False)
         torch_traj = cvt.preprocess_observations(torch_traj)
         torch_traj['dt'] = torch.ones(torch_traj['action'].shape[0]) * self.dt
         torch_traj = add_new_state(torch_traj)
+        torch_traj = handle_delay(torch_traj,year)
+
         torch.save(torch_traj,save_fp)
 
 if __name__ =='__main__':
     
     parser = argparse.ArgumentParser()
-
+    parser.add_argument('--year', type=str, required=True, help='Is it 2021 data or 2022 data ?')
     parser.add_argument('--source_fp', type=str, required=True, help='Path to the source directory')
     parser.add_argument('--save_fp', type=str, required=True, help='Path to the destination trajectory')
     parser.add_argument('--traj_file', type=str, required=False,default = "None", help='Path to the traj list. If None then entire source folder is converted')
@@ -340,7 +361,7 @@ if __name__ =='__main__':
 
             try:
                 # cvt.convert_to_torch(cvt,source_fp,save_fp)
-                pool.apply_async(cvt.convert_to_torch,args=(cvt,source_fp,save_fp,))
+                pool.apply_async(cvt.convert_to_torch,args=(cvt,source_fp,save_fp,year,))
             except Exception as e:
                 print(e)
                 print(x)
