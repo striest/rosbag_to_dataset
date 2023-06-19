@@ -1,3 +1,5 @@
+import os
+os.system('taskset -p --cpu-list 0-126 %d' % os.getpid())
 import rospy
 import torch
 import rosbag
@@ -261,27 +263,27 @@ class ConvertToTorchTraj:
         """
         for k in traj['observation'].keys():
             if k in ['heightmap','rgbmap','image_rgb']:
-                # import pdb;pdb.set_trace()
                 if k in ['rgbmap','image_rgb']:
                     og_key = [key for key,x in self.remap.items() if x == k][0]
                     if self.config['observation'][og_key]['normalize']:
                         traj['observation'][k] = traj['observation'][k]/255.
                         traj['next_observation'][k] = traj['next_observation'][k]/255.
 
-                traj['observation'][k] = traj['observation'][k].moveaxis(-1, -3).moveaxis(-1, -2)
-                traj['next_observation'][k] = traj['next_observation'][k].moveaxis(-1, -3).moveaxis(-1, -2)
+                traj['observation'][k] = traj['observation'][k].moveaxis(-1, -3)
+                traj['next_observation'][k] = traj['next_observation'][k].moveaxis(-1, -3)
         
         return traj
     
     def convert_to_torch(self,cvt,source_fp,save_fp,year):
         cvt.load_queue(source_fp,year)
+        print("queue loaded")
         torch_traj = cvt.convert_queue()
         torch_traj = cvt.traj_to_torch(torch_traj)
         torch_traj = cvt.preprocess_pose(torch_traj,sliding_window = False)
         torch_traj = cvt.preprocess_observations(torch_traj)
         torch_traj['dt'] = torch.ones(torch_traj['action'].shape[0]) * self.dt
         torch_traj = add_new_state(torch_traj)
-        torch_traj = handle_delay(torch_traj,year)
+        # torch_traj = handle_delay(torch_traj,year)
 
         torch.save(torch_traj,save_fp)
 
@@ -337,16 +339,13 @@ if __name__ =='__main__':
 
     print(already_extracted_traj_name)
     print("Remaining after ignoring already extracted ", len(traj_name))
-    # for x in tqdm(traj_name):
+
+    # for i in tqdm(range(len(traj_name))):
+    #     x = traj_name[i]
     #     source_fp = join(root_source_fp,x)
     #     save_fp = join(root_save_fp,f'{x}.pt')
-    #     try:
-    #         cvt.convert_to_torch(cvt,source_fp,save_fp)
-    #     except Exception as e:
-    #         print(e)
-    #         print(x)
-    #         # import pdb;pdb.set_trace()
-    num_proc = 18
+    #     cvt.convert_to_torch(cvt,source_fp,save_fp,args.year)
+    num_proc = 5
     i=0
     while i < len(traj_name):
         print(i)
@@ -361,7 +360,7 @@ if __name__ =='__main__':
 
             try:
                 # cvt.convert_to_torch(cvt,source_fp,save_fp)
-                pool.apply_async(cvt.convert_to_torch,args=(cvt,source_fp,save_fp,year,))
+                pool.apply_async(cvt.convert_to_torch,args=(cvt,source_fp,save_fp,args.year,))
             except Exception as e:
                 print(e)
                 print(x)
