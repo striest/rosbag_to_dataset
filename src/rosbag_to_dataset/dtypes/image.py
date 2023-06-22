@@ -45,8 +45,19 @@ class ImageConvert(Dtype):
             fill_value = np.percentile(data[~mask], 99)
             data[mask] = fill_value
 
-        data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
+            mask = np.any(mask,axis=-1,keepdims=True).astype(np.float32)
+            mask_normal = cv2.resize(mask, dsize=(self.output_resolution[0],self.output_resolution[1]), interpolation=cv2.INTER_AREA)
+            mask_int = cv2.resize(mask, dsize=(self.output_resolution[0],self.output_resolution[1]), interpolation=cv2.INTER_NEAREST)
+            assert(len(mask_normal.shape) == 2)
+            
+            mask_normal = np.expand_dims(mask_normal,axis = -1)
+            mask_int = np.expand_dims(mask_int,axis = -1)
 
+
+        data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
+        if self.empty_value:
+            data  = np.concatenate((data,mask_normal,mask_int),axis=-1) # appending normal and bool mask 
+        
         if self.aggregate == 'littleendian':
             data = sum([data[:, :, i] * (256**i) for i in range(self.nchannels)])
         elif self.aggregate == 'bigendian':

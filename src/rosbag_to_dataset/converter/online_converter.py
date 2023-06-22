@@ -10,6 +10,8 @@ import os
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import str2bool
 import time
+import scipy
+
 
 class OnlineConverter:
     """
@@ -92,6 +94,15 @@ class OnlineConverter:
             self.queue[topic] = self.queue[topic][1:] + [msg]
             self.times[topic] = self.times[topic][1:] + [t]
 
+    def add_new_state(self,traj):
+        rot_matrix = scipy.spatial.transform.Rotation.from_quat(traj['observation']['state'][..., 3:7].view(-1,4)).as_matrix()
+        rot_6 = rot_matrix[...,[0,1]].reshape((*traj['observation']['state'].shape[:-1],6))
+        steer = traj['observation']['steer_angle'] * (30./415.) * (-torch.pi/180.)
+        new_state = np.concatenate([traj['observation']['state'][...,:3],rot_6,traj['observation']['state'][...,7:],steer],axis=-1)
+
+        traj['observation']['new_state'] =  torch.from_numpy(new_state).to(torch.float32)
+        return traj
+    
     def get_data(self):
         out = {
                 'observation':{},
@@ -133,6 +144,8 @@ class OnlineConverter:
 
         if len(self.action_converters) > 0 and len(out['action'])>0:
             out['action'] = torch.cat([v for v in out['action'].values()], axis=0)
+        
+        out = self.add_new_state(out)
         return out
 
 if __name__ == '__main__':
