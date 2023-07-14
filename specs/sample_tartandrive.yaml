@@ -43,19 +43,24 @@
         options:
             mode: action
 
-    # "/wheel_rpm":
-    #     type: RPWheelEncoders
-    #     remap: "wheel_rpm"
-    #     N_per_step: 20
+    "/wheel_rpm":
+        type: RPWheelEncoders
+        folder: "wheel_rpm"
 
-    # "/shock_pos":
-    #     type: RPShockSensors
-    #     remap: "shock_travel"
-    #     N_per_step: 20
+    "/shock_pos":
+        type: RPShockSensors
+        folder: "shock_travel"
 
-    # "/controls":
-    #     type: RPControls
-    #     remap: "intervention"
-    #     options:
-    #         mode: "intervention"
-    #         intervention_threshold: 200.
+    "/controls":
+        type: RPControls
+        folder: "intervention"
+        options:
+            mode: "identity"
+
+    "/ros_talon/steering_angle":
+        type: Float32
+        folder: "steering_angle"
+
+    "/ros_talon/current_position":
+        type: Float32
+        folder: "current_position"

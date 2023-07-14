@@ -9,6 +9,8 @@ from os.path import isfile, join, isdir
 import time
 # python scripts/tartandrive_dataset.py --bag_fp /cairo/arl_bag_files/tartandrive/20210903_298.bag --config_spec specs/sample_tartandrive.yaml --save_to test_output/20210903_298
 # python scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive.yaml --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/tartandrive_extract
+# python3 scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive_add.yaml --bag_fp /project/learningphysics/dataset/20210812/trial3.bag --save_to /project/learningphysics/wenshanw/traj_test/20210812_trial3 --preload_timestamp_folder image_left_color
+# python3 scripts/tartandrive_dataset.py --config_spec specs/sample_tartandrive_add.yaml --bag_list scripts/trajlist.txt --save_to /project/learningphysics/tartandrive_trajs --preload_timestamp_folder image_left_color
 
 class FileLogger():
     def __init__(self, filename, overwrite=False):
@@ -120,7 +122,10 @@ if __name__ == '__main__':
         timestamps = None
         if args.preload_timestamp_folder != "":
             maintopicfolder = join(trajoutfolder, args.preload_timestamp_folder)
-            assert isdir(maintopicfolder), "Cannot find folder for the timestamp file {}".format(maintopicfolder)
+            if not isdir(maintopicfolder):
+                print("Cannot find folder for the timestamp file {}".format(maintopicfolder))
+                continue
+            # assert isdir(maintopicfolder), "Cannot find folder for the timestamp file {}".format(maintopicfolder)
             timestamps = load_timestamp(maintopicfolder)
 
 
@@ -144,6 +149,6 @@ if __name__ == '__main__':
         if not suc: 
             logfile.logline('Convert bagfile {} failure..'.format(bagfile))
             logfile.close()
-            maybe_rmdir(trajoutfolder, force=True)
+            # maybe_rmdir(trajoutfolder, force=True)
         else:
             logfile.close()
