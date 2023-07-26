@@ -24,8 +24,13 @@ if __name__ == '__main__':
     parser.add_argument('--bag_list', type=str, required=True, default="", help='List of bagfiles and output folders')
     parser.add_argument('--save_to', type=str, required=True, default="", help='Path to save the preview video')
     parser.add_argument('--cost_folder', type=str, default="cost", help='Cost folder name')
+    parser.add_argument('--folder_suffix', type=str, default="", help='the intput and output folder')
 
     args = parser.parse_args()
+
+    folder_suffix = args.folder_suffix
+    if folder_suffix != "":
+        folder_suffix = '_' + folder_suffix
 
     imgvissize = (512, 256)
     mapvissize = (256, 256)
@@ -52,14 +57,18 @@ if __name__ == '__main__':
         if not isdir(trajdir):
             print('!!! Trajectory Not Found {}'.format(trajdir))
             continue
-        rgbmapfolder = trajdir + '/rgb_map_vo' if isdir(trajdir + '/rgb_map_vo') else (trajdir + '/rgb_map')
-        hightmapfolder = trajdir + '/height_map_vo' if isdir(trajdir + '/height_map_vo') else (trajdir + '/height_map')
 
-        if not isdir(trajdir + '/image_left_color') or \
+        rgbmapfolder = trajdir + '/rgb_map_vo' if isdir(trajdir + '/rgb_map_vo') else (trajdir + '/rgb_map') + folder_suffix
+        hightmapfolder = trajdir + '/height_map_vo' if isdir(trajdir + '/height_map_vo') else (trajdir + '/height_map') + folder_suffix
+        fpvfolder = trajdir + '/image_left_color' if isdir(trajdir + '/image_left_color') else (trajdir + '/image_left') + folder_suffix
+        depthfolder = trajdir + '/depth_left' + folder_suffix
+        tartanvofolder = trajdir + '/tartanvo_odom' + folder_suffix
+
+        if not isdir(fpvfolder) or \
              not isdir(trajdir + '/cmd') or \
-             not isdir(trajdir + '/tartanvo_odom') or \
+             not isdir(tartanvofolder) or \
              not isdir(trajdir + '/odom') or \
-             not isdir(trajdir + '/depth_left') or \
+             not isdir(depthfolder) or \
              not isdir(rgbmapfolder) or \
              not isdir(hightmapfolder):
              print('!!! Missing data folders')
@@ -68,12 +77,12 @@ if __name__ == '__main__':
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')
         fout=cv2.VideoWriter(outvidfile, fourcc, 1.0/dt, (768, 512))
 
-        imglist = listdir(join(trajdir, 'image_left_color'))
-        imglist = [trajdir + '/image_left_color/' + img for img in imglist if img.endswith('.png')]
+        imglist = listdir(fpvfolder)
+        imglist = [fpvfolder + '/' + img for img in imglist if img.endswith('.png')]
         imglist.sort()
 
-        depthlist = listdir(join(trajdir, 'depth_left'))
-        depthlist = [trajdir + '/depth_left/' + img for img in depthlist if img.endswith('.npy')]
+        depthlist = listdir(depthfolder)
+        depthlist = [depthfolder + '/' + img for img in depthlist if img.endswith('.npy')]
         depthlist.sort()
 
         rgbmaplist = listdir(rgbmapfolder)
@@ -85,7 +94,7 @@ if __name__ == '__main__':
         heightmaplist.sort()
 
         cmds = np.load(trajdir + '/cmd/twist.npy')
-        motions = np.load(trajdir + '/tartanvo_odom/motions.npy')
+        motions = np.load(tartanvofolder + '/motions.npy')
         motions = np.concatenate((motions, motions[-1:,:])) # add one more frame
         odoms = np.load(trajdir + '/odom/odometry.npy')
         costfile = join(trajdir, args.cost_folder, 'cost.npy')
