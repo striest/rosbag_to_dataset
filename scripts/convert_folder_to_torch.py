@@ -17,6 +17,7 @@ from copy import deepcopy
 import multiprocessing
 from datetime import datetime
 import scipy
+from wheeledsim_rl.util.util import dict_map
 def odom_tf(data,year):
     idx = np.arange(data.shape[-1])
     if year == '2021':
@@ -53,9 +54,9 @@ def add_new_state(traj):
 
 def handle_delay(traj,year):
     if year == '2021':
-        delay_steps = 4
+        delay_steps = 5
     elif year == '2022':
-        delay_steps = 2
+        delay_steps = 5
     else:
         raise NotImplementedError
     for k in traj.keys():
@@ -283,7 +284,7 @@ class ConvertToTorchTraj:
         torch_traj = cvt.preprocess_observations(torch_traj)
         torch_traj['dt'] = torch.ones(torch_traj['action'].shape[0]) * self.dt
         torch_traj = add_new_state(torch_traj)
-        # torch_traj = handle_delay(torch_traj,year)
+        torch_traj = handle_delay(torch_traj,year)
 
         torch.save(torch_traj,save_fp)
 
@@ -345,7 +346,8 @@ if __name__ =='__main__':
     #     source_fp = join(root_source_fp,x)
     #     save_fp = join(root_save_fp,f'{x}.pt')
     #     cvt.convert_to_torch(cvt,source_fp,save_fp,args.year)
-    num_proc = 5
+
+    num_proc = 30
     i=0
     while i < len(traj_name):
         print(i)
