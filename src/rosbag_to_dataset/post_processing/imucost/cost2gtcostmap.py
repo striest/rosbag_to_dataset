@@ -126,6 +126,10 @@ class GTCostMapNode(object):
         ## Load intervention data
         intervention_dir = join(traj_root_folder, intervention_folder)
         intervention_fp = join(intervention_dir, "control.npy")
+
+        if cost.shape[0] < framenum:
+            print("*** Error: cost and map number mismatch {}/{}".format(cost.shape[0], framenum))
+            cost = np.concatenate((cost, [0,]*(framenum-cost.shape[0]))) # padding zero
         
         if isfile(intervention_fp):
             intervention_data = np.load(intervention_fp)
