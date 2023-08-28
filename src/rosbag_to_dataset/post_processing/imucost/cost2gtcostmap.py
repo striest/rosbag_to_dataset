@@ -86,14 +86,14 @@ class GTCostMapNode(object):
             motion[inter_start:,0] = randvel[:-1] * dt
         return motion, velx, cost
     
-    def process(self, traj_root_folder, costmap_output_folder, cost_input_folder='cost2', odom_folder='tartanvo_odom', new_odom=True, vis='file'):
+    def process(self, traj_root_folder, out_root_folder, costmap_output_folder, cost_input_folder='cost2', odom_folder='tartanvo_odom', new_odom=True, vis='file'):
         '''
         Output the costmap in the costmap folder
         '''
         print('Working on traj ', traj_root_folder)
 
         if costmap_output_folder is not None:
-            outdir = join(traj_root_folder, costmap_output_folder)
+            outdir = join(out_root_folder, costmap_output_folder)
             if not isdir(outdir):
                 mkdir(outdir)
                 print('Create folder: {}'.format(outdir))
