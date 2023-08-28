@@ -78,7 +78,6 @@ def main():
 
         for target_folder in removelist:
             target_dir = join(trajdir, target_folder)
-            print(cmd)
             cmd = 'rm -rf ' + target_dir
             print(cmd)
 
