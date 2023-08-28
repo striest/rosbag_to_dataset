@@ -7,6 +7,7 @@ from rosbag_to_dataset.post_processing.tartanvo.imgs2pointcloud import StereoInf
 from rosbag_to_dataset.post_processing.mapping.LocalMappingRegister import LocalMappingRegisterNode
 
 # python scripts/tartandrive_postprocessing.py --root /home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output --bag_list scripts/trajlist_local.txt
+# python3 scripts/tartandrive_postprocessing.py --root /project/learningphysics/tartandrive_trajs --bag_list scripts/trajlist_test.txt --save_to /project/learningphysics/tartandrive_trajs --stereo --vo --mapping
 if __name__ == '__main__':
     '''
     bag_list is a text file with the following content: 

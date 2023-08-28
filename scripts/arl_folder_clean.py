@@ -3,6 +3,7 @@
 
 import argparse
 from os.path import isdir, isfile, join, split
+from os import system
 
 # python3 image_correction.py --root /project/learningphysics/arl_20220922_traj --bag_list trajlist_arl.txt --save_to /project/learningphysics/arl_20220922_preview
 # python scripts/image_correction.py --root /cairo/arl_bag_files/sara_traj --bag_list scripts/trajlist_local.txt --save_to /cairo/arl_bag_files/arl_20220922_preview
@@ -64,8 +65,10 @@ def main():
 
             cmd = 'rm -rf ' + target_dir
             print(cmd)
+            system(cmd)
             cmd = 'mv ' + source_dir + ' ' + target_dir
             print(cmd)
+            system(cmd)
         
         for [source_folder, target_folder] in switchlist:
             source_dir = join(trajdir, source_folder)
@@ -73,13 +76,16 @@ def main():
 
             cmd = 'mv ' + target_dir + ' ' + target_dir + '_raw'
             print(cmd)
+            system(cmd)
             cmd = 'mv ' + source_dir + ' ' + target_dir
             print(cmd)
+            system(cmd)
 
         for target_folder in removelist:
             target_dir = join(trajdir, target_folder)
             cmd = 'rm -rf ' + target_dir
             print(cmd)
+            system(cmd)
 
 if __name__ == '__main__':
     main()
