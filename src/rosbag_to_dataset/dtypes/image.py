@@ -56,8 +56,9 @@ class ImageConvert(Dtype):
 
         data = cv2.resize(data, dsize=(self.output_resolution[0], self.output_resolution[1]), interpolation=cv2.INTER_AREA)
         if self.empty_value:
-            data  = np.concatenate((data,mask_normal),axis=-1) # appending normal and bool mask 
-        
+            data  = np.concatenate((data,mask_normal),axis=-1) # appending normal mask 
+            # data = np.concatenate((data,mask_int),axis=-1) # appending bool mask
+            
         if self.aggregate == 'littleendian':
             data = sum([data[:, :, i] * (256**i) for i in range(self.nchannels)])
         elif self.aggregate == 'bigendian':
