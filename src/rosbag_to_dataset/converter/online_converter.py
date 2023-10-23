@@ -9,6 +9,9 @@ import os
 
 from rosbag_to_dataset.config_parser.config_parser import ConfigParser
 from rosbag_to_dataset.util.os_util import str2bool
+import time
+import scipy
+
 
 class OnlineConverter:
     """
@@ -19,7 +22,7 @@ class OnlineConverter:
     Every dt, we will advance the queues.
     When we read a message, we will load it in the buffer if there's a time-slot for it. If there is, we will fill missing values between the msg and prev.
     """
-    def __init__(self, spec, converters, remap, rates, use_stamps):
+    def __init__(self, spec, converters, remap, rates, use_stamps, enable_live_subscribers= True):
         """
         Args:
             spec: As provided by the ConfigParser module, the sizes of the observation/action fields.
@@ -34,7 +37,7 @@ class OnlineConverter:
         self.rates = rates
         self.use_stamps = use_stamps
         self.max_queue_len = 100 #This is the max of expected num messages per dt over all time series (no need to change unless > 1000hz)
-
+        self.enable_live_subscribers = enable_live_subscribers
         #Printouts
         print('ONLINE CONVERTER:')
         print('Observation space:')
@@ -43,7 +46,8 @@ class OnlineConverter:
         print(self.action_converters)
 
         self.init_queue()
-        self.init_subscribers()
+        if self.enable_live_subscribers:
+            self.init_subscribers()
 
     def init_subscribers(self):
         self.subscribers = {}
@@ -56,13 +60,15 @@ class OnlineConverter:
     def init_queue(self):
         self.queue = {}
         self.times = {}
-        self.curr_time = rospy.Time.now()
+        if self.enable_live_subscribers:
+            self.curr_time = rospy.Time.now()
         for topic, cvt in self.observation_converters.items():
             if self.rates[topic] == self.dt:
                 self.queue[topic] = None
             else:
                 self.queue[topic] = [None] * self.max_queue_len
-                self.times[topic] = [0.] * self.max_queue_len
+                # if self.enable_live_subscribers:
+                self.times[topic] = [rospy.Time.from_sec(0.)] * self.max_queue_len
 
         for topic, cvt in self.action_converters.items():
             self.queue[topic] = None
@@ -73,8 +79,14 @@ class OnlineConverter:
 
         if self.use_stamps and (has_stamp or has_info):
             t = msg.header.stamp if has_stamp else msg.info.header.stamp
-        else:
+        elif self.enable_live_subscribers:
+            # print("f")
             t = rospy.Time.now()
+            if t ==0:
+                t = rospy.Time.from_sec(t)
+            # print(type(t))
+        else:
+            raise Exception("Sorry enable_live_subscribers is False")
 
         if self.rates[topic] == self.dt:
             self.queue[topic] = msg
@@ -82,6 +94,15 @@ class OnlineConverter:
             self.queue[topic] = self.queue[topic][1:] + [msg]
             self.times[topic] = self.times[topic][1:] + [t]
 
+    def add_new_state(self,traj):
+        rot_matrix = scipy.spatial.transform.Rotation.from_quat(traj['observation']['state'][..., 3:7].view(-1,4)).as_matrix()
+        rot_6 = rot_matrix[...,[0,1]].reshape((*traj['observation']['state'].shape[:-1],6))
+        steer = traj['observation']['steer_angle'] * (30./415.) * (-torch.pi/180.)
+        new_state = np.concatenate([traj['observation']['state'][...,:3],rot_6,traj['observation']['state'][...,7:],steer],axis=-1)
+
+        traj['observation']['new_state'] =  torch.from_numpy(new_state).to(torch.float32)
+        return traj
+    
     def get_data(self):
         out = {
                 'observation':{},
@@ -89,13 +110,25 @@ class OnlineConverter:
         }
 
         for topic, cvt in self.observation_converters.items():
+            while self.queue[topic] == None:
+                print(f"Waiting for message at - {topic}")
+                time.sleep(0.1)
             if self.rates[topic] == self.dt:
                 out['observation'][self.remap[topic]] = torch.tensor(cvt.ros_to_numpy(self.queue[topic])).float()
             else:
                 """
                 If time-series, look N steps backward from the last msg in buf.
                 """
-                msg_times = np.array([x.to_sec() for x in self.times[topic]])
+                if self.use_stamps:
+                    temp = []
+                    for x in self.times[topic]:
+                        try: 
+                            temp.append(x.to_sec())
+                        except:
+                            temp.append(x/1e9)
+                    msg_times = np.array(temp)
+                else:
+                    msg_times = np.array([x.to_sec() for x in self.times[topic]])
                 target_times = np.arange(msg_times[-1] - self.dt, msg_times[-1], self.rates[topic])
                 dists = abs(np.expand_dims(target_times, 0) - np.expand_dims(msg_times, 1))
                 msg_idxs = np.argmin(dists, axis=0)
@@ -103,14 +136,16 @@ class OnlineConverter:
                 out['observation'][self.remap[topic]] = torch.stack([torch.tensor(x).float() for x in datas], dim=0)
 
         for topic, cvt in self.action_converters.items():
-            data = torch.tensor(cvt.ros_to_numpy(self.queue[topic])).float()
-            if len(data.shape) == 0:
-                data = data.unsqueeze(0)
-            out['action'][topic] = data
+            if self.queue[topic] != None:
+                data = torch.tensor(cvt.ros_to_numpy(self.queue[topic])).float()
+                if len(data.shape) == 0:
+                    data = data.unsqueeze(0)
+                out['action'][topic] = data
 
-        if len(self.action_converters) > 0:
+        if len(self.action_converters) > 0 and len(out['action'])>0:
             out['action'] = torch.cat([v for v in out['action'].values()], axis=0)
-
+        
+        out = self.add_new_state(out)
         return out
 
 if __name__ == '__main__':

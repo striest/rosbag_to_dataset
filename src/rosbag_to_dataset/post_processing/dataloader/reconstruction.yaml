@@ -1,0 +1,201 @@
+device_ids: "0" 
+#Alwasy use it in the form of "<id_1>,<id_2>" without any space on either sides of 
+model_device: cuda:0
+output_device: "0"
+eval_fp: /data/datasets/parvm/tartandrive_trajs_parv_final/eval
+eval_framelistfile: /data/datasets/parvm/tartandrive_trajs_parv_final/eval/trainframes.txt
+
+experiment_fp: /data/datasets/parvm/tartandrive_trajs_parv_final/experiment
+latent_model:
+  params:
+    act_encoder_hidden_size:
+    - 16
+    - 16
+    mlp_decoder_hidden_size:
+    - 128
+    mlp_encoder_hidden_size: []
+    rnn_hidden_size: 128
+    rnn_layers: 1
+  type: ProbWorldModel
+lr: 0.001
+modalities:
+  frontcam:
+    decoder:
+      params:
+        channels:
+        - 32
+        - 16
+        - 8
+        - 4
+      type: CNNDecoder
+    encoder:
+      params:
+        channels:
+        - 4
+        - 8
+        - 16
+        - 32
+      type: CNNEncoder
+    loss:
+      params:
+        scale: 100.0
+      type: MSELoss
+    output_resolution: [128,128]
+    topic: image_rgb
+  # imu:
+  #   decoder:
+  #     params:
+  #       hidden_dims:
+  #       - 64
+  #       - 32
+  #       - 16
+  #       - 8
+  #       scales:
+  #       - 2
+  #       - 2
+  #       - 2
+  #       - 2
+  #     type: WaveNetDecoder
+  #   encoder:
+  #     params:
+  #       dilations:
+  #       - 2
+  #       - 4
+  #       - 8
+  #       - 16
+  #       hidden_dims:
+  #       - 9
+  #       - 9
+  #       - 9
+  #       - 9
+  #       kernel_sizes:
+  #       - 2
+  #       - 2
+  #       - 2
+  #       - 2
+  #     type: WaveNetEncoder
+  #   loss:
+  #     params:
+  #       scale: 0.1
+  #     type: MSELoss
+  #   topic: imu
+  rgbmap:
+    decoder:
+      params:
+        channels:
+        - 32
+        - 16
+        - 8
+        - 4
+      type: CNNDecoder
+    encoder:
+      params:
+        channels:
+        - 4
+        - 8
+        - 16
+        - 32
+      type: CNNEncoder
+    loss:
+      params:
+        scale: 100.0
+      type: MSELoss
+    output_resolution: [64,64]
+    topic: rgbmap
+  
+  heightmap:
+    decoder:
+      params:
+        channels:
+        - 32
+        - 16
+        - 8
+        - 4
+      type: CNNDecoder
+    encoder:
+      params:
+        channels:
+        - 4
+        - 8
+        - 16
+        - 32
+      type: CNNEncoder
+    loss:
+      params:
+        scale: 1.0
+      type: MSELoss
+    output_resolution: [64,64]
+    clipping: [-2,2]
+    num_channels: 2
+    topic: heightmap
+  # wheel_rpm:
+  #   decoder:
+  #     params:
+  #       hidden_dims:
+  #       - 64
+  #       - 32
+  #       - 16
+  #       - 8
+  #       scales:
+  #       - 2
+  #       - 2
+  #       - 2
+  #       - 2
+  #     type: WaveNetDecoder
+  #   encoder:
+  #     params:
+  #       dilations:
+  #       - 2
+  #       - 4
+  #       - 8
+  #       - 16
+  #       hidden_dims:
+  #       - 9
+  #       - 9
+  #       - 9
+  #       - 9
+  #       kernel_sizes:
+  #       - 2
+  #       - 2
+  #       - 2
+  #       - 2
+  #     type: WaveNetEncoder
+  #   loss:
+  #     params:
+  #       scale: 0.1
+  #     type: MSELoss
+  #   topic: wheel_rpm
+name: reconstruction_atv_all_t50
+save_every: 500
+dt: 0.1
+N_per_step: 10 #for imu (this is the supposed imu freq)
+modality_len: 30
+train_fp: /data/datasets/parvm/tartandrive_trajs_parv_final/train
+train_framelistfile: /data/datasets/parvm/tartandrive_trajs_parv_final/train/trainframes.txt
+state:
+  velocity: False
+
+loader:
+  train:
+    buffer_capacity: 76800
+    batch_size: 64
+    num_workers: 4
+    persistent_workers: True
+    shuffle: True
+  eval:
+    all: True
+    buffer_capacity: 7680
+    batch_size: 64
+    num_workers: 4
+    persistent_workers: True
+    shuffle: True 
+
+trainer:
+  params:
+    batch_size: 64
+    epochs: 5000
+    model_itrs: 10
+    n_eval_steps: 20
+    n_steps: 20
+    vae_beta: 1.0e-06
+  type: ProbWorldModelsTrainer
