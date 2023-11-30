@@ -1,0 +1,52 @@
+---
+  main_topic: "/coloroze_pcl_node/colorized_pcl"
+  dt: 0.1
+  data: 
+    "/cmd":
+        type: Twist
+        options:
+            mode: action
+
+    "/coloroze_pcl_node/colorized_pcl":
+        type: PointCloud
+        folder: "pcl"
+        options:
+          fields: ['x', 'y', 'z']
+
+    "/integrated_to_init":
+        type: Odometry
+        folder: "odom"
+        options:
+            use_vel: True
+
+    "/local_gridmap":
+        type: GridMap
+        folder: "local_gridmap"
+        options:
+          size: [480, 480]
+          channels: 
+            - terrain
+            - height_high
+            - diff
+            - SVD1
+            - SVD2
+            - SVD3
+            - roughness
+            - unknown
+
+    "/multisense/left/image_rect_color":
+        type: Image
+        folder: "image_left_color"
+        options:
+            output_resolution: [256, 128]
+            nchannels: 3
+
+    "/odometry/filtered_odom":
+        type: Odometry
+        folder: "gps_odom"
+        options:
+            use_vel: True
+
+    "/ros_talon/current_position":
+        type: Float32
+        folder: "steer_angle"
