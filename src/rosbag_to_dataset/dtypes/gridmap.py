@@ -1,6 +1,7 @@
 import rospy
 import numpy as np
 import cv2
+import yaml
 
 from grid_map_msgs.msg import GridMap
 
@@ -71,13 +72,27 @@ class GridMapConvert(Dtype):
         assert max(np.abs(reses - np.mean(reses))) < 1e-4, 'got inconsistent resolutions between gridmap dimensions/layers. Check that grid map layes are same shape and that size proportional to msg size'
         output_resolution = np.mean(reses, keepdims=True)
 
+        metadata = {
+            'origin': origin.tolist(),
+            'resolution': output_resolution.item(),
+            'width': map_width.item(),
+            'height': map_height.item(),
+            'feature_keys': self.channels
+        }
+
         return {
                 'data': data_out,
-                'origin': origin,
-                'resolution': output_resolution,
-                'width': map_width,
-                'height': map_height
+                'metadata': metadata
                 }
+
+    def save_file_one_msg(self, data, filename):
+        data = self.ros_to_numpy(data)
+        np.save(filename + '_data.npy', data['data'])
+        with open(filename + '_metadata.yaml', 'w') as fh:
+            fh.write(yaml.dump(data['metadata']))
+
+    def save_file(self, data, filename):
+        pass
 
 if __name__ == "__main__":
     c = ImageConvert(nchannels=1, output_resolution=[32, 32])

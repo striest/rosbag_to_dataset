@@ -198,13 +198,13 @@ class PointCloudConvert(Dtype):
     Convert a pointcloud message to numpy
     Note that this one in particular needs some hacks to work.
     """
-    def __init__(self, fields, out_format='npy'):
+    def __init__(self, rgb=False, out_format='npy'):
         """
         Args:
             fields: List of fields in the pointcloud
             out_format: npy, ply_binary, ply_text, plt_binary_rgb, plt_text_rgb
         """
-        self.fields = fields
+        self.rgb = rgb
         # self.max_num_points = max_num_points
         # self.fill_value = fill_value
 
@@ -244,8 +244,16 @@ class PointCloudConvert(Dtype):
         msg2.data = msg.data
         msg2.is_dense = msg.is_dense
 
-        pts = ros_numpy.numpify(msg2)
-        pts = np.stack([pts[f].flatten() for f in self.fields], axis=-1)
+        pcl = ros_numpy.numpify(msg2)
+        pts = np.stack([pcl[f].flatten() for f in 'xyz'], axis=-1)
+
+        if self.rgb:
+            colors_raw = pcl['rgb'].flatten()
+            red = ((colors_raw & 0x00FF0000)>>16)
+            green = ((colors_raw & 0x0000FF00)>>8)
+            blue = ((colors_raw & 0x000000FF)>>0)
+            colors = np.stack([red, green, blue], axis=-1)/255.
+            pts = np.concatenate([pts, colors], axis=-1)
 
         # out = np.ones([self.max_num_points, len(self.fields)]) * self.fill_value
         # out[:pts.shape[0]] = pts
@@ -259,7 +267,7 @@ class PointCloudConvert(Dtype):
         """
         data = self.ros_to_numpy(data)
 
-        if ( 2 != len(data.shape) or data.shape[1] != 3 ):
+        if ( 2 != len(data.shape) or data.shape[1] not in  [3, 6] ):
             raise Exception("xyz.shape = {}. ".format(data.shape))
 
         maxDistColor = 200 # hard code
