@@ -1,5 +1,6 @@
 import argparse
 import rosbag
+import os
 
 import numpy as np
 from rosbag_to_dataset.converter.converter_tofiles import ConverterToFiles
@@ -86,6 +87,7 @@ if __name__ == '__main__':
         with open(args.bag_list, 'r') as f:
             lines = f.readlines()
         bagfilelist = [line.strip().split(' ') for line in lines]
+        bagfilelist = [x for x in bagfilelist if len(x) == 2] #filter out newlines
     elif(isfile(args.bag_fp)): # process one file 
         bagfilelist = [[args.bag_fp, ""]]
     else:
@@ -107,6 +109,8 @@ if __name__ == '__main__':
         bagfilelist_combine_split.append([sublist, lastfolder])
 
     print("Find {} bagfiles, {} trajectories".format(len(bagfilelist), len(bagfilelist_combine_split)))
+    for x in bagfilelist:
+        assert os.path.exists(x[0]), 'path {} does not exist'.format(x[0])
 
     maybe_mkdir(args.save_to)
     for bagfiles, outfolder in bagfilelist_combine_split:
