@@ -11,7 +11,7 @@
     "/multisense/imu/imu_data":
         type: Imu
         folder: "imu"
-        N_per_step: 10
+        N_per_step: 40
         options:
             orientation: False
             angular_velocity: True
@@ -57,19 +57,20 @@
             fields: ['x', 'y', 'z']
             out_format: 'npy'
 
-    # "/wheel_rpm":
-    #     type: RPWheelEncoders
-    #     remap: "wheel_rpm"
-    #     N_per_step: 20
+    "/wheel_rpm":
+        type: RPWheelEncoders
+        remap: "wheel_rpm"
+        N_per_step: 5
 
-    # "/shock_pos":
-    #     type: RPShockSensors
-    #     remap: "shock_travel"
-    #     N_per_step: 20
+    "/shock_pos":
+        type: RPShockSensors
+        remap: "shock_travel"
+        N_per_step: 5
 
-    # "/controls":
-    #     type: RPControls
-    #     remap: "intervention"
-    #     options:
-    #         mode: "intervention"
-    #         intervention_threshold: 200.
+    "/controls":
+        type: RPControls
+        remap: "intervention"
+        N_per_step: 5
+        options:
+            mode: "identity"
+            intervention_threshold: 200.

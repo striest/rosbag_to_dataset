@@ -18,6 +18,8 @@ from rosbag_to_dataset.dtypes.pointcloud import PointCloudConvert
 from rosbag_to_dataset.dtypes.float_stamped import FloatStampedConvert
 from rosbag_to_dataset.dtypes.float32 import Float32Convert
 from rosbag_to_dataset.dtypes.racepak_sensors import RPControlsConvert, RPWheelEncodersConvert, RPShockSensorsConvert
+from rosbag_to_dataset.dtypes.gridmap import GridMapConvert
+from rosbag_to_dataset.dtypes.float32multiarray import Float32MultiArrayConvert
 
 class ConfigParser:
     """
@@ -80,6 +82,8 @@ class ConfigParser:
         "RPControls":RPControlsConvert,
         "RPWheelEncoders":RPWheelEncodersConvert,
         "RPShockSensors":RPShockSensorsConvert,
+        "GridMap":GridMapConvert,
+        "Float32MultiArray":Float32MultiArrayConvert
     }
 
 # class ParseObject:

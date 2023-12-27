@@ -157,7 +157,7 @@ def write_ply(fn, verts, colors=None, pt_format='binary_little_endian'):
         else:
             print("ERROR: Unknow PLY format {}".format(pt_format))
 
-def output_to_ply(fn, X, imageSize, rLimit, origin, format, use_rgb=False):
+def output_to_ply(fn, X, imageSize, rLimit, origin, format, use_rgb=False, rgb=None):
     # Check the input X.
     if ( X.max() <= X.min() ):
         raise Exception("X.max() = %f, X.min() = %f." % ( X.max(), X.min() ) )
@@ -180,14 +180,16 @@ def output_to_ply(fn, X, imageSize, rLimit, origin, format, use_rgb=False):
     r = r[ mask ]
 
     if use_rgb:
+        if rgb is None:
+            cr, cg, cb = color_map(r, PLY_COLORS, PLY_COLOR_LEVELS)
 
-        cr, cg, cb = color_map(r, PLY_COLORS, PLY_COLOR_LEVELS)
+            colors = np.zeros( (r.size, 3), dtype = np.uint8 )
 
-        colors = np.zeros( (r.size, 3), dtype = np.uint8 )
-
-        colors[:, 0] = cr.reshape( cr.size )
-        colors[:, 1] = cg.reshape( cr.size )
-        colors[:, 2] = cb.reshape( cr.size )
+            colors[:, 0] = cr.reshape( cr.size )
+            colors[:, 1] = cg.reshape( cr.size )
+            colors[:, 2] = cb.reshape( cr.size )
+        else: 
+            colors = rgb
     else:
         colors = None
 
@@ -245,19 +247,31 @@ class PointCloudConvert(Dtype):
         msg2.is_dense = msg.is_dense
 
         pts = ros_numpy.numpify(msg2)
-        pts = np.stack([pts[f].flatten() for f in self.fields], axis=-1)
 
-        # out = np.ones([self.max_num_points, len(self.fields)]) * self.fill_value
-        # out[:pts.shape[0]] = pts
+        if 'rgb' in self.fields:
+            color = pts['rgb'].flatten()
+            dt = np.dtype((np.int32, {'r':(np.uint8,0),'g':(np.uint8,1),'b':(np.uint8,2), 'a':(np.uint8,3)}))
+            color = color.view(dtype=dt)
+            colors = np.zeros(color.shape + (3,), dtype=np.uint8)
+            colors[:,0] = color['r']
+            colors[:,1] = color['g']
+            colors[:,2] = color['b']
 
-        return pts
+            fields_res = [ff for ff in self.fields if ff != "rgb"]
+            pts = np.stack([pts[f].flatten() for f in fields_res], axis=-1)
+
+            return pts, colors
+        else:
+            pts = np.stack([pts[f].flatten() for f in self.fields], axis=-1)
+            return pts, None
+
 
     def save_file_one_msg(self, data, filename):
         """
         Save the data to hard drive.
         This function should be implemented where the data is stored frame by frame like image or point cloud
         """
-        data = self.ros_to_numpy(data)
+        data, colors = self.ros_to_numpy(data)            
 
         if ( 2 != len(data.shape) or data.shape[1] != 3 ):
             raise Exception("xyz.shape = {}. ".format(data.shape))
@@ -265,11 +279,13 @@ class PointCloudConvert(Dtype):
         maxDistColor = 200 # hard code
         if self.pt_format == 'npy':
             np.save(filename + '.npy', data)
+            if colors is not None:
+                np.save(filename + '_color.npy', colors)
         else:
             data = data.transpose(1,0)
             output_to_ply( filename + '.ply', data, [ 1, data.shape[1]], 
                             maxDistColor, np.array([0, 0, 0]).reshape((-1,1)), 
-                            self.pt_format, self.gen_rgb )
+                            self.pt_format, self.gen_rgb, colors )
 
     def save_file(self, data, filename):
         pass

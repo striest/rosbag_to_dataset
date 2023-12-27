@@ -4,6 +4,8 @@ from os import mkdir, listdir
 from os.path import isfile, isdir, join, split
 from rosbag_to_dataset.post_processing.imucost.cost2gtcostmap import GTCostMapNode
 
+# python3 costmap.py --data_dir /project/learningphysics/tartandrive_trajs
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 

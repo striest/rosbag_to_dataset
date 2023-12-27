@@ -149,7 +149,7 @@ class ConverterToFiles:
                 else:
                     bagtimestamp_sort.append(lasttime)
                     bagindex_sort.append(lastind)
-                    print("topic {} time stamp going back frame {}".format(topic, k))
+                    logfile.logline("  ** topic {} time stamp going back frame {}".format(topic, k))
 
             difflist = []
             for k, timestep in enumerate(self.timesteps[topic]):
