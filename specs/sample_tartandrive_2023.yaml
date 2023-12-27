@@ -1,0 +1,170 @@
+---
+  main_topic: "/multisense/left/image_rect"
+  dt: 0.1
+  data: 
+    "/odometry/filtered_odom":
+        type: Odometry
+        folder: "gps_odom"
+        options:
+            use_vel: True
+
+    "/multisense/imu/imu_data":
+        type: Imu
+        folder: "multisense_imu"
+        N_per_step: 40
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+
+    "/multisense/left/image_rect_color":
+        type: Image
+        folder: "image_left_color"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 3
+
+    "/multisense/right/image_rect":
+        type: Image
+        folder: "image_right"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 1
+
+    "/multisense/left/image_rect":
+        type: Image
+        folder: "image_left"
+        options:
+            output_resolution: [1024, 544]
+            nchannels: 1
+
+    "/cmd":
+        type: Twist
+        options:
+            mode: action
+
+    "/velodyne_1/velodyne_points":
+        type: PointCloud
+        folder: "velodyne_0"
+        options:
+            fields: ['x', 'y', 'z']
+            out_format: 'npy'
+
+    "/velodyne_2/velodyne_points":
+        type: PointCloud
+        folder: "velodyne_1"
+        options:
+            fields: ['x', 'y', 'z']
+            out_format: 'npy'
+
+    "/wheel_rpm":
+        type: RPWheelEncoders
+        remap: "wheel_rpm"
+        N_per_step: 5
+
+    "/shock_pos":
+        type: RPShockSensors
+        remap: "shock_travel"
+        N_per_step: 5
+
+    "/controls":
+        type: RPControls
+        remap: "intervention"
+        N_per_step: 5
+        options:
+            mode: "identity"
+            intervention_threshold: 200.
+
+    "/ros_talon/steering_angle":
+        type: Float32
+        folder: "steering_angle"
+
+    "/ros_talon/current_position":
+        type: Float32
+        folder: "current_position"
+
+    "/local_height_map_inflate":
+        type: Image
+        folder: "height_map"
+        options:
+            output_resolution: [600, 600]
+            nchannels: 4
+            savetype: 'npy'
+
+    "/local_rgb_map_inflate":
+        type: Image
+        folder: "rgb_map"
+        options:
+            output_resolution: [600, 600]
+            nchannels: 3
+            savetype: 'png'
+
+    "/deep_cloud":
+        type: PointCloud
+        folder: "stereo_colored_point_cloud"
+        options:
+            fields: ['x', 'y', 'z', 'rgb']
+            out_format: 'npy'
+
+    "/full_cloud":
+        type: PointCloud
+        folder: "full_cloud"
+        options:
+            fields: ['x', 'y', 'z']
+            out_format: 'npy'
+
+    "/livox/lidar":
+        type: PointCloud
+        folder: "livox"
+        options:
+            fields: ['x', 'y', 'z']
+            out_format: 'npy'
+
+    "/integrated_to_init":
+        type: Odometry
+        folder: "super_odom"
+        N_per_step: 10
+        options:
+            use_vel: True
+
+    "/tartanvo_odom":
+        type: Odometry
+        folder: "tartanvo_odom"
+        options:
+            use_vel: True
+
+    "/traversability_cost":
+        type: Float32
+        folder: "traversability_cost"
+
+    "/traversability_breakdown":
+        type: Float32MultiArray
+        folder: "traversability_breakdown"
+
+    "/novatel/imu/data":
+        type: Imu
+        folder: "novatel_imu"
+        N_per_step: 10
+        options:
+            orientation: False
+            angular_velocity: True
+            linear_acceleration: True
+
+    "/local_gridmap":
+        type: GridMap
+        folder: "local_gridmap"
+        options:
+          size: [480, 480]
+          channels: 
+            - terrain
+            - height_low
+            - height_high
+            - terrain_slope
+            - terrain_slope_x
+            - terrain_slope_y
+            - diff
+            - SVD1
+            - SVD2
+            - SVD3
+            - roughness
+            - unknown
