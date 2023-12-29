@@ -5,6 +5,7 @@
     "/odometry/filtered_odom":
         type: Odometry
         folder: "gps_odom"
+        N_per_step: 5
         options:
             use_vel: True
 
@@ -136,10 +137,12 @@
     "/traversability_cost":
         type: Float32
         folder: "traversability_cost"
+        N_per_step: 10
 
     "/traversability_breakdown":
         type: Float32MultiArray
         folder: "traversability_breakdown"
+        N_per_step: 10
 
     "/novatel/imu/data":
         type: Imu

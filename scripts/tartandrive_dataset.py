@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
         logfilepath = trajoutfolder + '/data_extraction.log'
         logfile = FileLogger(logfilepath,overwrite=False)
-        logfile.logline("Process bagfile {}".format(bagfiles[0]))
+        logfile.logline("Process bagfile {}".format(bagfile))
 
         bag = rosbag.Bag(bagfile)
         converter = ConverterToFiles(trajoutfolder, dt, converters, outfolders, rates)
