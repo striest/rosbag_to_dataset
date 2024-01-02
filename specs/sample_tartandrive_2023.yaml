@@ -48,14 +48,14 @@
         type: PointCloud
         folder: "velodyne_0"
         options:
-            fields: ['x', 'y', 'z']
+            fields: ['x', 'y', 'z', 'intensity']
             out_format: 'npy'
 
     "/velodyne_2/velodyne_points":
         type: PointCloud
         folder: "velodyne_1"
         options:
-            fields: ['x', 'y', 'z']
+            fields: ['x', 'y', 'z', 'intensity']
             out_format: 'npy'
 
     "/wheel_rpm":
@@ -118,7 +118,7 @@
         type: PointCloud
         folder: "livox"
         options:
-            fields: ['x', 'y', 'z']
+            fields: ['x', 'y', 'z', 'intensity']
             out_format: 'npy'
 
     "/integrated_to_init":

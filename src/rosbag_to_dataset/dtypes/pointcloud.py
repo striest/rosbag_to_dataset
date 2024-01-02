@@ -1,3 +1,5 @@
+from dataclasses import field
+from importlib.metadata import metadata
 import numpy as np
 import ros_numpy
 
@@ -7,6 +9,7 @@ from rosbag_to_dataset.dtypes.base import Dtype
 import copy
 import numpy.linalg as LA
 import struct
+import yaml
 
 ply_header_color = '''ply
 format %(pt_format)s 1.0
@@ -203,7 +206,7 @@ class PointCloudConvert(Dtype):
     def __init__(self, fields, out_format='npy'):
         """
         Args:
-            fields: List of fields in the pointcloud
+            fields: List of fields in the pointcloud, e.g. ['x', 'y', 'z', 'rgb', 'intensity']
             out_format: npy, ply_binary, ply_text, plt_binary_rgb, plt_text_rgb
         """
         self.fields = fields
@@ -256,14 +259,17 @@ class PointCloudConvert(Dtype):
             colors[:,0] = color['r']
             colors[:,1] = color['g']
             colors[:,2] = color['b']
-
-            fields_res = [ff for ff in self.fields if ff != "rgb"]
-            pts = np.stack([pts[f].flatten() for f in fields_res], axis=-1)
-
-            return pts, colors
         else:
-            pts = np.stack([pts[f].flatten() for f in self.fields], axis=-1)
-            return pts, None
+            colors = None
+
+        if 'intensity' in self.fields:
+            intensity = pts['intensity'].astype(np.uint8)
+        else: 
+            intensity = None
+        
+        fields_xyz = [ff for ff in self.fields if ff == 'x' or ff == 'y' or ff=='z']
+        pts = np.stack([pts[f].flatten() for f in fields_xyz], axis=-1)
+        return pts, colors, intensity
 
 
     def save_file_one_msg(self, data, filename):
@@ -271,25 +277,33 @@ class PointCloudConvert(Dtype):
         Save the data to hard drive.
         This function should be implemented where the data is stored frame by frame like image or point cloud
         """
-        data, colors = self.ros_to_numpy(data)            
+        data, colors, intensity = self.ros_to_numpy(data)            
 
         if ( 2 != len(data.shape) or data.shape[1] != 3 ):
             raise Exception("xyz.shape = {}. ".format(data.shape))
 
-        maxDistColor = 200 # hard code
         if self.pt_format == 'npy':
             np.save(filename + '.npy', data)
+
+            if intensity is not None: 
+                np.save(filename + '_intensity.npy', intensity)
+
             if colors is not None:
                 np.save(filename + '_color.npy', colors)
-        else:
+                
+        else: # TODO: save intensity to ply
+            maxDistColor = 200 # hard code
             data = data.transpose(1,0)
             output_to_ply( filename + '.ply', data, [ 1, data.shape[1]], 
                             maxDistColor, np.array([0, 0, 0]).reshape((-1,1)), 
                             self.pt_format, self.gen_rgb, colors )
+            if intensity is not None: 
+                np.save(filename + '_intensity.npy', intensity)
 
     def save_file(self, data, filename):
-        pass
-
+        metadata = {'fields': self.fields}
+        with open(filename + '/metadata.yaml', 'w') as fh:
+            fh.write(yaml.dump(metadata))
 
 if __name__ == "__main__":
     points = np.random.random((3,1600*16)).astype(np.float32)
