@@ -1,0 +1,39 @@
+/home/physics_atv/rosbags/irl_data/test/figure_8_turnpike_2023-09-13-17-40-27/2023-11-30-20-17-50_0.bag train_figure_8_turnpike_2023-09-13-17-40-27
+/home/physics_atv/rosbags/irl_data/test/figure_8_turnpike_2023-09-13-17-40-27/2023-11-30-20-19-50_0.bag train_figure_8_turnpike_2023-09-13-17-40-27
+/home/physics_atv/rosbags/irl_data/test/figure_8_turnpike_2023-09-13-17-40-27/2023-11-30-20-23-50_1.bag train_figure_8_turnpike_2023-09-13-17-40-27
+
+/home/physics_atv/rosbags/irl_data/train/figure_8_2023-09-14-11-37-49/2023-11-30-19-53-39_0.bag test_figure_8_2023-09-14-11-37-49
+/home/physics_atv/rosbags/irl_data/train/figure_8_2023-09-14-11-37-49/2023-11-30-19-56-57_0.bag test_figure_8_2023-09-14-11-37-49
+/home/physics_atv/rosbags/irl_data/train/figure_8_2023-09-14-11-37-49/2023-11-30-20-00-57_1.bag test_figure_8_2023-09-14-11-37-49
+/home/physics_atv/rosbags/irl_data/train/figure_8_2023-09-14-11-37-49/2023-11-30-20-02-35_0.bag test_figure_8_2023-09-14-11-37-49
+
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-18-58-26.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-04-02_0.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-08-03_1.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-11-10_0.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-12-48_0.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-16-48_1.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-20-48_2.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-21-11_0.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-26-06_0.bag train_sam_loop_2023-09-27-13-04-54
+/home/physics_atv/rosbags/irl_data/train/sam_loop_2023-09-27-13-04-54/2023-11-30-19-28-07_0.bag train_sam_loop_2023-09-27-13-04-54
+
+/home/physics_atv/rosbags/irl_data/train/gupta_2023-09-14-10-47-09/2023-12-13-14-40-46_0.bag train_gupta_2023-09-14-10-47-09
+/home/physics_atv/rosbags/irl_data/train/gupta_2023-09-14-10-47-09/2023-12-13-14-44-46_1.bag train_gupta_2023-09-14-10-47-09
+/home/physics_atv/rosbags/irl_data/train/gupta_2023-09-14-10-47-09/2023-12-13-14-48-46_2.bag train_gupta_2023-09-14-10-47-09
+/home/physics_atv/rosbags/irl_data/train/gupta_2023-09-14-10-47-09/2023-12-13-14-50-52_0.bag train_gupta_2023-09-14-10-47-09
+/home/physics_atv/rosbags/irl_data/train/gupta_2023-09-14-10-47-09/2023-12-13-14-54-26_0.bag train_gupta_2023-09-14-10-47-09
+
+/home/physics_atv/rosbags/irl_data/train/meadow_turnpike_2023-09-14-13-35-35/2023-12-13-14-58-50_0.bag train_meadow_turnpike_2023-09-14-13-35-35
+/home/physics_atv/rosbags/irl_data/train/meadow_turnpike_2023-09-14-13-35-35/2023-12-13-15-01-32_0.bag train_meadow_turnpike_2023-09-14-13-35-35
+/home/physics_atv/rosbags/irl_data/train/meadow_turnpike_2023-09-14-13-35-35/2023-12-13-15-03-19_0.bag train_meadow_turnpike_2023-09-14-13-35-35
+/home/physics_atv/rosbags/irl_data/train/meadow_turnpike_2023-09-14-13-35-35/2023-12-13-15-04-36_0.bag train_meadow_turnpike_2023-09-14-13-35-35
+/home/physics_atv/rosbags/irl_data/train/meadow_turnpike_2023-09-14-13-35-35/2023-12-13-15-08-36_1.bag train_meadow_turnpike_2023-09-14-13-35-35
+
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-13-13_0.bag train_turnpike_flat_2023-09-12-14-21-03
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-16-52_0.bag train_turnpike_flat_2023-09-12-14-21-03
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-20-35_0.bag train_turnpike_flat_2023-09-12-14-21-03
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-24-35_1.bag train_turnpike_flat_2023-09-12-14-21-03
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-26-03_0.bag train_turnpike_flat_2023-09-12-14-21-03
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-26-38_0.bag train_turnpike_flat_2023-09-12-14-21-03
+/home/physics_atv/rosbags/irl_data/train/turnpike_flat_2023-09-12-14-21-03/2023-12-13-15-29-11_0.bag train_turnpike_flat_2023-09-12-14-21-03
