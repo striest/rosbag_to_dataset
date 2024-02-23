@@ -119,6 +119,20 @@ def SOs2Eulers(SOs):
     rot = R.as_euler(R.from_matrix(SOs), 'XYZ', degrees=False)
     return rot
 
+def pose2motion(data, skip=0):
+    '''
+    data: pose from odometry folder
+    all_motion_mat (N-1-skip) x (4 x 4)
+    '''
+    data_size = data.shape[0]
+    all_motion_mat = []
+    for i in range(0,data_size-1-skip):
+        pose_curr = quat2SE(data[i])
+        pose_next = quat2SE(data[i+1+skip])
+        motion = pose_curr.I*pose_next
+        all_motion_mat.append(motion)
+    return np.array(all_motion_mat)
+
 # def data_transform(sample, augment_data=False):
 #     # Transform left_img=img0, right_img=img1, color_img=imgc, disparity image=disp0
 #     # Convert to Tensor

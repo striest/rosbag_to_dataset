@@ -2,15 +2,15 @@ import numpy as np
 from os.path import join, isdir, isfile
 from os import listdir, mkdir
 import cv2
-from .utils import add_text
-from .terrain_map_tartandrive import TerrainMap, tartanvo_motion_to_odom, get_local_path, tartanodom2vel, gpsodom2vel
+from .utils import add_text, pose2motion
+from .terrain_map_tartandrive import TerrainMap, tartanvo_motion_to_odom, get_local_path, tartanmotion2vel, gpsodom2vel
 import torch
 
 class GTCostMapNode(object):
     def __init__(self, crop_size=[2,2]) -> None:
-        map_height = 12.0
+        map_height = 30.0
         map_width = 12.0
-        resolution = 0.02
+        resolution = 0.05
         output_size = [int(crop_size[0]/resolution), int(crop_size[1]/resolution)]
 
         self.map_metadata = {
@@ -86,9 +86,10 @@ class GTCostMapNode(object):
             motion[inter_start:,0] = randvel[:-1] * dt
         return motion, velx, cost
     
-    def process(self, traj_root_folder, out_root_folder, costmap_output_folder, cost_input_folder='cost2', odom_folder='tartanvo_odom', new_odom=True, vis='file'):
+    def process(self, traj_root_folder, out_root_folder, costmap_output_folder, cost_input_folder='traversability_v2', odom_folder='super_odom', new_odom=True, vis='file'):
         '''
         Output the costmap in the costmap folder
+        odom_folder could be: tartanvo_odom, gps_odom, and super_odom
         '''
         print('Working on traj ', traj_root_folder)
 
@@ -103,18 +104,21 @@ class GTCostMapNode(object):
         intervention_folder='intervention'
 
         maplist = listdir(join(traj_root_folder, rgbmap_folder))
-        maplist = [mm for mm in maplist if mm.endswith('.npy')]
+        maplist = [mm for mm in maplist if mm.endswith('.png')]
         maplist.sort()
 
         framenum = len(maplist)
 
         # using tartanvo
         if odom_folder.startswith('tartanvo'):
-            motions = np.load(join(traj_root_folder, odom_folder, 'motions.npy'))
-            vels = tartanodom2vel(motions, dt=0.1)
+            poses = np.load(join(traj_root_folder, odom_folder, 'odometry.npy'))
+            motions = pose2motion(poses)
+            vels = tartanmotion2vel(motions, dt=0.1)
             assert framenum==motions.shape[0]+1, "Error: map number {} and motion number {} mismatch".format(framenum, motions.shape[0])
         else: # using novatel
             odom = np.load(join(traj_root_folder, odom_folder, 'odometry.npy'))
+            scale = len(odom) // framenum
+            odom = odom[::scale, :]
             vels = gpsodom2vel(odom) # TODO: test
             assert framenum==odom.shape[0], "Error: map number {} and odom number {} mismatch".format(framenum, odom.shape[0])
 
@@ -141,17 +145,20 @@ class GTCostMapNode(object):
             intervention_data = np.zeros((framenum,2))
 
 
-        cropnum = 50
+        cropnum = 100
         preframenum = 10
         # for startframe in range(startframe, framenum, 1):
-        for currentframe in range(0, framenum, 1):
+        for currentframe in range(0, framenum, 1): 
             if currentframe%100 == 0:
                 print('  processing', currentframe)
             startframe = max(0, currentframe-preframenum)
             endframe = min(framenum, currentframe + cropnum)
             seqcropnum = endframe - startframe
-            rgbmap = np.load(join(traj_root_folder, rgbmap_folder, maplist[currentframe]))
-            heightmap = np.load(join(traj_root_folder, heightmap_folder, maplist[currentframe]))
+            # rgbmap = cv2.imread(join(traj_root_folder, rgbmap_folder, maplist[currentframe]))
+            # heightmap = np.load(join(traj_root_folder, heightmap_folder, maplist[currentframe].replace('.png', '.npy')))
+            rgbmap = np.zeros((600,240,3),dtype=np.uint8)
+            heightmap = np.zeros((600,240,5),dtype=np.float32)
+
 
             map_valid_mask = heightmap[:,:,0] < 1000 # there are unknow areas in the currentmap
 
@@ -197,6 +204,7 @@ class GTCostMapNode(object):
                 costmap[k, dd[:,0],dd[:,1]] = cost[costind] # TODO: test if the coordinate has duplicate
                 costcount[dd[:,0], dd[:,1]] = costcount[dd[:,0], dd[:,1]] + 1
 
+            # import ipdb;ipdb.set_trace()
             costmask = costcount > 0
             costmap_ave[costmask] = np.sum(costmap[:,costmask], axis=0) / costcount[costmask]
             costmap_ave = (costmap_ave*255).astype(np.uint8) # scale and save the value in uint8 to save space
@@ -215,11 +223,11 @@ class GTCostMapNode(object):
             disp_overlay[costcount > 0] = (rgbmap[costcount > 0] * 0.8 + costmap_vis[costcount > 0] * 0.2).astype(np.uint8)
             disp = cv2.hconcat((disp_overlay, costmap_vis))
             # cv2.imshow('img',disp)
-            # cv2.waitKey(1)
+            # cv2.waitKey(0)
             if costmap_output_folder is not None:
                 # save the result
-                np.save(join(outdir, maplist[currentframe]), costmap_res)
-                np.savetxt(join(outdir, maplist[currentframe].replace('.npy', '_vel.txt')), vels_crop_valid)
+                np.save(join(outdir, maplist[currentframe].replace('.png', '.npy')), costmap_res)
+                np.savetxt(join(outdir, maplist[currentframe].replace('.png', '_vel.txt')), vels_crop_valid)
                 # save visualization
                 cv2.imwrite(join(outdir, maplist[currentframe].replace('.npy', '.png')), cv2.resize(disp, (0,0), fx=0.5, fy=0.5))
             # cv2.imshow('count',np.clip(costcount*20,0,255).astype(np.uint8))
@@ -227,6 +235,6 @@ class GTCostMapNode(object):
             # import ipdb;ipdb.set_trace()
 
 if __name__=="__main__":
-    base_dir = '/home/amigo/workspace/ros_atv/src/rosbag_to_dataset/test_output/20210903_10' #'/home/wenshan/tmp/arl_data/full_trajs/20210826_61' # 20210826_61 # 20220531_lowvel_0
+    base_dir = '/home/wenshan/tmp/arl_data/data2023/slag_heap_skydio_2023-09-14-12-36-46' #turnpike_warehouse_2023-09-14-14-05-14' #slag_heap_skydio_2023-09-14-12-36-46' #'/home/wenshan/tmp/arl_data/full_trajs/20210826_61' # 20210826_61 # 20220531_lowvel_0
     costmap = GTCostMapNode()
-    costmap.process(base_dir, 'costmap')
+    costmap.process(base_dir, base_dir, 'None') #, 'costmap'

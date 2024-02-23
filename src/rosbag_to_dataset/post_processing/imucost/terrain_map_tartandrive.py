@@ -2,7 +2,7 @@
 import torch
 import numpy as np
 from scipy.spatial.transform import Rotation
-from .utils import quat_to_yaw, SO2quat, quat2SE, quats2SEs, SOs2Eulers
+from .utils import quat_to_yaw, SO2quat, quat2SE, quats2SEs, SOs2Eulers, pose2motion
 np.set_printoptions(suppress=True,precision=4)
 
 def get_local_path(odom, ref_ind=0):
@@ -166,7 +166,10 @@ def integrate_motion(motion):
     poselist = [pose,]
     for k in range(motion.shape[0]):
         # np.savetxt(outdir + '/' + filestr +'_motion.txt', motion_quat)
-        motion_mat = quat2SE(motion[k])
+        if len(motion[k].shape) == 1: # in the quaternion
+            motion_mat = quat2SE(motion[k])
+        else:
+            motion_mat = motion[k]
         pose = pose * motion_mat
         # quat = SO2quat(pose[0:3,0:3])
         # pose_quat = [pose[0,3], pose[1,3], pose[2,3], quat[0], quat[1], quat[2], quat[3]]
@@ -212,8 +215,8 @@ def tartanvo_motion_to_odom(motion):
     pose_transformed = np.concatenate((pose_trans[:,:3,3], pose_transformed_quat),axis=1) # n x 7
     return np.array(pose_transformed, dtype=np.float32)
 
-def tartanodom2vel(motions, dt=0.1):
-    motions_mat = quats2SEs(motions)
+def tartanmotion2vel(motions_mat, dt=0.1):
+    # motions_mat = quats2SEs(motions)
     motions_trans = transform_ground_motion(motions_mat)
     motions_rot = SOs2Eulers(motions_trans[:,:3,:3])
     vels = np.concatenate((motions_trans[:,0:1,3], motions_rot[:,2:3]), axis=1)
