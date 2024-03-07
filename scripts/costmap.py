@@ -49,4 +49,5 @@ if __name__ == "__main__":
             mkdir(traj_output_dir)
         print(f"Output to {traj_output_dir}")
         ## Load IMU data
-        costmap.process(d, traj_output_dir, 'costmap')
+        costmap.process('/ocean/projects/cis220039p/shared/tartandrive/f2/v2/2023',  # hard code
+                        d, traj_output_dir, 'costmap_v3')

@@ -240,11 +240,14 @@ def gpsodom2vel(odom):
     # print(vel_rot)
     return np.concatenate((vel,yaw),axis=1).astype(np.float32)
 
-#     velx = motion[:,0:1] / 0.1
-#     rot = Rotation.from_quat(motion[:,3:7]).as_euler("XYZ", degrees=False)
-#     yaw = rot[:,2:3]
-#     yaw = yaw / 0.1
-#     return np.concatenate((velx,yaw),axis=1).astype(np.float32)
+def superodom2vel(odom):
+    '''
+    odom: N x 13 numpy array (x, y, z, rx, ry, rz, rw, vx, vy, xz, vrx, vry, vrz) in the global frame
+    res: (forward vel, yaw)
+    '''
+    vel = odom[:,7:8] 
+    yaw = odom[:,12:13]
+    return np.concatenate((vel,yaw),axis=1).astype(np.float32)
 
 if __name__ == "__main__":
     from os.path import join
