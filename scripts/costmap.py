@@ -5,6 +5,7 @@ from os.path import isfile, isdir, join, split
 from rosbag_to_dataset.post_processing.imucost.cost2gtcostmap import GTCostMapNode
 
 # python3 costmap.py --data_dir /project/learningphysics/tartandrive_trajs
+# python scripts/costmap.py  --data_dir /home/wenshan/tmp/arl_data/data2023 --bag_list scripts/trajlist_localtest.txt
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -49,5 +50,7 @@ if __name__ == "__main__":
             mkdir(traj_output_dir)
         print(f"Output to {traj_output_dir}")
         ## Load IMU data
-        costmap.process('/ocean/projects/cis220039p/shared/tartandrive/f2/v2/2023',  # hard code
-                        d, traj_output_dir, 'costmap_v3')
+        costmap.process('/ocean/projects/cis220039p/shared/tartandrive/f2/v3/2023',  # hard code
+                        d, traj_output_dir, 
+                        costmap_output_folder='costmap_v4_2cm',
+                        cost_input_folder='traversability_v4',)

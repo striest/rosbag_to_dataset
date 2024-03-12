@@ -15,6 +15,7 @@ from rosbag_to_dataset.util.os_util import maybe_mkdir
 
 # python scripts/data_preview.py --root /project/learningphysics/tartandrive_trajs --bag_list scripts/trajlist.txt --save_to /project/learningphysics/tartandrive_preview
 # python scripts/data_preview.py --root test_output --bag_list scripts/trajlist_local.txt --save_to test_output
+# python3 scripts/costmap_preview.py --root /ocean/projects/cis220039p/shared/tartandrive/2023_traj/v1 --bag_list scripts/trajlist_2023_v1.txt --save_to /ocean/projects/cis220039p/shared/tartandrive/2023_costmap_preview
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

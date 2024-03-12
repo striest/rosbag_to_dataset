@@ -10,7 +10,7 @@ class GTCostMapNode(object):
     def __init__(self, crop_size=[2,2]) -> None:
         map_height = 30.0
         map_width = 12.0
-        resolution = 0.05
+        resolution = 0.02
         output_size = [int(crop_size[0]/resolution), int(crop_size[1]/resolution)]
 
         self.map_metadata = {
@@ -111,16 +111,17 @@ class GTCostMapNode(object):
                 mkdir(outdir)
                 print('Create folder: {}'.format(outdir))
 
-        rgbmap_folder = 'rgb_map'
+        rgbmap_folder = 'rgb_map_2cm_ff'
         heightmap_folder ='height_map'
         intervention_folder='intervention'
 
         _, trajfolder = split(traj_root_folder)
-        vis_rgbmap_folder = join(rgb_root_folder, trajfolder, 'split_1/stereo/rgb_12m_x_30m_5cm/mindist')
-        if isdir(vis_rgbmap_folder):
-            splitlen = self.find_split_len(vis_rgbmap_folder)
-        else:
-            splitlen = -1
+        
+        # vis_rgbmap_folder = join(rgb_root_folder, trajfolder, 'split_1/stereo/rgb_12m_x_30m_5cm/mindist') 
+        # if isdir(vis_rgbmap_folder):
+        #     splitlen = self.find_split_len(vis_rgbmap_folder)
+        # else:
+        #     splitlen = -1
 
         maplist = listdir(join(traj_root_folder, rgbmap_folder))
         maplist = [mm for mm in maplist if mm.endswith('.png')]
@@ -181,16 +182,20 @@ class GTCostMapNode(object):
             seqcropnum = endframe - startframe
 
             # import ipdb;ipdb.set_trace()
-            if splitlen > 0:
-                splitfolder, visframe = self.find_rgb_map(currentframe, splitlen)
-                rgbmap = cv2.imread(join(rgb_root_folder, trajfolder,
-                                splitfolder, 'stereo/rgb_12m_x_30m_5cm/mindist', 
-                                'label_' + str(visframe).zfill(6)+'.png'))
-                rgbmap = cv2.rotate(rgbmap, cv2.ROTATE_90_CLOCKWISE)
-                rgbmap = cv2.flip(rgbmap, flipCode=1)
-            else: 
-                rgbmap = np.zeros((600,240,3),dtype=np.uint8)
-            # rgbmap = cv2.imread(join(traj_root_folder, rgbmap_folder, maplist[currentframe]))
+            # if splitlen > 0:
+            #     splitfolder, visframe = self.find_rgb_map(currentframe, splitlen)
+            #     rgbmap = cv2.imread(join(rgb_root_folder, trajfolder,
+            #                     splitfolder, 'stereo/rgb_12m_x_30m_5cm/mindist', 
+            #                     'label_' + str(visframe).zfill(6)+'.png'))
+            #     rgbmap = cv2.rotate(rgbmap, cv2.ROTATE_90_CLOCKWISE)
+            #     rgbmap = cv2.flip(rgbmap, flipCode=1)
+            # else: 
+            #     rgbmap = np.zeros((600,240,3),dtype=np.uint8)
+            rgbmap = cv2.imread(join(traj_root_folder, rgbmap_folder, maplist[currentframe]))
+            rgbmap = cv2.rotate(rgbmap, cv2.ROTATE_90_CLOCKWISE)
+            rgbmap = cv2.flip(rgbmap, flipCode=1)
+            rgbmap = rgbmap[:,:,::-1] # rgb-bgr
+
             # heightmap = np.load(join(traj_root_folder, heightmap_folder, maplist[currentframe].replace('.png', '.npy')))
             # rgbmap = np.zeros((600,240,3),dtype=np.uint8)
             # heightmap = np.zeros((600,240,5),dtype=np.float32)
@@ -222,29 +227,29 @@ class GTCostMapNode(object):
             # filter out patches that covers too much unknown area
             enough_known = self.crop_contains_enough_known(map_valid_mask, crop_coordinates, valid_masks)
 
-            # # Start to aggregate the cost
-            # costmap = np.zeros((seqcropnum, rgbmap.shape[0], rgbmap.shape[1]),dtype=np.float32) 
-            # costcount = np.zeros((rgbmap.shape[0], rgbmap.shape[1]),dtype=np.uint32)
-            # costmap_ave = np.zeros((rgbmap.shape[0], rgbmap.shape[1]),dtype=np.float32) 
+            # Start to aggregate the cost
+            costmap = np.zeros((seqcropnum, rgbmap.shape[0], rgbmap.shape[1]),dtype=np.float32) 
+            costcount = np.zeros((rgbmap.shape[0], rgbmap.shape[1]),dtype=np.uint32)
+            costmap_ave = np.zeros((rgbmap.shape[0], rgbmap.shape[1]),dtype=np.float32) 
 
-            # for k in range(seqcropnum):
-            #     # this crop covers mostly unknown or out-of-boundary region
-            #     if not enough_known[k]:
-            #         continue
+            for k in range(seqcropnum):
+                # this crop covers mostly unknown or out-of-boundary region
+                if not enough_known[k]:
+                    continue
 
-            #     costind = int(startframe+k)
-            #     assert costind>=0 and costind<len(cost), "Error! Cost ind out of limit {}/{}".format(costind, len(cost))
-            #     cc = crop_coordinates[k][valid_masks[k]] # -1 x 2
-            #     dd = np.unique(cc, axis=0)
-            #     # print('  cordinates shape', cc.shape, dd.shape)
-            #     costmap[k, dd[:,0],dd[:,1]] = cost[costind] # TODO: test if the coordinate has duplicate
-            #     costcount[dd[:,0], dd[:,1]] = costcount[dd[:,0], dd[:,1]] + 1
+                costind = int(startframe+k)
+                assert costind>=0 and costind<len(cost), "Error! Cost ind out of limit {}/{}".format(costind, len(cost))
+                cc = crop_coordinates[k][valid_masks[k]] # -1 x 2
+                dd = np.unique(cc, axis=0)
+                # print('  cordinates shape', cc.shape, dd.shape)
+                costmap[k, dd[:,0],dd[:,1]] = cost[costind] # TODO: test if the coordinate has duplicate
+                costcount[dd[:,0], dd[:,1]] = costcount[dd[:,0], dd[:,1]] + 1
 
-            # # import ipdb;ipdb.set_trace()
-            # costmask = costcount > 0
-            # costmap_ave[costmask] = np.sum(costmap[:,costmask], axis=0) / costcount[costmask]
-            # costmap_ave = (costmap_ave*255).astype(np.uint8) # scale and save the value in uint8 to save space
-            # costmap_res = np.stack((costmap_ave, costmask), axis=-1)
+            # import ipdb;ipdb.set_trace()
+            costmask = costcount > 0
+            costmap_ave[costmask] = np.sum(costmap[:,costmask], axis=0) / costcount[costmask]
+            costmap_ave = (costmap_ave*255).astype(np.uint8) # scale and save the value in uint8 to save space
+            costmap_res = np.stack((costmap_ave, costmask), axis=-1)
 
             # save the velocities
             vels_crop = vels[startframe:endframe, :]
@@ -252,20 +257,20 @@ class GTCostMapNode(object):
             vels_crop_valid = vels_crop[enough_known]
             # print(len(vels_crop_valid), vels_crop_valid)
 
-            # costmap_vis = costmap_ave.copy()
-            # costmap_vis[costcount == 0] = 128
-            # costmap_vis = cv2.applyColorMap(costmap_vis, cv2.COLORMAP_JET)
-            # disp_overlay = rgbmap.copy()
-            # disp_overlay[costcount > 0] = (rgbmap[costcount > 0] * 0.8 + costmap_vis[costcount > 0] * 0.2).astype(np.uint8)
-            # disp = cv2.hconcat((disp_overlay, costmap_vis))
-            # # cv2.imshow('img',disp)
-            # # cv2.waitKey(0)
+            costmap_vis = costmap_ave.copy()
+            costmap_vis[costcount == 0] = 128
+            costmap_vis = cv2.applyColorMap(costmap_vis, cv2.COLORMAP_JET)
+            disp_overlay = rgbmap.copy()
+            disp_overlay[costcount > 0] = (rgbmap[costcount > 0] * 0.8 + costmap_vis[costcount > 0] * 0.2).astype(np.uint8)
+            disp = cv2.hconcat((disp_overlay, costmap_vis))
+            # cv2.imshow('img',disp)
+            # cv2.waitKey(0)
             if costmap_output_folder is not None:
-                # # save the result
-                # np.save(join(outdir, maplist[currentframe].replace('.png', '.npy')), costmap_res)
+                # save the result
+                np.save(join(outdir, maplist[currentframe].replace('.png', '.npy')), costmap_res)
                 np.savetxt(join(outdir, maplist[currentframe].replace('.png', '_vel.txt')), vels_crop_valid)
                 # save visualization
-                # cv2.imwrite(join(outdir, maplist[currentframe].replace('.npy', '.png')), disp) #cv2.resize(disp, (0,0), fx=0.5, fy=0.5))
+                cv2.imwrite(join(outdir, maplist[currentframe].replace('.npy', '.png')), disp) #cv2.resize(disp, (0,0), fx=0.5, fy=0.5))
             # # cv2.imshow('count',np.clip(costcount*20,0,255).astype(np.uint8))
             # # cv2.waitKey(1)
             # # import ipdb;ipdb.set_trace()
