@@ -1,0 +1,22 @@
+/home/physics_atv/rosbags/irl_data/train/fig8_snow_2024-02-19-12-32-21/2024-02-29-17-11-31_0.bag train_fig8_snow_2024-02-19-12-32-21
+/home/physics_atv/rosbags/irl_data/train/fig8_snow_2024-02-19-12-32-21/2024-02-29-17-13-31_1.bag train_fig8_snow_2024-02-19-12-32-21
+
+/home/physics_atv/rosbags/irl_data/train/gupta_explore_2024-02-26-19-27-37/2024-02-29-16-09-24_0.bag train_gupta_explore_2024-02-26-19-27-37
+/home/physics_atv/rosbags/irl_data/train/gupta_explore_2024-02-26-19-27-37/2024-02-29-16-11-24_1.bag train_gupta_explore_2024-02-26-19-27-37
+
+/home/physics_atv/rosbags/irl_data/train/gupta_snow_2024-02-19-12-16-39/2024-02-29-17-03-44_0.bag train_gupta_snow_2024-02-19-12-16-39
+
+/home/physics_atv/rosbags/irl_data/train/gupta_snow_2024-02-19-12-23-59/2024-02-29-17-09-58_0.bag train_gupta_snow_2024-02-19-12-23-59
+
+/home/physics_atv/rosbags/irl_data/train/meadows_vegetation_2024-02-26-20-03-29/2024-02-29-16-53-46_0.bag train_meadows_vegetation_2024-02-26-20-03-29
+/home/physics_atv/rosbags/irl_data/train/meadows_vegetation_2024-02-26-20-03-29/2024-02-29-16-54-47_0.bag train_meadows_vegetation_2024-02-26-20-03-29
+/home/physics_atv/rosbags/irl_data/train/meadows_vegetation_2024-02-26-20-03-29/2024-02-29-16-55-09_0.bag train_meadows_vegetation_2024-02-26-20-03-29
+/home/physics_atv/rosbags/irl_data/train/meadows_vegetation_2024-02-26-20-03-29/2024-02-29-16-56-41_0.bag train_meadows_vegetation_2024-02-26-20-03-29
+/home/physics_atv/rosbags/irl_data/train/meadows_vegetation_2024-02-26-20-03-29/2024-02-29-16-57-55_0.bag train_meadows_vegetation_2024-02-26-20-03-29
+
+/home/physics_atv/rosbags/irl_data/test/gupta_explore_2024-02-26-19-35-15/2024-02-29-16-14-06_0.bag test_gupta_explore_2024-02-26-19-35-15
+
+/home/physics_atv/rosbags/irl_data/test/gupta_snow_2024-02-19-12-19-51/2024-02-29-17-06-52_0.bag test_gupta_snow_2024-02-19-12-19-51
+
+/home/physics_atv/rosbags/irl_data/test/meadows_vegetation_2024-02-26-20-15-31/2024-02-29-16-59-09_0.bag test_meadows_vegetation_2024-02-26-20-15-31
+/home/physics_atv/rosbags/irl_data/test/meadows_vegetation_2024-02-26-20-15-31/2024-02-29-16-59-09_0.bag test_meadows_vegetation_2024-02-26-20-15-31
