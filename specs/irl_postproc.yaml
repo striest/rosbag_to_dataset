@@ -42,7 +42,7 @@
         type: Image
         folder: "image_left_color"
         options:
-            output_resolution: [1036, 546]
+            output_resolution: [1024, 544]
             nchannels: 3
 
     "/odometry/filtered_odom":
